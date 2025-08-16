@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>จัดการกลุ่มเกษตรกร - ระบบสอบย้อนกลับผักอุดร</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-success fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="../index.html">
+                <i class="fas fa-leaf me-2"></i>
+                ระบบสอบย้อนกลับผักอุดร
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="dashboard.html">
+                            <i class="fas fa-tachometer-alt me-1"></i>แผงควบคุม
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="manage-groups.html">
+                            <i class="fas fa-users me-1"></i>จัดการกลุ่ม
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="reports.html">
+                            <i class="fas fa-chart-bar me-1"></i>รายงาน
+                        </a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-circle me-1"></i>
+                            <span class="user-display">Admin</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item logout-btn" href="#">
+                                <i class="fas fa-sign-out-alt me-2"></i>ออกจากระบบ
+                            </a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container-fluid">
+            <!-- Header -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="page-header d-flex justify-content-between align-items-center">
+                        <div>
+                            <h1 class="h3 mb-3 fw-bold text-success">
+                                <i class="fas fa-users me-3"></i>
+                                จัดการกลุ่มเกษตรกร
+                            </h1>
+                            <p class="text-muted">จัดการข้อมูลกลุ่มเกษตรกรและสมาชิกในระบบ</p>
+                        </div>
+                        <div>
+                            <button class="btn btn-success" onclick="showAddGroupModal()">
+                                <i class="fas fa-plus me-2"></i>เพิ่มกลุ่มใหม่
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistics Row -->
+            <div class="row mb-4">
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <div class="card border-left-success">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col">
+                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                        กลุ่มทั้งหมด
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800" id="totalGroups">-</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-users fa-2x text-success"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <div class="card border-left-info">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col">
+                                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                        เกษตรกรทั้งหมด
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800" id="totalFarmers">-</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-seedling fa-2x text-info"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <div class="card border-left-warning">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col">
+                                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                        QR Code
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800" id="totalQRCodes">-</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-qrcode fa-2x text-warning"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <div class="card border-left-danger">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col">
+                                    <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                        รหัสค้นหา
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800" id="totalSearchCodes">-</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-search fa-2x text-danger"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Groups Table -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">
+                                <i class="fas fa-table me-2"></i>รายการกลุ่มเกษตรกร
+                            </h5>
+                            <div class="btn-group">
+                                <button class="btn btn-sm btn-outline-success" onclick="refreshData()">
+                                    <i class="fas fa-sync-alt me-1"></i>รีเฟรช
+                                </button>
+                                <button class="btn btn-sm btn-outline-primary" onclick="exportGroups()">
+                                    <i class="fas fa-download me-1"></i>ส่งออก
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover" id="groupsTable">
+                                    <thead class="table-success">
+                                        <tr>
+                                            <th>รหัสกลุ่ม</th>
+                                            <th>ชื่อกลุ่ม</th>
+                                            <th>ผู้จัดการ</th>
+                                            <th>เกษตรกร</th>
+                                            <th>QR Code</th>
+                                            <th>สถานะ</th>
+                                            <th>วันที่สร้าง</th>
+                                            <th>จัดการ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Data will be loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Add Group Modal -->
+    <div class="modal fade" id="addGroupModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-plus me-2"></i>เพิ่มกลุ่มเกษตรกร
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="addGroupForm">
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="groupName" class="form-label">ชื่อกลุ่มเกษตรกร *</label>
+                                <input type="text" class="form-control" id="groupName" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="managerName" class="form-label">ชื่อผู้จัดการ *</label>
+                                <input type="text" class="form-control" id="managerName" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="managerPhone" class="form-label">เบอร์โทรศัพท์ *</label>
+                                <input type="tel" class="form-control" id="managerPhone" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="managerEmail" class="form-label">อีเมล (ถ้ามี)</label>
+                                <input type="email" class="form-control" id="managerEmail">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-plus me-2"></i>เพิ่มกลุ่ม
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Group Modal -->
+    <div class="modal fade" id="editGroupModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-edit me-2"></i>แก้ไขกลุ่มเกษตรกร
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="editGroupForm">
+                    <input type="hidden" id="editGroupId">
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="editGroupName" class="form-label">ชื่อกลุ่มเกษตรกร *</label>
+                                <input type="text" class="form-control" id="editGroupName" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="editGroupCode" class="form-label">รหัสกลุ่ม</label>
+                                <input type="text" class="form-control" id="editGroupCode" readonly>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="editManagerUsername" class="form-label">ผู้จัดการ</label>
+                                <input type="text" class="form-control" id="editManagerUsername" readonly>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="editGroupStatus" class="form-label">สถานะ</label>
+                                <select class="form-select" id="editGroupStatus">
+                                    <option value="active">เปิดใช้งาน</option>
+                                    <option value="inactive">ปิดใช้งาน</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>บันทึก
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Group Details Modal -->
+    <div class="modal fade" id="groupDetailsModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-info-circle me-2"></i>รายละเอียดกลุ่มเกษตรกร
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="groupDetailsContent">
+                        <!-- Group details will be loaded here -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ปิด</button>
+                    <button type="button" class="btn btn-primary" onclick="editCurrentGroup()">
+                        <i class="fas fa-edit me-2"></i>แก้ไข
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Modal -->
+    <div class="modal fade" id="loadingModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body text-center py-5">
+                    <div class="spinner-border text-success mb-3" role="status">
+                        <span class="visually-hidden">กำลังโหลด...</span>
+                    </div>
+                    <h5>กำลังโหลดข้อมูล...</h5>
+                    <p class="text-muted">กรุณารอสักครู่</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <!-- Axios for API calls -->
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.4.0/dist/axios.min.js"></script>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- Custom Scripts -->
+    <script src="../assets/js/utils.js"></script>
+    <script src="../assets/js/api.js"></script>
+    <script src="../assets/js/auth.js"></script>
+
+    <style>
+        .main-content {
+            padding-top: 100px;
+            padding-bottom: 2rem;
+        }
+
+        .page-header {
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 1rem;
+        }
+
+        .border-left-success {
+            border-left: 4px solid #198754 !important;
+        }
+
+        .border-left-info {
+            border-left: 4px solid #0dcaf0 !important;
+        }
+
+        .border-left-warning {
+            border-left: 4px solid #ffc107 !important;
+        }
+
+        .border-left-danger {
+            border-left: 4px solid #dc3545 !important;
+        }
+
+        .text-xs {
+            font-size: 0.75rem;
+        }
+
+        .font-weight-bold {
+            font-weight: 700 !important;
+        }
+
+        .text-gray-800 {
+            color: #343a40 !important;
+        }
+
+        .group-badge {
+            font-size: 0.875rem;
+            padding: 0.375rem 0.75rem;
+        }
+
+        .action-buttons .btn {
+            margin: 0 2px;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding-top: 80px;
+            }
+            
+            .page-header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .action-buttons {
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+        }
+    </style>
+
+    <script>
+        // Global variables
+        let groupsTable = null;
+        let allGroups = [];
+        let currentGroup = null;
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            initializePage();
+            loadGroupsData();
+            setupEventListeners();
+        });
+
+        // Initialize page
+        function initializePage() {
+            // Initialize DataTables
+            groupsTable = $('#groupsTable').DataTable({
+                responsive: true,
+                pageLength: 10,
+                order: [[6, 'desc']], // Sort by created date
+                columnDefs: [
+                    { orderable: false, targets: [7] } // Disable sorting for actions column
+                ],
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/th.json'
+                }
+            });
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Add group form
+            document.getElementById('addGroupForm').addEventListener('submit', handleAddGroup);
+            
+            // Edit group form
+            document.getElementById('editGroupForm').addEventListener('submit', handleEditGroup);
+        }
+
+        // Load groups data
+        async function loadGroupsData() {
+            try {
+                Utils.showLoading('กำลังโหลดข้อมูลกลุ่ม...');
+                
+                const result = await AdminAPI.getAllGroups();
+                
+                if (result.success) {
+                    allGroups = result.groups;
+                    displayGroups(allGroups);
+                    updateStatistics(result);
+                } else {
+                    Utils.showError('เกิดข้อผิดพลาด', result.message);
+                }
+                
+                Utils.hideLoading();
+                
+            } catch (error) {
+                Utils.hideLoading();
+                handleAPIError(error, 'เกิดข้อผิดพลาดในการโหลดข้อมูล');
+            }
+        }
+
+        // Display groups in table
+        function displayGroups(groups) {
+            // Clear existing data
+            groupsTable.clear();
+            
+            // Add new data
+            groups.forEach(group => {
+                const statusBadge = group.status === 'active' ? 
+                    '<span class="badge bg-success">เปิดใช้งาน</span>' : 
+                    '<span class="badge bg-secondary">ปิดใช้งาน</span>';
+                
+                const actions = `
+                    <div class="action-buttons">
+                        <button class="btn btn-sm btn-outline-info" onclick="viewGroup('${group.groupId}')" title="ดูรายละเอียด">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-primary" onclick="editGroup('${group.groupId}')" title="แก้ไข">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteGroup('${group.groupId}', '${group.groupName}')" title="ลบ">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                
+                groupsTable.row.add([
+                    `<span class="badge bg-outline-primary group-badge">${group.groupCode}</span>`,
+                    group.groupName,
+                    group.managerUsername,
+                    `${group.statistics.totalFarmers} ราย`,
+                    `${group.statistics.totalQRCodes} รหัส`,
+                    statusBadge,
+                    Utils.formatDateThai(group.created),
+                    actions
+                ]);
+            });
+            
+            // Redraw table
+            groupsTable.draw();
+        }
+
+        // Update statistics
+        function updateStatistics(result) {
+            document.getElementById('totalGroups').textContent = result.totalGroups;
+            
+            // Calculate total farmers and QR codes
+            let totalFarmers = 0;
+            let totalQRCodes = 0;
+            let totalSearchCodes = 0;
+            
+            result.groups.forEach(group => {
+                totalFarmers += group.statistics.totalFarmers;
+                totalQRCodes += group.statistics.totalQRCodes;
+                totalSearchCodes += group.statistics.totalSearchCodes;
+            });
+            
+            document.getElementById('totalFarmers').textContent = totalFarmers;
+            document.getElementById('totalQRCodes').textContent = totalQRCodes;
+            document.getElementById('totalSearchCodes').textContent = totalSearchCodes;
+        }
+
+        // Show add group modal
+        function showAddGroupModal() {
+            const modal = new bootstrap.Modal(document.getElementById('addGroupModal'));
+            modal.show();
+        }
+
+        // Handle add group
+        async function handleAddGroup(event) {
+            event.preventDefault();
+            
+            const formData = {
+                groupName: document.getElementById('groupName').value.trim(),
+                managerName: document.getElementById('managerName').value.trim(),
+                managerPhone: document.getElementById('managerPhone').value.trim()
+            };
+            
+            if (!formData.groupName || !formData.managerName || !formData.managerPhone) {
+                Utils.showWarning('ข้อมูลไม่ครบ', 'กรุณากรอกข้อมูลให้ครบถ้วน');
+                return;
+            }
+
+            try {
+                Utils.showLoading('กำลังเพิ่มกลุ่มเกษตรกร...');
+                
+                const result = await AdminAPI.createGroup(formData);
+                
+                Utils.hideLoading();
+                
+                if (result.success) {
+                    Utils.showSuccess('เพิ่มกลุ่มสำเร็จ', `สร้างกลุ่ม ${result.group.groupName} เรียบร้อยแล้ว`);
+                    
+                    // Close modal and refresh data
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('addGroupModal'));
+                    modal.hide();
+                    document.getElementById('addGroupForm').reset();
+                    
+                    // Reload data
+                    setTimeout(() => {
+                        loadGroupsData();
+                    }, 1000);
+                } else {
+                    Utils.showError('เกิดข้อผิดพลาด', result.message);
+                }
+                
+            } catch (error) {
+                Utils.hideLoading();
+                handleAPIError(error, 'เกิดข้อผิดพลาดในการเพิ่มกลุ่ม');
+            }
+        }
+
+        // View group details
+        async function viewGroup(groupId) {
+            try {
+                Utils.showLoading('กำลังโหลดรายละเอียด...');
+                
+                const group = allGroups.find(g => g.groupId === groupId);
+                if (!group) {
+                    Utils.showError('ไม่พบข้อมูล', 'ไม่พบข้อมูลกลุ่มที่ต้องการ');
+                    return;
+                }
+                
+                currentGroup = group;
+                displayGroupDetails(group);
+                
+                Utils.hideLoading();
+                
+                const modal = new bootstrap.Modal(document.getElementById('groupDetailsModal'));
+                modal.show();
+                
+            } catch (error) {
+                Utils.hideLoading();
+                handleAPIError(error, 'เกิดข้อผิดพลาดในการโหลดรายละเอียด');
+            }
+        }
+
+        // Display group details
+        function displayGroupDetails(group) {
+            const content = document.getElementById('groupDetailsContent');
+            content.innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="text-success mb-3">ข้อมูลพื้นฐาน</h6>
+                        <table class="table table-borderless">
+                            <tr>
+                                <td class="fw-bold">รหัสกลุ่ม:</td>
+                                <td><span class="badge bg-primary">${group.groupCode}</span></td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold">ชื่อกลุ่ม:</td>
+                                <td>${group.groupName}</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold">ผู้จัดการ:</td>
+                                <td>${group.managerUsername}</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold">สถานะ:</td>
+                                <td>
+                                    ${group.status === 'active' ? 
+                                        '<span class="badge bg-success">เปิดใช้งาน</span>' : 
+                                        '<span class="badge bg-secondary">ปิดใช้งาน</span>'
+                                    }
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold">วันที่สร้าง:</td>
+                                <td>${Utils.formatDateTimeThai(group.created)}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-success mb-3">สถิติ</h6>
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <div class="card border-success">
+                                    <div class="card-body text-center">
+                                        <h4 class="text-success">${group.statistics.totalFarmers}</h4>
+                                        <small class="text-muted">เกษตรกร</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="card border-info">
+                                    <div class="card-body text-center">
+                                        <h4 class="text-info">${group.statistics.totalQRCodes}</h4>
+                                        <small class="text-muted">QR Code</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="card border-warning">
+                                    <div class="card-body text-center">
+                                        <h4 class="text-warning">${group.statistics.totalSearchCodes}</h4>
+                                        <small class="text-muted">รหัสค้นหา</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="card border-secondary">
+                                    <div class="card-body text-center">
+                                        <h4 class="text-secondary">100%</h4>
+                                        <small class="text-muted">ความสมบูรณ์</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <hr class="my-4">
+                
+                <div class="row">
+                    <div class="col-12">
+                        <h6 class="text-success mb-3">เอกสาร</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card border-light">
+                                    <div class="card-body">
+                                        <h6 class="card-title">
+                                            <i class="fas fa-file-alt text-info me-2"></i>
+                                            หนังสือจดทะเบียนวิสาหกิจชุมชน
+                                        </h6>
+                                        ${group.registrationDoc ? 
+                                            '<span class="badge bg-success">อัพโหลดแล้ว</span>' : 
+                                            '<span class="badge bg-warning">ยังไม่อัพโหลด</span>'
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card border-light">
+                                    <div class="card-body">
+                                        <h6 class="card-title">
+                                            <i class="fas fa-certificate text-success me-2"></i>
+                                            ใบรับรองแหล่งผลิต GAP
+                                        </h6>
+                                        ${group.gapCert ? 
+                                            '<span class="badge bg-success">อัพโหลดแล้ว</span>' : 
+                                            '<span class="badge bg-warning">ยังไม่อัพโหลด</span>'
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Edit group
+        function editGroup(groupId) {
+            const group = allGroups.find(g => g.groupId === groupId);
+            if (!group) return;
+            
+            // Fill form data
+            document.getElementById('editGroupId').value = group.groupId;
+            document.getElementById('editGroupName').value = group.groupName;
+            document.getElementById('editGroupCode').value = group.groupCode;
+            document.getElementById('editManagerUsername').value = group.managerUsername;
+            document.getElementById('editGroupStatus').value = group.status;
+            
+            // Show modal
+            const modal = new bootstrap.Modal(document.getElementById('editGroupModal'));
+            modal.show();
+        }
+
+        // Edit current group (from details modal)
+        function editCurrentGroup() {
+            if (currentGroup) {
+                // Close details modal
+                const detailsModal = bootstrap.Modal.getInstance(document.getElementById('groupDetailsModal'));
+                detailsModal.hide();
+                
+                // Open edit modal
+                setTimeout(() => {
+                    editGroup(currentGroup.groupId);
+                }, 300);
+            }
+        }
+
+        // Handle edit group
+        async function handleEditGroup(event) {
+            event.preventDefault();
+            
+            const groupId = document.getElementById('editGroupId').value;
+            const formData = {
+                groupName: document.getElementById('editGroupName').value.trim(),
+                status: document.getElementById('editGroupStatus').value
+            };
+
+            try {
+                Utils.showLoading('กำลังอัพเดทข้อมูล...');
+                
+                const result = await AdminAPI.updateGroup(groupId, formData);
+                
+                Utils.hideLoading();
+                
+                if (result.success) {
+                    Utils.showSuccess('อัพเดทสำเร็จ', 'อัพเดทข้อมูลกลุ่มเรียบร้อยแล้ว');
+                    
+                    // Close modal and refresh data
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('editGroupModal'));
+                    modal.hide();
+                    
+                    // Reload data
+                    setTimeout(() => {
+                        loadGroupsData();
+                    }, 1000);
+                } else {
+                    Utils.showError('เกิดข้อผิดพลาด', result.message);
+                }
+                
+            } catch (error) {
+                Utils.hideLoading();
+                handleAPIError(error, 'เกิดข้อผิดพลาดในการอัพเดทข้อมูล');
+            }
+        }
+
+        // Delete group
+        async function deleteGroup(groupId, groupName) {
+            const result = await Utils.showConfirm(
+                'ลบกลุ่มเกษตรกร',
+                `คุณต้องการลบกลุ่ม "${groupName}" หรือไม่?\n\nการดำเนินการนี้จะลบข้อมูลทั้งหมดและไม่สามารถกู้คืนได้`,
+                'ลบ',
+                'ยกเลิก'
+            );
+
+            if (result.isConfirmed) {
+                try {
+                    Utils.showLoading('กำลังลบข้อมูล...');
+                    
+                    const deleteResult = await AdminAPI.deleteGroup(groupId);
+                    
+                    Utils.hideLoading();
+                    
+                    if (deleteResult.success) {
+                        Utils.showSuccess('ลบสำเร็จ', 'ลบกลุ่มเกษตรกรเรียบร้อยแล้ว');
+                        
+                        // Reload data
+                        setTimeout(() => {
+                            loadGroupsData();
+                        }, 1000);
+                    } else {
+                        Utils.showError('ไม่สามารถลบได้', deleteResult.message);
+                    }
+                    
+                } catch (error) {
+                    Utils.hideLoading();
+                    handleAPIError(error, 'เกิดข้อผิดพลาดในการลบข้อมูล');
+                }
+            }
+        }
+
+        // Refresh data
+        function refreshData() {
+            loadGroupsData();
+        }
+
+        // Export groups
+        function exportGroups() {
+            // Create CSV data
+            let csvData = 'รหัสกลุ่ม,ชื่อกลุ่ม,ผู้จัดการ,จำนวนเกษตรกร,จำนวน QR Code,สถานะ,วันที่สร้าง\n';
+            
+            allGroups.forEach(group => {
+                csvData += `"${group.groupCode}","${group.groupName}","${group.managerUsername}",${group.statistics.totalFarmers},${group.statistics.totalQRCodes},"${group.status}","${Utils.formatDateThai(group.created)}"\n`;
+            });
+            
+            // Download CSV
+            const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `groups_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            Utils.showSuccess('ส่งออกสำเร็จ', 'ดาวน์โหลดไฟล์ข้อมูลเรียบร้อยแล้ว');
+        }
+    </script>
+</body>
+</html>

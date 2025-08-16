@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แผงควบคุมผู้ดูแลระบบ - ระบบสอบย้อนกลับผักอุดร</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-success fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="../index.html">
+                <i class="fas fa-leaf me-2"></i>
+                ระบบสอบย้อนกลับผักอุดร
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="dashboard.html">
+                            <i class="fas fa-tachometer-alt me-1"></i>แผงควบคุม
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="manage-groups.html">
+                            <i class="fas fa-users me-1"></i>จัดการกลุ่ม
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="reports.html">
+                            <i class="fas fa-chart-bar me-1"></i>รายงาน
+                        </a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-circle me-1"></i>
+                            <span class="user-display">Admin</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#" onclick="changePassword()">
+                                <i class="fas fa-key me-2"></i>เปลี่ยนรหัสผ่าน
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item logout-btn" href="#">
+                                <i class="fas fa-sign-out-alt me-2"></i>ออกจากระบบ
+                            </a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container-fluid">
+            <!-- Header -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="page-header">
+                        <h1 class="h3 mb-3 fw-bold text-success">
+                            <i class="fas fa-tachometer-alt me-3"></i>
+                            แผงควบคุมผู้ดูแลระบบ
+                        </h1>
+                        <p class="text-muted">ภาพรวมและการจัดการระบบสอบย้อนกลับผักอุดร</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistics Cards -->
+            <div class="row mb-4" id="statsCards">
+                <!-- Stats will be loaded here -->
+            </div>
+
+            <!-- Charts Row -->
+            <div class="row mb-4">
+                <!-- Groups Chart -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">
+                                <i class="fas fa-users me-2 text-success"></i>
+                                สถิติกลุ่มเกษตรกร
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="groupsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Activity Chart -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">
+                                <i class="fas fa-chart-line me-2 text-success"></i>
+                                กิจกรรมรายเดือน
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="activityChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity and Quick Actions -->
+            <div class="row">
+                <!-- Recent Activity -->
+                <div class="col-lg-8 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">
+                                <i class="fas fa-history me-2 text-success"></i>
+                                กิจกรรมล่าสุด
+                            </h5>
+                            <button class="btn btn-sm btn-outline-success" onclick="refreshActivity()">
+                                <i class="fas fa-sync-alt me-1"></i>รีเฟรช
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div class="activity-list" id="activityList">
+                                <!-- Activity items will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="col-lg-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">
+                                <i class="fas fa-bolt me-2 text-success"></i>
+                                เมนูด่วน
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-grid gap-3">
+                                <a href="#" class="btn btn-success" onclick="showAddGroupModal()">
+                                    <i class="fas fa-plus me-2"></i>เพิ่มกลุ่มเกษตรกร
+                                </a>
+                                <a href="manage-groups.html" class="btn btn-outline-primary">
+                                    <i class="fas fa-users me-2"></i>จัดการกลุ่ม
+                                </a>
+                                <a href="reports.html" class="btn btn-outline-info">
+                                    <i class="fas fa-chart-bar me-2"></i>ดูรายงาน
+                                </a>
+                                <a href="#" class="btn btn-outline-warning" onclick="exportData()">
+                                    <i class="fas fa-download me-2"></i>ส่งออกข้อมูล
+                                </a>
+                                <a href="#" class="btn btn-outline-secondary" onclick="systemSettings()">
+                                    <i class="fas fa-cog me-2"></i>ตั้งค่าระบบ
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Groups -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">
+                                <i class="fas fa-users me-2 text-success"></i>
+                                กลุ่มเกษตรกรล่าสุด
+                            </h5>
+                            <a href="manage-groups.html" class="btn btn-sm btn-outline-success">
+                                ดูทั้งหมด <i class="fas fa-arrow-right ms-1"></i>
+                            </a>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover" id="recentGroupsTable">
+                                    <thead class="table-success">
+                                        <tr>
+                                            <th>รหัสกลุ่ม</th>
+                                            <th>ชื่อกลุ่ม</th>
+                                            <th>ผู้จัดการ</th>
+                                            <th>สมาชิก</th>
+                                            <th>สถานะ</th>
+                                            <th>วันที่สร้าง</th>
+                                            <th>จัดการ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Recent groups will be loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Add Group Modal -->
+    <div class="modal fade" id="addGroupModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-plus me-2"></i>เพิ่มกลุ่มเกษตรกร
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="addGroupForm">
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="groupName" class="form-label">ชื่อกลุ่มเกษตรกร *</label>
+                                <input type="text" class="form-control" id="groupName" required 
+                                       placeholder="เช่น กลุ่มเกษตรกรผักปลอดสารอุดรธานี">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="managerName" class="form-label">ชื่อผู้จัดการกลุ่ม *</label>
+                                <input type="text" class="form-control" id="managerName" required 
+                                       placeholder="นายสมชาย ใจดี">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="managerPhone" class="form-label">เบอร์โทรศัพท์ *</label>
+                                <input type="tel" class="form-control" id="managerPhone" required 
+                                       placeholder="081-234-5678">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="groupCode" class="form-label">รหัสกลุ่ม</label>
+                                <input type="text" class="form-control" id="groupCode" readonly 
+                                       placeholder="จะถูกสร้างอัตโนมัติ">
+                            </div>
+                        </div>
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>หมายเหตุ:</strong> ระบบจะสร้างบัญชีผู้จัดการกลุ่มอัตโนมัติ และส่งข้อมูลการเข้าสู่ระบบให้ผู้จัดการ
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-plus me-2"></i>เพิ่มกลุ่ม
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div class="modal fade" id="changePasswordModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-key me-2"></i>เปลี่ยนรหัสผ่าน
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="changePasswordForm">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="oldPassword" class="form-label">รหัสผ่านเดิม</label>
+                            <input type="password" class="form-control" id="oldPassword" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="newPassword" class="form-label">รหัสผ่านใหม่</label>
+                            <input type="password" class="form-control" id="newPassword" required minlength="6">
+                        </div>
+                        <div class="mb-3">
+                            <label for="confirmPassword" class="form-label">ยืนยันรหัสผ่านใหม่</label>
+                            <input type="password" class="form-control" id="confirmPassword" required minlength="6">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>เปลี่ยนรหัสผ่าน
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Modal -->
+    <div class="modal fade" id="loadingModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body text-center py-5">
+                    <div class="spinner-border text-success mb-3" role="status">
+                        <span class="visually-hidden">กำลังโหลด...</span>
+                    </div>
+                    <h5>กำลังโหลดข้อมูล...</h5>
+                    <p class="text-muted">กรุณารอสักครู่</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.min.js"></script>
+    <!-- Axios for API calls -->
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.4.0/dist/axios.min.js"></script>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- Custom Scripts -->
+    <script src="../assets/js/utils.js"></script>
+    <script src="../assets/js/api.js"></script>
+    <script src="../assets/js/auth.js"></script>
+
+    <style>
+        .main-content {
+            padding-top: 100px;
+            padding-bottom: 2rem;
+        }
+
+        .page-header {
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 1rem;
+        }
+
+        .stats-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .stats-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #f8f9fa;
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            font-size: 0.875rem;
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-time {
+            font-size: 0.75rem;
+            color: #6c757d;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding-top: 80px;
+            }
+            
+            .stats-card {
+                margin-bottom: 1rem;
+            }
+        }
+    </style>
+
+    <script>
+        // Global variables
+        let groupsChart = null;
+        let activityChart = null;
+        let systemStats = null;
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDashboardData();
+            setupEventListeners();
+        });
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Add group form
+            document.getElementById('addGroupForm').addEventListener('submit', handleAddGroup);
+            
+            // Change password form
+            document.getElementById('changePasswordForm').addEventListener('submit', handleChangePassword);
+        }
+
+        // Load dashboard data
+        async function loadDashboardData() {
+            try {
+                Utils.showLoading('กำลังโหลดข้อมูล...');
+                
+                // Load system statistics
+                const statsResult = await AdminAPI.getSystemStats();
+                if (statsResult.success) {
+                    systemStats = statsResult.statistics;
+                    displayStatistics(systemStats);
+                    createCharts(systemStats);
+                    displayRecentActivity(systemStats.recentActivity);
+                }
+                
+                // Load recent groups
+                const groupsResult = await AdminAPI.getAllGroups();
+                if (groupsResult.success) {
+                    displayRecentGroups(groupsResult.groups.slice(0, 5));
+                }
+                
+                Utils.hideLoading();
+                
+            } catch (error) {
+                Utils.hideLoading();
+                handleAPIError(error, 'เกิดข้อผิดพลาดในการโหลดข้อมูล');
+            }
+        }
+
+        // Display statistics cards
+        function displayStatistics(stats) {
+            const statsContainer = document.getElementById('statsCards');
+            
+            const statsCards = [
+                {
+                    title: 'กลุ่มเกษตรกรทั้งหมด',
+                    value: stats.totalGroups,
+                    subtitle: `เปิดใช้งาน ${stats.activeGroups} กลุ่ม`,
+                    icon: 'fas fa-users',
+                    color: 'bg-success',
+                    link: 'manage-groups.html'
+                },
+                {
+                    title: 'เกษตรกรทั้งหมด',
+                    value: stats.totalFarmers,
+                    subtitle: `เปิดใช้งาน ${stats.activeFarmers} ราย`,
+                    icon: 'fas fa-seedling',
+                    color: 'bg-info',
+                    link: '#'
+                },
+                {
+                    title: 'QR Code ทั้งหมด',
+                    value: stats.totalQRCodes,
+                    subtitle: 'ผลิตภัณฑ์ที่สร้างแล้ว',
+                    icon: 'fas fa-qrcode',
+                    color: 'bg-warning',
+                    link: '#'
+                },
+                {
+                    title: 'รหัสค้นหาเชิงลึก',
+                    value: stats.totalSearchCodes,
+                    subtitle: 'สำหรับตรวจสอบ',
+                    icon: 'fas fa-search',
+                    color: 'bg-danger',
+                    link: '#'
+                }
+            ];
+
+            let html = '';
+            statsCards.forEach(card => {
+                html += `
+                    <div class="col-lg-3 col-md-6 mb-4">
+                        <div class="card stats-card h-100" onclick="window.location.href='${card.link}'">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col">
+                                        <div class="stats-icon ${card.color}">
+                                            <i class="${card.icon}"></i>
+                                        </div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <div class="text-end">
+                                            <h2 class="fw-bold mb-1">${card.value}</h2>
+                                            <p class="text-muted small mb-1">${card.title}</p>
+                                            <p class="text-muted small mb-0">${card.subtitle}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            statsContainer.innerHTML = html;
+        }
+
+        // Create charts
+        function createCharts(stats) {
+            createGroupsChart();
+            createActivityChart();
+        }
+
+        // Create groups chart
+        function createGroupsChart() {
+            const ctx = document.getElementById('groupsChart').getContext('2d');
+            
+            groupsChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['กลุ่มที่เปิดใช้งาน', 'กลุ่มที่ปิดใช้งาน'],
+                    datasets: [{
+                        data: [systemStats.activeGroups, systemStats.totalGroups - systemStats.activeGroups],
+                        backgroundColor: ['#198754', '#6c757d'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        // Create activity chart
+        function createActivityChart() {
+            const ctx = document.getElementById('activityChart').getContext('2d');
+            
+            // Mock data for demonstration
+            const monthlyData = {
+                labels: ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.'],
+                datasets: [{
+                    label: 'QR Code ใหม่',
+                    data: [12, 19, 15, 25, 22, 30],
+                    borderColor: '#198754',
+                    backgroundColor: 'rgba(25, 135, 84, 0.1)',
+                    tension: 0.4
+                }, {
+                    label: 'เกษตรกรใหม่',
+                    data: [8, 12, 10, 15, 18, 20],
+                    borderColor: '#0dcaf0',
+                    backgroundColor: 'rgba(13, 202, 240, 0.1)',
+                    tension: 0.4
+                }]
+            };
+            
+            activityChart = new Chart(ctx, {
+                type: 'line',
+                data: monthlyData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        // Display recent activity
+        function displayRecentActivity(activities) {
+            const activityContainer = document.getElementById('activityList');
+            
+            if (!activities || activities.length === 0) {
+                activityContainer.innerHTML = `
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-history mb-2"></i>
+                        <p>ไม่มีกิจกรรมล่าสุด</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            activities.forEach(activity => {
+                const iconClass = getActivityIcon(activity.type);
+                const timeAgo = getTimeAgo(activity.timestamp);
+                
+                html += `
+                    <div class="activity-item">
+                        <div class="activity-icon bg-success text-white">
+                            <i class="${iconClass}"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="fw-medium">${activity.description}</div>
+                            <div class="activity-time">${timeAgo}</div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            activityContainer.innerHTML = html;
+        }
+
+        // Get activity icon
+        function getActivityIcon(type) {
+            const icons = {
+                'login': 'fas fa-sign-in-alt',
+                'qr_code': 'fas fa-qrcode',
+                'farmer_add': 'fas fa-user-plus',
+                'group_add': 'fas fa-users'
+            };
+            return icons[type] || 'fas fa-circle';
+        }
+
+        // Get time ago
+        function getTimeAgo(timestamp) {
+            const now = new Date();
+            const time = new Date(timestamp);
+            const diff = now - time;
+            
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(diff / 3600000);
+            const days = Math.floor(diff / 86400000);
+            
+            if (days > 0) return `${days} วันที่แล้ว`;
+            if (hours > 0) return `${hours} ชั่วโมงที่แล้ว`;
+            if (minutes > 0) return `${minutes} นาทีที่แล้ว`;
+            return 'เมื่อสักครู่';
+        }
+
+        // Display recent groups
+        function displayRecentGroups(groups) {
+            const tableBody = document.querySelector('#recentGroupsTable tbody');
+            
+            if (!groups || groups.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-4">
+                            ไม่มีข้อมูลกลุ่มเกษตรกร
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            let html = '';
+            groups.forEach(group => {
+                const statusBadge = group.status === 'active' ? 
+                    '<span class="badge bg-success">เปิดใช้งาน</span>' : 
+                    '<span class="badge bg-secondary">ปิดใช้งาน</span>';
+                
+                html += `
+                    <tr>
+                        <td><span class="badge bg-outline-primary">${group.groupCode}</span></td>
+                        <td>${group.groupName}</td>
+                        <td>${group.managerUsername}</td>
+                        <td>${group.statistics.totalFarmers} ราย</td>
+                        <td>${statusBadge}</td>
+                        <td>${Utils.formatDateThai(group.created)}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary" onclick="viewGroup('${group.groupId}')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            tableBody.innerHTML = html;
+        }
+
+        // Show add group modal
+        function showAddGroupModal() {
+            const modal = new bootstrap.Modal(document.getElementById('addGroupModal'));
+            modal.show();
+        }
+
+        // Handle add group
+        async function handleAddGroup(event) {
+            event.preventDefault();
+            
+            const formData = {
+                groupName: document.getElementById('groupName').value.trim(),
+                managerName: document.getElementById('managerName').value.trim(),
+                managerPhone: document.getElementById('managerPhone').value.trim()
+            };
+            
+            if (!formData.groupName || !formData.managerName || !formData.managerPhone) {
+                Utils.showWarning('ข้อมูลไม่ครบ', 'กรุณากรอกข้อมูลให้ครบถ้วน');
+                return;
+            }
+
+            try {
+                Utils.showLoading('กำลังเพิ่มกลุ่มเกษตรกร...');
+                
+                const result = await AdminAPI.createGroup(formData);
+                
+                Utils.hideLoading();
+                
+                if (result.success) {
+                    Utils.showSuccess('เพิ่มกลุ่มสำเร็จ', `สร้างกลุ่ม ${result.group.groupName} เรียบร้อยแล้ว`);
+                    
+                    // Close modal and refresh data
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('addGroupModal'));
+                    modal.hide();
+                    document.getElementById('addGroupForm').reset();
+                    
+                    // Reload dashboard data
+                    setTimeout(() => {
+                        loadDashboardData();
+                    }, 1000);
+                } else {
+                    Utils.showError('เกิดข้อผิดพลาด', result.message);
+                }
+                
+            } catch (error) {
+                Utils.hideLoading();
+                handleAPIError(error, 'เกิดข้อผิดพลาดในการเพิ่มกลุ่ม');
+            }
+        }
+
+        // Change password
+        function changePassword() {
+            const modal = new bootstrap.Modal(document.getElementById('changePasswordModal'));
+            modal.show();
+        }
+
+        // Handle change password
+        async function handleChangePassword(event) {
+            event.preventDefault();
+            
+            const oldPassword = document.getElementById('oldPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (newPassword !== confirmPassword) {
+                Utils.showWarning('รหัสผ่านไม่ตรงกัน', 'กรุณาตรวจสอบรหัสผ่านใหม่');
+                return;
+            }
+
+            try {
+                await AuthAPI.changePassword(oldPassword, newPassword);
+                
+                const modal = bootstrap.Modal.getInstance(document.getElementById('changePasswordModal'));
+                modal.hide();
+                
+            } catch (error) {
+                handleAPIError(error, 'เกิดข้อผิดพลาดในการเปลี่ยนรหัสผ่าน');
+            }
+        }
+
+        // View group details
+        function viewGroup(groupId) {
+            window.location.href = `manage-groups.html?group=${groupId}`;
+        }
+
+        // Refresh activity
+        function refreshActivity() {
+            loadDashboardData();
+        }
+
+        // Export data
+        function exportData() {
+            Utils.showSuccess('ส่งออกข้อมูล', 'ฟีเจอร์นี้จะเปิดใช้งานในเร็วๆ นี้');
+        }
+
+        // System settings
+        function systemSettings() {
+            Utils.showSuccess('ตั้งค่าระบบ', 'ฟีเจอร์นี้จะเปิดใช้งานในเร็วๆ นี้');
+        }
+    </script>
+</body>
+</html>
