@@ -319,16 +319,16 @@ const GroupAPI = {
     /**
      * Upload group documents
      */
-    async uploadGroupDocument(file, documentType) {
+    async uploadGroupDocument(file, documentType, groupId) {
         try {
             const uploadResult = await API.uploadFile(file, 'group-documents');
             
             return await API.makeRequest('saveGroupDocument', {
-                groupId: groupData.groupId,
+                groupId: groupId,
                 documentType: documentType,
                 fileName: file.name,
-                fileUrl: uploadResult.fileUrl,
-                fileId: uploadResult.fileId
+                fileUrl: uploadResult.file.fileUrl,
+                fileId: uploadResult.file.fileId
             });
         } catch (error) {
             console.error('Group document upload error:', error);
@@ -378,6 +378,23 @@ const GroupAPI = {
      */
     async getGroupStats(groupId) {
         return await API.makeRequest('getGroupStats', { groupId: groupId });
+    },
+
+    /**
+     * List files in group folder
+     */
+    async listGroupFiles(groupId, folderType = 'all') {
+        return await API.makeRequest('listGroupFiles', { 
+            groupId: groupId, 
+            folderType: folderType 
+        });
+    },
+
+    /**
+     * Create folder for existing group
+     */
+    async createFolderForGroup(groupId) {
+        return await API.makeRequest('createFolderForGroup', { groupId: groupId });
     }
 };
 
