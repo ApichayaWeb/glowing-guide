@@ -1,0 +1,1518 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>รายงานระบบ - ระบบสอบย้อนกลับผักอุดร</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom CSS -->
+    <link href="../assets/css/main.css" rel="stylesheet">
+    
+    <style>
+        .reports-header {
+            background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+            color: white;
+            border-radius: 0.5rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .report-card {
+            border: 1px solid #e9ecef;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            height: 100%;
+        }
+        
+        .report-card:hover {
+            border-color: #6f42c1;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .report-card.active {
+            border-color: #6f42c1;
+            background-color: #f8f5ff;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin: 2rem 0;
+        }
+        
+        .chart-container.small {
+            height: 300px;
+        }
+        
+        .filters-panel {
+            background: #f8f9fa;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-widget {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            text-align: center;
+            border: 1px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+        
+        .stat-widget:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-change {
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        
+        .stat-change.positive {
+            color: #28a745;
+        }
+        
+        .stat-change.negative {
+            color: #dc3545;
+        }
+        
+        .report-table {
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .report-table th {
+            background: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+            font-weight: 600;
+        }
+        
+        .report-table td {
+            border-bottom: 1px solid #e9ecef;
+            vertical-align: middle;
+        }
+        
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+        
+        .progress-ring circle {
+            fill: transparent;
+            stroke-width: 8;
+            stroke-linecap: round;
+        }
+        
+        .progress-ring .bg {
+            stroke: #e9ecef;
+        }
+        
+        .progress-ring .progress {
+            stroke: #28a745;
+            stroke-dasharray: 0 251.2;
+            transition: stroke-dasharray 0.3s ease;
+        }
+        
+        .report-export {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 0.375rem;
+            padding: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .report-tabs {
+            border-bottom: 2px solid #e9ecef;
+            margin-bottom: 2rem;
+        }
+        
+        .report-tab {
+            border: none;
+            background: none;
+            padding: 1rem 1.5rem;
+            color: #6c757d;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .report-tab.active {
+            color: #6f42c1;
+            border-bottom: 2px solid #6f42c1;
+        }
+        
+        .date-range-picker {
+            position: relative;
+        }
+        
+        .trend-indicator {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .trend-up {
+            background-color: #d1f2eb;
+            color: #006644;
+        }
+        
+        .trend-down {
+            background-color: #fadbd8;
+            color: #922b21;
+        }
+        
+        .trend-stable {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        .export-formats {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .format-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid #dee2e6;
+            border-radius: 0.375rem;
+            background: white;
+            color: #495057;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 0.875rem;
+        }
+        
+        .format-btn:hover {
+            border-color: #6f42c1;
+            background-color: #f8f5ff;
+            color: #6f42c1;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+        <div class="container">
+            <a class="navbar-brand text-success" href="../index.html">
+                <i class="fas fa-leaf me-2"></i>ผักอุดรคลีน
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="dashboard.html">
+                            <i class="fas fa-home me-1"></i>แดชบอร์ด
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="manage-groups.html">
+                            <i class="fas fa-users me-1"></i>จัดการกลุ่ม
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="reports.html">
+                            <i class="fas fa-chart-bar me-1"></i>รายงาน
+                        </a>
+                    </li>
+                </ul>
+                
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user me-1"></i><span id="userName">ผู้ดูแลระบบ</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="dashboard.html">
+                                <i class="fas fa-home me-2"></i>แดชบอร์ด
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" onclick="logout()">
+                                <i class="fas fa-sign-out-alt me-2"></i>ออกจากระบบ
+                            </a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container-fluid py-4">
+        <!-- Page Header -->
+        <div class="reports-header">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="mb-2">
+                        <i class="fas fa-chart-bar me-3"></i>
+                        รายงานระบบสอบย้อนกลับผักอุดร
+                    </h1>
+                    <p class="fs-5 mb-0">
+                        ข้อมูลสถิติและรายงานการใช้งานระบบ
+                    </p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <div class="fs-6">
+                        <i class="fas fa-calendar me-1"></i>
+                        อัปเดตล่าสุด: <span id="lastUpdate">-</span>
+                    </div>
+                    <button class="btn btn-light btn-sm mt-2" onclick="refreshAllData()">
+                        <i class="fas fa-sync-alt me-1"></i>รีเฟรชข้อมูล
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Report Filters -->
+        <div class="filters-panel">
+            <div class="row">
+                <div class="col-md-3 mb-3">
+                    <label for="reportType" class="form-label">ประเภทรายงาน</label>
+                    <select class="form-select" id="reportType" onchange="changeReportType()">
+                        <option value="overview">ภาพรวมระบบ</option>
+                        <option value="groups">รายงานกลุ่ม</option>
+                        <option value="farmers">รายงานเกษตรกร</option>
+                        <option value="data">ความสมบูรณ์ข้อมูล</option>
+                        <option value="activity">กิจกรรมการใช้งาน</option>
+                        <option value="growth">การเติบโตของระบบ</option>
+                    </select>
+                </div>
+                
+                <div class="col-md-3 mb-3">
+                    <label for="dateFrom" class="form-label">จากวันที่</label>
+                    <input type="date" class="form-control" id="dateFrom" onchange="filterData()">
+                </div>
+                
+                <div class="col-md-3 mb-3">
+                    <label for="dateTo" class="form-label">ถึงวันที่</label>
+                    <input type="date" class="form-control" id="dateTo" onchange="filterData()">
+                </div>
+                
+                <div class="col-md-3 mb-3">
+                    <label for="groupFilter" class="form-label">กลุ่ม</label>
+                    <select class="form-select" id="groupFilter" onchange="filterData()">
+                        <option value="">ทุกกลุ่ม</option>
+                        <!-- Groups will be loaded here -->
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Export Options -->
+        <div class="report-export">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="mb-2">
+                        <i class="fas fa-download me-2"></i>ส่งออกรายงาน
+                    </h6>
+                    <p class="mb-0 small text-muted">เลือกรูปแบบไฟล์ที่ต้องการส่งออก</p>
+                </div>
+                <div class="export-formats">
+                    <button class="format-btn" onclick="exportReport('pdf')">
+                        <i class="fas fa-file-pdf me-1"></i>PDF
+                    </button>
+                    <button class="format-btn" onclick="exportReport('excel')">
+                        <i class="fas fa-file-excel me-1"></i>Excel
+                    </button>
+                    <button class="format-btn" onclick="exportReport('csv')">
+                        <i class="fas fa-file-csv me-1"></i>CSV
+                    </button>
+                    <button class="format-btn" onclick="printReport()">
+                        <i class="fas fa-print me-1"></i>พิมพ์
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Report Content -->
+        <div id="reportContent">
+            <!-- Overview Report (Default) -->
+            <div id="overviewReport" class="report-section">
+                <!-- Key Statistics -->
+                <div class="row mb-4">
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <div class="stat-widget">
+                            <div class="stat-value text-primary" id="totalGroups">0</div>
+                            <div class="mb-2">กลุ่มทั้งหมด</div>
+                            <div class="stat-change positive" id="groupsChange">
+                                <i class="fas fa-arrow-up me-1"></i>+5.2%
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <div class="stat-widget">
+                            <div class="stat-value text-success" id="totalFarmers">0</div>
+                            <div class="mb-2">เกษตรกรทั้งหมด</div>
+                            <div class="stat-change positive" id="farmersChange">
+                                <i class="fas fa-arrow-up me-1"></i>+12.8%
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <div class="stat-widget">
+                            <div class="stat-value text-info" id="totalPlots">0</div>
+                            <div class="mb-2">แปลงทั้งหมด</div>
+                            <div class="stat-change positive" id="plotsChange">
+                                <i class="fas fa-arrow-up me-1"></i>+8.4%
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <div class="stat-widget">
+                            <div class="stat-value text-warning" id="avgCompletion">0%</div>
+                            <div class="mb-2">ความสมบูรณ์เฉลี่ย</div>
+                            <div class="stat-change positive" id="completionChange">
+                                <i class="fas fa-arrow-up me-1"></i>+3.1%
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Row -->
+                <div class="row mb-4">
+                    <div class="col-lg-8">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-chart-line me-2"></i>การเติบโตของระบบ (6 เดือนล่าสุด)
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="growthChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-4">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-chart-pie me-2"></i>สัดส่วนสถานะเกษตรกร
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container small">
+                                    <canvas id="statusChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Data Completion Progress -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-tasks me-2"></i>ความคืบหน้าการกรอกข้อมูล 6 ส่วน
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="completionChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Top Performing Groups -->
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-trophy me-2"></i>กลุ่มที่มีผลงานดีเด่น
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="topGroupsList">
+                                    <!-- Top groups will be loaded here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-6">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-clock me-2"></i>กิจกรรมล่าสุด
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="recentActivitiesList" style="max-height: 400px; overflow-y: auto;">
+                                    <!-- Recent activities will be loaded here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Groups Report -->
+            <div id="groupsReport" class="report-section" style="display: none;">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-users me-2"></i>รายงานกลุ่มเกษตรกร
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table report-table" id="groupsTable">
+                                        <thead>
+                                            <tr>
+                                                <th>ชื่อกลุ่ม</th>
+                                                <th>ผู้จัดการ</th>
+                                                <th>จำนวนสมาชิก</th>
+                                                <th>แปลงทั้งหมด</th>
+                                                <th>ความสมบูรณ์เฉลี่ย</th>
+                                                <th>สถานะ</th>
+                                                <th>วันที่สร้าง</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Groups data will be loaded here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Farmers Report -->
+            <div id="farmersReport" class="report-section" style="display: none;">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-user-friends me-2"></i>รายงานเกษตรกร
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table report-table" id="farmersTable">
+                                        <thead>
+                                            <tr>
+                                                <th>ชื่อ-นามสกุล</th>
+                                                <th>กลุ่ม</th>
+                                                <th>รหัสแปลง</th>
+                                                <th>ขนาดแปลง</th>
+                                                <th>ความสมบูรณ์</th>
+                                                <th>สถานะ</th>
+                                                <th>เข้าใช้ล่าสุด</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Farmers data will be loaded here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Completion Report -->
+            <div id="dataReport" class="report-section" style="display: none;">
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-chart-bar me-2"></i>ความสมบูรณ์ข้อมูล 6 ส่วน
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="sectionsCompletionChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Completion by Groups -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-list me-2"></i>ความสมบูรณ์ข้อมูลแยกตามกลุ่ม
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="groupCompletionList">
+                                    <!-- Group completion data will be loaded here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Activity Report -->
+            <div id="activityReport" class="report-section" style="display: none;">
+                <div class="row mb-4">
+                    <div class="col-lg-8">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-chart-area me-2"></i>กิจกรรมการใช้งานรายวัน
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="activityChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-4">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-clock me-2"></i>เวลาใช้งานยอดนิยม
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container small">
+                                    <canvas id="timeUsageChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Activity Log -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-history me-2"></i>บันทึกกิจกรรม
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table report-table" id="activityTable">
+                                        <thead>
+                                            <tr>
+                                                <th>วันที่-เวลา</th>
+                                                <th>ผู้ใช้</th>
+                                                <th>กิจกรรม</th>
+                                                <th>รายละเอียด</th>
+                                                <th>IP Address</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Activity log will be loaded here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Growth Report -->
+            <div id="growthReport" class="report-section" style="display: none;">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-chart-line me-2"></i>การเติบโตของระบบ
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="detailedGrowthChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div id="loadingSpinner" class="d-none">
+        <div class="spinner-overlay">
+            <div class="spinner-border text-success" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="../assets/js/utils.js"></script>
+    <script src="../assets/js/auth.js"></script>
+    <script src="../assets/js/api.js"></script>
+    
+    <script>
+        let systemStats = null;
+        let chartsInitialized = false;
+        let currentReportType = 'overview';
+
+        // Page initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            initializePage();
+        });
+
+        async function initializePage() {
+            try {
+                // Check authentication
+                if (!AuthAPI.isLoggedIn()) {
+                    window.location.href = '../login.html';
+                    return;
+                }
+
+                const user = AuthAPI.getCurrentUser();
+                if (user.role !== 'admin') {
+                    AuthAPI.logout();
+                    return;
+                }
+
+                // Update user info
+                updateUserInfo(user);
+                
+                // Set default date range (last 30 days)
+                setDefaultDateRange();
+                
+                // Load initial data
+                await loadSystemStats();
+                await loadGroupsFilter();
+                
+                // Initialize charts
+                initializeCharts();
+
+            } catch (error) {
+                console.error('Initialization error:', error);
+                Utils.showError('ข้อผิดพลาด', 'ไม่สามารถโหลดข้อมูลได้ กรุณาลองใหม่อีกครั้ง');
+            }
+        }
+
+        function updateUserInfo(user) {
+            document.getElementById('userName').textContent = user.fullName || user.username;
+        }
+
+        function setDefaultDateRange() {
+            const today = new Date();
+            const thirtyDaysAgo = new Date(today.getTime() - (30 * 24 * 60 * 60 * 1000));
+            
+            document.getElementById('dateTo').value = today.toISOString().split('T')[0];
+            document.getElementById('dateFrom').value = thirtyDaysAgo.toISOString().split('T')[0];
+        }
+
+        async function loadSystemStats() {
+            try {
+                Utils.showLoading('กำลังโหลดข้อมูลระบบ...');
+                
+                const result = await AdminAPI.getSystemStats();
+                
+                Utils.hideLoading();
+                
+                if (result.success) {
+                    systemStats = result.data;
+                    updateOverviewStats();
+                    
+                    // Update last update time
+                    document.getElementById('lastUpdate').textContent = 
+                        new Date().toLocaleString('th-TH');
+                    
+                } else {
+                    Utils.showError('ข้อผิดพลาด', result.message || 'ไม่สามารถโหลดข้อมูลระบบได้');
+                }
+            } catch (error) {
+                Utils.hideLoading();
+                console.error('Load system stats error:', error);
+                handleAPIError(error, 'ไม่สามารถโหลดข้อมูลระบบได้');
+            }
+        }
+
+        async function loadGroupsFilter() {
+            try {
+                const result = await AdminAPI.getAllGroups();
+                
+                if (result.success) {
+                    const select = document.getElementById('groupFilter');
+                    select.innerHTML = '<option value="">ทุกกลุ่ม</option>';
+                    
+                    result.data.forEach(group => {
+                        const option = document.createElement('option');
+                        option.value = group.id;
+                        option.textContent = group.groupName;
+                        select.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Load groups filter error:', error);
+            }
+        }
+
+        function updateOverviewStats() {
+            if (!systemStats) return;
+            
+            document.getElementById('totalGroups').textContent = systemStats.totalGroups || 0;
+            document.getElementById('totalFarmers').textContent = systemStats.totalFarmers || 0;
+            document.getElementById('totalPlots').textContent = systemStats.totalPlots || 0;
+            document.getElementById('avgCompletion').textContent = (systemStats.avgCompletion || 0) + '%';
+            
+            // Update change indicators
+            updateChangeIndicator('groupsChange', systemStats.groupsGrowth);
+            updateChangeIndicator('farmersChange', systemStats.farmersGrowth);
+            updateChangeIndicator('plotsChange', systemStats.plotsGrowth);
+            updateChangeIndicator('completionChange', systemStats.completionGrowth);
+        }
+
+        function updateChangeIndicator(elementId, change) {
+            const element = document.getElementById(elementId);
+            const value = change || 0;
+            const isPositive = value >= 0;
+            
+            element.className = `stat-change ${isPositive ? 'positive' : 'negative'}`;
+            element.innerHTML = `
+                <i class="fas fa-arrow-${isPositive ? 'up' : 'down'} me-1"></i>
+                ${isPositive ? '+' : ''}${value.toFixed(1)}%
+            `;
+        }
+
+        function initializeCharts() {
+            if (chartsInitialized) return;
+            
+            // Growth Chart
+            const growthCtx = document.getElementById('growthChart').getContext('2d');
+            new Chart(growthCtx, {
+                type: 'line',
+                data: {
+                    labels: ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.'],
+                    datasets: [
+                        {
+                            label: 'กลุ่มเกษตรกร',
+                            data: [5, 8, 12, 15, 18, 22],
+                            borderColor: '#6f42c1',
+                            backgroundColor: 'rgba(111, 66, 193, 0.1)',
+                            tension: 0.4
+                        },
+                        {
+                            label: 'เกษตรกร',
+                            data: [45, 72, 96, 128, 165, 198],
+                            borderColor: '#28a745',
+                            backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                            tension: 0.4
+                        },
+                        {
+                            label: 'แปลงผักอุดร',
+                            data: [48, 76, 102, 135, 174, 210],
+                            borderColor: '#17a2b8',
+                            backgroundColor: 'rgba(23, 162, 184, 0.1)',
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+            
+            // Status Chart
+            const statusCtx = document.getElementById('statusChart').getContext('2d');
+            new Chart(statusCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['ใช้งานปกติ', 'ไม่ใช้งาน', 'รอการยืนยัน'],
+                    datasets: [{
+                        data: [165, 28, 15],
+                        backgroundColor: ['#28a745', '#dc3545', '#ffc107']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+            
+            // Completion Chart
+            const completionCtx = document.getElementById('completionChart').getContext('2d');
+            new Chart(completionCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['ส่วนที่ 1', 'ส่วนที่ 2', 'ส่วนที่ 3', 'ส่วนที่ 4', 'ส่วนที่ 5', 'ส่วนที่ 6'],
+                    datasets: [{
+                        label: 'ความสมบูรณ์ (%)',
+                        data: [85, 78, 72, 65, 58, 52],
+                        backgroundColor: [
+                            '#28a745', '#32c967', '#5dda7d', '#7ee593', '#9ff0a9', '#c0fbbf'
+                        ],
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            chartsInitialized = true;
+            
+            // Load additional data for other sections
+            loadTopGroups();
+            loadRecentActivities();
+        }
+
+        function loadTopGroups() {
+            const topGroupsData = [
+                { name: 'กลุ่มเกษตรอินทรีย์บ้านดอนแก้ว', completion: 95, farmers: 25 },
+                { name: 'กลุ่มผักปลอดภัยหนองบัว', completion: 89, farmers: 18 },
+                { name: 'กลุ่มเกษตรยั่งยืนบ้านเหนือ', completion: 84, farmers: 22 },
+                { name: 'กลุ่มผักไฮโดรโพนิกส์กุดค้อ', completion: 78, farmers: 15 },
+                { name: 'กลุ่มเกษตรผสมผสานบ้านใต้', completion: 72, farmers: 20 }
+            ];
+            
+            let html = '';
+            topGroupsData.forEach((group, index) => {
+                html += `
+                    <div class="d-flex align-items-center mb-3 p-3 border rounded">
+                        <div class="flex-shrink-0 me-3">
+                            <div class="badge bg-primary rounded-circle p-2" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                                ${index + 1}
+                            </div>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1">${group.name}</h6>
+                            <div class="small text-muted mb-2">
+                                <i class="fas fa-users me-1"></i>${group.farmers} สมาชิก
+                            </div>
+                            <div class="progress" style="height: 6px;">
+                                <div class="progress-bar bg-success" style="width: ${group.completion}%"></div>
+                            </div>
+                        </div>
+                        <div class="flex-shrink-0 ms-3">
+                            <span class="badge bg-success">${group.completion}%</span>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            document.getElementById('topGroupsList').innerHTML = html;
+        }
+
+        function loadRecentActivities() {
+            const activitiesData = [
+                {
+                    user: 'นายสมชาย ใจดี',
+                    action: 'เพิ่มข้อมูลส่วนที่ 3: การปลูก',
+                    time: '5 นาทีที่แล้ว',
+                    icon: 'seedling',
+                    color: 'success'
+                },
+                {
+                    user: 'นางสมศรี สุขใส',
+                    action: 'อัปโหลดรูปภาพการเก็บเกี่ยว',
+                    time: '12 นาทีที่แล้ว',
+                    icon: 'camera',
+                    color: 'info'
+                },
+                {
+                    user: 'ผู้จัดการกลุ่มดอนแก้ว',
+                    action: 'เพิ่มสมาชิกใหม่ 2 คน',
+                    time: '25 นาทีที่แล้ว',
+                    icon: 'user-plus',
+                    color: 'primary'
+                },
+                {
+                    user: 'นายประสิทธิ์ งามดี',
+                    action: 'สร้างรหัสค้นหาสำหรับจัดส่ง',
+                    time: '1 ชั่วโมงที่แล้ว',
+                    icon: 'qrcode',
+                    color: 'warning'
+                },
+                {
+                    user: 'นางสาวมาลี ดีใจ',
+                    action: 'เสร็จสิ้นการกรอกข้อมูล 6 ส่วน',
+                    time: '2 ชั่วโมงที่แล้ว',
+                    icon: 'check-circle',
+                    color: 'success'
+                }
+            ];
+            
+            let html = '';
+            activitiesData.forEach(activity => {
+                html += `
+                    <div class="d-flex align-items-center mb-3 p-2">
+                        <div class="flex-shrink-0 me-3">
+                            <div class="bg-${activity.color} bg-opacity-10 rounded-circle p-2" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-${activity.icon} text-${activity.color}"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="fw-medium">${activity.user}</div>
+                            <div class="small text-muted">${activity.action}</div>
+                            <div class="small text-muted">
+                                <i class="fas fa-clock me-1"></i>${activity.time}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            document.getElementById('recentActivitiesList').innerHTML = html;
+        }
+
+        function changeReportType() {
+            const reportType = document.getElementById('reportType').value;
+            currentReportType = reportType;
+            
+            // Hide all report sections
+            document.querySelectorAll('.report-section').forEach(section => {
+                section.style.display = 'none';
+            });
+            
+            // Show selected report section
+            document.getElementById(reportType + 'Report').style.display = 'block';
+            
+            // Load specific report data
+            switch (reportType) {
+                case 'groups':
+                    loadGroupsReport();
+                    break;
+                case 'farmers':
+                    loadFarmersReport();
+                    break;
+                case 'data':
+                    loadDataReport();
+                    break;
+                case 'activity':
+                    loadActivityReport();
+                    break;
+                case 'growth':
+                    loadGrowthReport();
+                    break;
+            }
+        }
+
+        function loadGroupsReport() {
+            // Sample groups data
+            const groupsData = [
+                {
+                    name: 'กลุ่มเกษตรอินทรีย์บ้านดอนแก้ว',
+                    manager: 'นายสมชาย ใจดี',
+                    farmers: 25,
+                    plots: 28,
+                    completion: 95,
+                    status: 'active',
+                    created: '2024-01-15'
+                },
+                {
+                    name: 'กลุ่มผักปลอดภัยหนองบัว',
+                    manager: 'นางสมศรี สุขใส',
+                    farmers: 18,
+                    plots: 22,
+                    completion: 89,
+                    status: 'active',
+                    created: '2024-02-20'
+                }
+                // Add more sample data...
+            ];
+            
+            let html = '';
+            groupsData.forEach(group => {
+                const statusBadge = group.status === 'active' ? 'bg-success' : 'bg-danger';
+                const statusText = group.status === 'active' ? 'ใช้งาน' : 'ไม่ใช้งาน';
+                
+                html += `
+                    <tr>
+                        <td>${group.name}</td>
+                        <td>${group.manager}</td>
+                        <td>${group.farmers}</td>
+                        <td>${group.plots}</td>
+                        <td>
+                            <div class="progress" style="height: 20px;">
+                                <div class="progress-bar" style="width: ${group.completion}%">
+                                    ${group.completion}%
+                                </div>
+                            </div>
+                        </td>
+                        <td><span class="badge ${statusBadge}">${statusText}</span></td>
+                        <td>${new Date(group.created).toLocaleDateString('th-TH')}</td>
+                    </tr>
+                `;
+            });
+            
+            document.querySelector('#groupsTable tbody').innerHTML = html;
+        }
+
+        function loadFarmersReport() {
+            // Sample farmers data
+            const farmersData = [
+                {
+                    name: 'นายสมชาย ใจดี',
+                    group: 'กลุ่มเกษตรอินทรีย์บ้านดอนแก้ว',
+                    plotCode: 'DK001',
+                    plotSize: '2.5',
+                    completion: 95,
+                    status: 'active',
+                    lastLogin: '2024-03-15'
+                },
+                {
+                    name: 'นางสมศรี สุขใส',
+                    group: 'กลุ่มผักปลอดภัยหนองบัว',
+                    plotCode: 'NB002',
+                    plotSize: '1.8',
+                    completion: 78,
+                    status: 'active',
+                    lastLogin: '2024-03-14'
+                }
+                // Add more sample data...
+            ];
+            
+            let html = '';
+            farmersData.forEach(farmer => {
+                const statusBadge = farmer.status === 'active' ? 'bg-success' : 'bg-danger';
+                const statusText = farmer.status === 'active' ? 'ใช้งาน' : 'ไม่ใช้งาน';
+                
+                html += `
+                    <tr>
+                        <td>${farmer.name}</td>
+                        <td>${farmer.group}</td>
+                        <td><span class="badge bg-info">${farmer.plotCode}</span></td>
+                        <td>${farmer.plotSize} ไร่</td>
+                        <td>
+                            <div class="progress" style="height: 20px;">
+                                <div class="progress-bar" style="width: ${farmer.completion}%">
+                                    ${farmer.completion}%
+                                </div>
+                            </div>
+                        </td>
+                        <td><span class="badge ${statusBadge}">${statusText}</span></td>
+                        <td>${new Date(farmer.lastLogin).toLocaleDateString('th-TH')}</td>
+                    </tr>
+                `;
+            });
+            
+            document.querySelector('#farmersTable tbody').innerHTML = html;
+        }
+
+        function loadDataReport() {
+            // Load sections completion chart
+            const sectionsCtx = document.getElementById('sectionsCompletionChart').getContext('2d');
+            new Chart(sectionsCtx, {
+                type: 'horizontalBar',
+                data: {
+                    labels: [
+                        'ส่วนที่ 1: ข้อมูลพื้นฐานแปลง',
+                        'ส่วนที่ 2: การเตรียมดิน',
+                        'ส่วนที่ 3: การปลูก',
+                        'ส่วนที่ 4: การดูแลรักษา',
+                        'ส่วนที่ 5: การเก็บเกี่ยว',
+                        'ส่วนที่ 6: หลังการเก็บเกี่ยว'
+                    ],
+                    datasets: [{
+                        label: 'ความสมบูรณ์ (%)',
+                        data: [85, 78, 72, 65, 58, 52],
+                        backgroundColor: '#28a745',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Load group completion data
+            loadGroupCompletionList();
+        }
+
+        function loadGroupCompletionList() {
+            const groupCompletion = [
+                { name: 'กลุ่มเกษตรอินทรีย์บ้านดอนแก้ว', sections: [95, 92, 88, 85, 82, 78] },
+                { name: 'กลุ่มผักปลอดภัยหนองบัว', sections: [88, 85, 82, 75, 68, 62] },
+                { name: 'กลุ่มเกษตรยั่งยืนบ้านเหนือ', sections: [82, 78, 75, 70, 65, 58] },
+                { name: 'กลุ่มผักไฮโดรโพนิกส์กุดค้อ', sections: [78, 75, 70, 65, 58, 52] }
+            ];
+            
+            let html = '';
+            groupCompletion.forEach(group => {
+                const avgCompletion = Math.round(group.sections.reduce((a, b) => a + b, 0) / 6);
+                
+                html += `
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="mb-0">${group.name}</h6>
+                                <span class="badge bg-primary">${avgCompletion}% เฉลี่ย</span>
+                            </div>
+                            <div class="row">
+                `;
+                
+                group.sections.forEach((completion, index) => {
+                    html += `
+                        <div class="col-md-2 mb-2">
+                            <div class="text-center">
+                                <div class="small text-muted mb-1">ส่วนที่ ${index + 1}</div>
+                                <div class="progress" style="height: 8px;">
+                                    <div class="progress-bar" style="width: ${completion}%"></div>
+                                </div>
+                                <div class="small">${completion}%</div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += `
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            document.getElementById('groupCompletionList').innerHTML = html;
+        }
+
+        function loadActivityReport() {
+            // Activity Chart
+            const activityCtx = document.getElementById('activityChart').getContext('2d');
+            new Chart(activityCtx, {
+                type: 'line',
+                data: {
+                    labels: ['จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส', 'อา'],
+                    datasets: [
+                        {
+                            label: 'การเข้าใช้งาน',
+                            data: [65, 78, 90, 81, 56, 42, 38],
+                            borderColor: '#6f42c1',
+                            backgroundColor: 'rgba(111, 66, 193, 0.1)',
+                            tension: 0.4
+                        },
+                        {
+                            label: 'การกรอกข้อมูล',
+                            data: [28, 35, 42, 38, 25, 18, 15],
+                            borderColor: '#28a745',
+                            backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+            
+            // Time Usage Chart
+            const timeCtx = document.getElementById('timeUsageChart').getContext('2d');
+            new Chart(timeCtx, {
+                type: 'radar',
+                data: {
+                    labels: ['6-9', '9-12', '12-15', '15-18', '18-21', '21-24'],
+                    datasets: [{
+                        label: 'การใช้งาน (%)',
+                        data: [12, 35, 28, 45, 25, 8],
+                        backgroundColor: 'rgba(111, 66, 193, 0.2)',
+                        borderColor: '#6f42c1',
+                        pointBackgroundColor: '#6f42c1'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 50
+                        }
+                    }
+                }
+            });
+            
+            // Load activity table
+            loadActivityTable();
+        }
+
+        function loadActivityTable() {
+            const activityLog = [
+                {
+                    datetime: '2024-03-15 14:30:25',
+                    user: 'นายสมชาย ใจดี',
+                    activity: 'เข้าสู่ระบบ',
+                    details: 'เข้าสู่ระบบผ่าน farmer dashboard',
+                    ip: '192.168.1.100'
+                },
+                {
+                    datetime: '2024-03-15 14:25:12',
+                    user: 'นางสมศรี สุขใส',
+                    activity: 'บันทึกข้อมูล',
+                    details: 'บันทึกข้อมูลส่วนที่ 4: การดูแลรักษา',
+                    ip: '192.168.1.101'
+                }
+                // Add more activity log entries...
+            ];
+            
+            let html = '';
+            activityLog.forEach(log => {
+                html += `
+                    <tr>
+                        <td>${log.datetime}</td>
+                        <td>${log.user}</td>
+                        <td><span class="badge bg-info">${log.activity}</span></td>
+                        <td>${log.details}</td>
+                        <td><code>${log.ip}</code></td>
+                    </tr>
+                `;
+            });
+            
+            document.querySelector('#activityTable tbody').innerHTML = html;
+        }
+
+        function loadGrowthReport() {
+            const growthCtx = document.getElementById('detailedGrowthChart').getContext('2d');
+            new Chart(growthCtx, {
+                type: 'line',
+                data: {
+                    labels: ['ม.ค. 2024', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'],
+                    datasets: [
+                        {
+                            label: 'กลุ่มเกษตรกร',
+                            data: [5, 8, 12, 15, 18, 22, 25, 28, 32, 35, 38, 42],
+                            borderColor: '#6f42c1',
+                            backgroundColor: 'rgba(111, 66, 193, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'เกษตรกร',
+                            data: [45, 72, 96, 128, 165, 198, 225, 258, 285, 315, 342, 375],
+                            borderColor: '#28a745',
+                            backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'แปลงผักอุดร',
+                            data: [48, 76, 102, 135, 174, 210, 242, 278, 308, 342, 375, 405],
+                            borderColor: '#17a2b8',
+                            backgroundColor: 'rgba(23, 162, 184, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'ข้อมูลสมบูรณ์',
+                            data: [15, 28, 45, 68, 92, 125, 158, 185, 215, 248, 275, 298],
+                            borderColor: '#ffc107',
+                            backgroundColor: 'rgba(255, 193, 7, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function filterData() {
+            // Get filter values
+            const dateFrom = document.getElementById('dateFrom').value;
+            const dateTo = document.getElementById('dateTo').value;
+            const groupFilter = document.getElementById('groupFilter').value;
+            
+            // Apply filters and reload current report
+            switch (currentReportType) {
+                case 'overview':
+                    loadSystemStats();
+                    break;
+                case 'groups':
+                    loadGroupsReport();
+                    break;
+                case 'farmers':
+                    loadFarmersReport();
+                    break;
+                case 'data':
+                    loadDataReport();
+                    break;
+                case 'activity':
+                    loadActivityReport();
+                    break;
+                case 'growth':
+                    loadGrowthReport();
+                    break;
+            }
+        }
+
+        async function refreshAllData() {
+            Utils.showLoading('กำลังรีเฟรชข้อมูล...');
+            
+            try {
+                await loadSystemStats();
+                
+                // Refresh current report
+                changeReportType();
+                
+                Utils.hideLoading();
+                Utils.showSuccess('สำเร็จ', 'รีเฟรชข้อมูลเรียบร้อยแล้ว');
+                
+            } catch (error) {
+                Utils.hideLoading();
+                handleAPIError(error, 'ไม่สามารถรีเฟรชข้อมูลได้');
+            }
+        }
+
+        async function exportReport(format) {
+            try {
+                Utils.showLoading(`กำลังส่งออกรายงานรูปแบบ ${format.toUpperCase()}...`);
+                
+                const dateFrom = document.getElementById('dateFrom').value;
+                const dateTo = document.getElementById('dateTo').value;
+                const groupFilter = document.getElementById('groupFilter').value;
+                
+                const result = await AdminAPI.generateSystemReport(currentReportType, dateFrom, dateTo);
+                
+                Utils.hideLoading();
+                
+                if (result.success) {
+                    const link = document.createElement('a');
+                    link.href = result.reportUrl;
+                    link.download = `รายงานระบบ_${currentReportType}_${new Date().toISOString().split('T')[0]}.${format}`;
+                    link.click();
+                    
+                    Utils.showSuccess('สำเร็จ', 'ส่งออกรายงานเรียบร้อยแล้ว');
+                } else {
+                    Utils.showError('ข้อผิดพลาด', result.message || 'ไม่สามารถส่งออกรายงานได้');
+                }
+                
+            } catch (error) {
+                Utils.hideLoading();
+                handleAPIError(error, 'ไม่สามารถส่งออกรายงานได้');
+            }
+        }
+
+        function printReport() {
+            window.print();
+        }
+
+        function logout() {
+            AuthAPI.logout();
+        }
+    </script>
+</body>
+</html>

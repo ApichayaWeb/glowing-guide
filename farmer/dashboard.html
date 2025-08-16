@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แดชบอร์ดเกษตรกร - ระบบสอบย้อนกลับผักอุดร</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="../assets/css/main.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+        <div class="container">
+            <a class="navbar-brand text-success" href="../index.html">
+                <i class="fas fa-leaf me-2"></i>ผักอุดรคลีน
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="dashboard.html">
+                            <i class="fas fa-home me-1"></i>แดชบอร์ด
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="data-entry.html">
+                            <i class="fas fa-edit me-1"></i>กรอกข้อมูล
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="view-data.html">
+                            <i class="fas fa-eye me-1"></i>ดูข้อมูล
+                        </a>
+                    </li>
+                </ul>
+                
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user me-1"></i><span id="userName">เกษตรกร</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#" onclick="changePassword()">
+                                <i class="fas fa-key me-2"></i>เปลี่ยนรหัสผ่าน
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" onclick="logout()">
+                                <i class="fas fa-sign-out-alt me-2"></i>ออกจากระบบ
+                            </a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container-fluid py-4">
+        <div class="row">
+            <!-- Welcome Section -->
+            <div class="col-12 mb-4">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body bg-success text-white rounded">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <h2 class="mb-2">
+                                    <i class="fas fa-seedling me-2"></i>
+                                    ยินดีต้อนรับ <span id="farmerName">คุณเกษตรกร</span>
+                                </h2>
+                                <p class="mb-0 fs-5">
+                                    กลุ่ม: <span id="groupName">-</span> | 
+                                    รหัสแปลง: <span id="plotCode">-</span>
+                                </p>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <div class="fs-6">
+                                    <i class="fas fa-calendar me-1"></i>
+                                    วันที่: <span id="currentDate"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="col-12 mb-4">
+                <div class="row g-3">
+                    <div class="col-md-3 col-sm-6">
+                        <div class="card text-center border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <div class="text-primary fs-1 mb-2">
+                                    <i class="fas fa-percentage"></i>
+                                </div>
+                                <h5 class="card-title">ความสมบูรณ์ข้อมูล</h5>
+                                <h3 class="text-primary mb-0">
+                                    <span id="dataCompleteness">0</span>%
+                                </h3>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3 col-sm-6">
+                        <div class="card text-center border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <div class="text-success fs-1 mb-2">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <h5 class="card-title">ส่วนที่เสร็จแล้ว</h5>
+                                <h3 class="text-success mb-0">
+                                    <span id="completedSections">0</span>/6
+                                </h3>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3 col-sm-6">
+                        <div class="card text-center border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <div class="text-info fs-1 mb-2">
+                                    <i class="fas fa-qrcode"></i>
+                                </div>
+                                <h5 class="card-title">QR Code</h5>
+                                <button class="btn btn-info btn-sm" onclick="showQRCode()">
+                                    <i class="fas fa-eye me-1"></i>ดู QR Code
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3 col-sm-6">
+                        <div class="card text-center border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <div class="text-warning fs-1 mb-2">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <h5 class="card-title">อัปเดตล่าสุด</h5>
+                                <small class="text-muted" id="lastUpdate">-</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Sections Progress -->
+            <div class="col-lg-8 mb-4">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">
+                            <i class="fas fa-tasks me-2"></i>ความคืบหน้าการกรอกข้อมูล 6 ส่วน
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="sectionsProgress">
+                            <!-- Progress items will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="col-lg-4 mb-4">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">
+                            <i class="fas fa-bolt me-2"></i>เมนูด่วน
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <a href="data-entry.html" class="btn btn-success">
+                                <i class="fas fa-edit me-2"></i>กรอกข้อมูลผลผลิต
+                            </a>
+                            <a href="view-data.html" class="btn btn-info">
+                                <i class="fas fa-eye me-2"></i>ดูข้อมูลของฉัน
+                            </a>
+                            <button class="btn btn-warning" onclick="generateSearchCode()">
+                                <i class="fas fa-search me-2"></i>สร้างรหัสค้นหา
+                            </button>
+                            <button class="btn btn-secondary" onclick="downloadReport()">
+                                <i class="fas fa-download me-2"></i>ดาวน์โหลดรายงาน
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">
+                            <i class="fas fa-history me-2"></i>กิจกรรมล่าสุด
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="recentActivity">
+                            <div class="text-center text-muted py-4">
+                                <i class="fas fa-spinner fa-spin me-2"></i>กำลังโหลดข้อมูล...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- QR Code Modal -->
+    <div class="modal fade" id="qrModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-qrcode me-2"></i>QR Code ของแปลง
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <div id="qrCodeContainer">
+                        <!-- QR Code will be displayed here -->
+                    </div>
+                    <p class="mt-3 text-muted">
+                        ใช้ QR Code นี้สำหรับระบบสอบย้อนกลับผลผลิต
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="downloadQRCode()">
+                        <i class="fas fa-download me-1"></i>ดาวน์โหลด
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ปิด</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Code Modal -->
+    <div class="modal fade" id="searchCodeModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-search me-2"></i>สร้างรหัสค้นหา
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="searchCodeForm">
+                        <div class="mb-3">
+                            <label for="shipDate" class="form-label">วันที่จัดส่ง</label>
+                            <input type="date" class="form-control" id="shipDate" required>
+                        </div>
+                        <div id="searchCodeResult" class="d-none">
+                            <div class="alert alert-success">
+                                <h6>รหัสค้นหาของคุณ:</h6>
+                                <h4 class="text-center font-monospace" id="generatedSearchCode"></h4>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="generateCode()">
+                        <i class="fas fa-cog me-1"></i>สร้างรหัส
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ปิด</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div id="loadingSpinner" class="d-none">
+        <div class="spinner-overlay">
+            <div class="spinner-border text-success" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="../assets/js/utils.js"></script>
+    <script src="../assets/js/auth.js"></script>
+    <script src="../assets/js/api.js"></script>
+    
+    <script>
+        // Page initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            initializePage();
+        });
+
+        async function initializePage() {
+            try {
+                // Check authentication
+                if (!AuthAPI.isLoggedIn()) {
+                    window.location.href = '../login.html';
+                    return;
+                }
+
+                const user = AuthAPI.getCurrentUser();
+                if (user.role !== 'farmer') {
+                    AuthAPI.logout();
+                    return;
+                }
+
+                // Update UI with user data
+                updateUserInfo(user);
+                
+                // Load farmer data
+                await loadFarmerData();
+                
+                // Load data progress
+                await loadDataProgress();
+                
+                // Load recent activity
+                await loadRecentActivity();
+
+            } catch (error) {
+                console.error('Initialization error:', error);
+                Utils.showError('ข้อผิดพลาด', 'ไม่สามารถโหลดข้อมูลได้ กรุณาลองใหม่อีกครั้ง');
+            }
+        }
+
+        function updateUserInfo(user) {
+            document.getElementById('userName').textContent = user.fullName || user.username;
+            document.getElementById('farmerName').textContent = user.fullName || user.username;
+            document.getElementById('groupName').textContent = user.groupName || '-';
+            document.getElementById('plotCode').textContent = user.plotCode || '-';
+            document.getElementById('currentDate').textContent = new Date().toLocaleDateString('th-TH');
+        }
+
+        async function loadFarmerData() {
+            try {
+                const user = AuthAPI.getCurrentUser();
+                const result = await FarmerAPI.getFarmerData(user.farmerId);
+                
+                if (result.success) {
+                    const data = result.data;
+                    
+                    // Update last update time
+                    if (data.lastUpdate) {
+                        document.getElementById('lastUpdate').textContent = 
+                            new Date(data.lastUpdate).toLocaleDateString('th-TH');
+                    }
+                }
+            } catch (error) {
+                console.error('Load farmer data error:', error);
+            }
+        }
+
+        async function loadDataProgress() {
+            try {
+                const user = AuthAPI.getCurrentUser();
+                const result = await FarmerAPI.getFarmerData(user.farmerId);
+                
+                if (result.success) {
+                    const data = result.data;
+                    const sections = data.sections || {};
+                    
+                    let completedCount = 0;
+                    let totalFields = 0;
+                    let completedFields = 0;
+                    
+                    const sectionNames = [
+                        'ข้อมูลพื้นฐานแปลง',
+                        'การเตรียมดิน',
+                        'การปลูก',
+                        'การดูแลรักษา',
+                        'การเก็บเกี่ยว',
+                        'หลังการเก็บเกี่ยว'
+                    ];
+                    
+                    let progressHtml = '';
+                    
+                    for (let i = 1; i <= 6; i++) {
+                        const section = sections[`section${i}`];
+                        const isCompleted = section && section.completed;
+                        
+                        if (isCompleted) completedCount++;
+                        
+                        const progress = section ? (section.progress || 0) : 0;
+                        totalFields += 10; // Assume 10 fields per section
+                        completedFields += Math.floor(progress * 10 / 100);
+                        
+                        progressHtml += `
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span class="fw-medium">ส่วนที่ ${i}: ${sectionNames[i-1]}</span>
+                                    <span class="badge ${isCompleted ? 'bg-success' : 'bg-warning'}">
+                                        ${isCompleted ? 'เสร็จแล้ว' : progress + '%'}
+                                    </span>
+                                </div>
+                                <div class="progress" style="height: 8px;">
+                                    <div class="progress-bar ${isCompleted ? 'bg-success' : 'bg-warning'}" 
+                                         style="width: ${progress}%"></div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    
+                    document.getElementById('sectionsProgress').innerHTML = progressHtml;
+                    document.getElementById('completedSections').textContent = completedCount;
+                    
+                    const overallProgress = Math.round((completedFields / totalFields) * 100);
+                    document.getElementById('dataCompleteness').textContent = overallProgress;
+                }
+            } catch (error) {
+                console.error('Load progress error:', error);
+            }
+        }
+
+        async function loadRecentActivity() {
+            try {
+                const user = AuthAPI.getCurrentUser();
+                const result = await FarmerAPI.getFarmerData(user.farmerId);
+                
+                let activityHtml = '';
+                
+                if (result.success && result.data.recentActivity) {
+                    const activities = result.data.recentActivity;
+                    
+                    if (activities.length === 0) {
+                        activityHtml = '<div class="text-center text-muted py-3">ยังไม่มีกิจกรรม</div>';
+                    } else {
+                        activities.forEach(activity => {
+                            activityHtml += `
+                                <div class="d-flex align-items-center mb-3 pb-3 border-bottom">
+                                    <div class="flex-shrink-0 me-3">
+                                        <div class="bg-light rounded-circle p-2">
+                                            <i class="fas fa-${activity.icon || 'edit'} text-success"></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <div class="fw-medium">${activity.title}</div>
+                                        <div class="text-muted small">${activity.description}</div>
+                                        <div class="text-muted small">
+                                            <i class="fas fa-clock me-1"></i>
+                                            ${new Date(activity.timestamp).toLocaleDateString('th-TH')}
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                    }
+                } else {
+                    activityHtml = '<div class="text-center text-muted py-3">ยังไม่มีกิจกรรม</div>';
+                }
+                
+                document.getElementById('recentActivity').innerHTML = activityHtml;
+                
+            } catch (error) {
+                console.error('Load activity error:', error);
+                document.getElementById('recentActivity').innerHTML = 
+                    '<div class="text-center text-danger py-3">ไม่สามารถโหลดข้อมูลกิจกรรมได้</div>';
+            }
+        }
+
+        async function showQRCode() {
+            try {
+                Utils.showLoading('กำลังสร้าง QR Code...');
+                
+                const user = AuthAPI.getCurrentUser();
+                const result = await FarmerAPI.getFarmerQRCode(user.farmerId);
+                
+                Utils.hideLoading();
+                
+                if (result.success) {
+                    document.getElementById('qrCodeContainer').innerHTML = 
+                        `<img src="${result.qrCodeUrl}" alt="QR Code" class="img-fluid" style="max-width: 300px;">`;
+                    
+                    const modal = new bootstrap.Modal(document.getElementById('qrModal'));
+                    modal.show();
+                } else {
+                    Utils.showError('ข้อผิดพลาด', result.message || 'ไม่สามารถสร้าง QR Code ได้');
+                }
+            } catch (error) {
+                Utils.hideLoading();
+                handleAPIError(error, 'ไม่สามารถสร้าง QR Code ได้');
+            }
+        }
+
+        function generateSearchCode() {
+            const modal = new bootstrap.Modal(document.getElementById('searchCodeModal'));
+            modal.show();
+            
+            // Set default date to today
+            document.getElementById('shipDate').value = new Date().toISOString().split('T')[0];
+            
+            // Hide previous result
+            document.getElementById('searchCodeResult').classList.add('d-none');
+        }
+
+        async function generateCode() {
+            try {
+                const shipDate = document.getElementById('shipDate').value;
+                if (!shipDate) {
+                    Utils.showError('ข้อผิดพลาด', 'กรุณาเลือกวันที่จัดส่ง');
+                    return;
+                }
+
+                Utils.showLoading('กำลังสร้างรหัสค้นหา...');
+                
+                const user = AuthAPI.getCurrentUser();
+                const result = await FarmerAPI.generateSearchCode(user.farmerId, shipDate);
+                
+                Utils.hideLoading();
+                
+                if (result.success) {
+                    document.getElementById('generatedSearchCode').textContent = result.searchCode;
+                    document.getElementById('searchCodeResult').classList.remove('d-none');
+                } else {
+                    Utils.showError('ข้อผิดพลาด', result.message || 'ไม่สามารถสร้างรหัสค้นหาได้');
+                }
+            } catch (error) {
+                Utils.hideLoading();
+                handleAPIError(error, 'ไม่สามารถสร้างรหัสค้นหาได้');
+            }
+        }
+
+        async function downloadReport() {
+            try {
+                Utils.showLoading('กำลังสร้างรายงาน...');
+                
+                const user = AuthAPI.getCurrentUser();
+                const result = await ReportAPI.generateFarmerReport(user.farmerId);
+                
+                Utils.hideLoading();
+                
+                if (result.success) {
+                    // Create download link
+                    const link = document.createElement('a');
+                    link.href = result.reportUrl;
+                    link.download = `รายงานเกษตรกร_${user.plotCode || user.username}_${new Date().toISOString().split('T')[0]}.pdf`;
+                    link.click();
+                } else {
+                    Utils.showError('ข้อผิดพลาด', result.message || 'ไม่สามารถสร้างรายงานได้');
+                }
+            } catch (error) {
+                Utils.hideLoading();
+                handleAPIError(error, 'ไม่สามารถสร้างรายงานได้');
+            }
+        }
+
+        function downloadQRCode() {
+            const qrImage = document.querySelector('#qrCodeContainer img');
+            if (qrImage) {
+                const link = document.createElement('a');
+                link.href = qrImage.src;
+                link.download = `QRCode_${AuthAPI.getCurrentUser().plotCode || 'farmer'}.png`;
+                link.click();
+            }
+        }
+
+        function changePassword() {
+            // Redirect to change password page or show modal
+            Utils.showInfo('การเปลี่ยนรหัสผ่าน', 'กรุณาติดต่อผู้จัดการกลุ่มเพื่อเปลี่ยนรหัสผ่าน');
+        }
+
+        function logout() {
+            AuthAPI.logout();
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>กรอกข้อมูลผลผลิต - ระบบสอบย้อนกลับผักอุดร</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="../assets/css/main.css" rel="stylesheet">
+    
+    <style>
+        .section-card {
+            transition: all 0.3s ease;
+            border-left: 4px solid #dee2e6;
+        }
+        
+        .section-card.completed {
+            border-left-color: #28a745;
+            background-color: #f8fff9;
+        }
+        
+        .section-card.active {
+            border-left-color: #007bff;
+            background-color: #f8fbff;
+        }
+        
+        .section-nav {
+            position: sticky;
+            top: 90px;
+            z-index: 100;
+        }
+        
+        .form-section {
+            display: none;
+        }
+        
+        .form-section.active {
+            display: block;
+        }
+        
+        .step-indicator {
+            background: #dee2e6;
+            color: #6c757d;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+        
+        .step-indicator.completed {
+            background: #28a745;
+            color: white;
+        }
+        
+        .step-indicator.active {
+            background: #007bff;
+            color: white;
+        }
+        
+        .file-upload-area {
+            border: 2px dashed #dee2e6;
+            border-radius: 0.375rem;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .file-upload-area:hover {
+            border-color: #007bff;
+            background-color: #f8fbff;
+        }
+        
+        .file-upload-area.dragover {
+            border-color: #28a745;
+            background-color: #f8fff9;
+        }
+        
+        .progress-bar-custom {
+            height: 6px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+        <div class="container">
+            <a class="navbar-brand text-success" href="../index.html">
+                <i class="fas fa-leaf me-2"></i>ผักอุดรคลีน
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="dashboard.html">
+                            <i class="fas fa-home me-1"></i>แดชบอร์ด
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="data-entry.html">
+                            <i class="fas fa-edit me-1"></i>กรอกข้อมูล
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="view-data.html">
+                            <i class="fas fa-eye me-1"></i>ดูข้อมูล
+                        </a>
+                    </li>
+                </ul>
+                
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user me-1"></i><span id="userName">เกษตรกร</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="dashboard.html">
+                                <i class="fas fa-home me-2"></i>แดชบอร์ด
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" onclick="logout()">
+                                <i class="fas fa-sign-out-alt me-2"></i>ออกจากระบบ
+                            </a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <div class="container-fluid py-4">
+        <div class="row">
+            <div class="col-12 mb-4">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body bg-primary text-white rounded">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <h2 class="mb-2">
+                                    <i class="fas fa-edit me-2"></i>
+                                    กรอกข้อมูลผลผลิต 6 ส่วน
+                                </h2>
+                                <p class="mb-0">
+                                    เกษตรกร: <span id="farmerName">-</span> | 
+                                    รหัสแปลง: <span id="plotCode">-</span>
+                                </p>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <div class="fs-6">
+                                    <i class="fas fa-clock me-1"></i>
+                                    อัปเดตล่าสุด: <span id="lastUpdate">-</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Section Navigation -->
+            <div class="col-lg-3 mb-4">
+                <div class="section-nav">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0">
+                                <i class="fas fa-list me-2"></i>ส่วนข้อมูล 6 ส่วน
+                            </h6>
+                        </div>
+                        <div class="card-body p-2">
+                            <div id="sectionNavigation">
+                                <!-- Navigation items will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Progress Overview -->
+                    <div class="card border-0 shadow-sm mt-3">
+                        <div class="card-body">
+                            <h6 class="mb-3">
+                                <i class="fas fa-chart-pie me-2"></i>ความคืบหน้า
+                            </h6>
+                            <div class="text-center mb-3">
+                                <div class="fs-1 text-primary">
+                                    <span id="overallProgress">0</span>%
+                                </div>
+                                <small class="text-muted">ความสมบูรณ์โดยรวม</small>
+                            </div>
+                            <div class="progress progress-bar-custom mb-2">
+                                <div class="progress-bar bg-primary" id="progressBar" style="width: 0%"></div>
+                            </div>
+                            <div class="small text-muted text-center">
+                                <span id="completedSections">0</span>/6 ส่วนเสร็จแล้ว
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Content -->
+            <div class="col-lg-9">
+                <form id="dataEntryForm">
+                    <!-- Section 1: ข้อมูลพื้นฐานแปลง -->
+                    <div class="form-section" id="section1">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-map me-2"></i>ส่วนที่ 1: ข้อมูลพื้นฐานแปลง
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="plotSize" class="form-label">ขนาดแปลง (ไร่)</label>
+                                        <input type="number" class="form-control" id="plotSize" step="0.01" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="soilType" class="form-label">ชนิดดิน</label>
+                                        <select class="form-select" id="soilType" required>
+                                            <option value="">เลือกชนิดดิน</option>
+                                            <option value="ดินเหนียว">ดินเหนียว</option>
+                                            <option value="ดินร่วน">ดินร่วน</option>
+                                            <option value="ดินทราย">ดินทราย</option>
+                                            <option value="ดินร่วนเหนียว">ดินร่วนเหนียว</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="waterSource" class="form-label">แหล่งน้ำ</label>
+                                        <select class="form-select" id="waterSource" required>
+                                            <option value="">เลือกแหล่งน้ำ</option>
+                                            <option value="น้ำฝน">น้ำฝน</option>
+                                            <option value="น้ำบาดาล">น้ำบาดาล</option>
+                                            <option value="คลองชลประทาน">คลองชลประทาน</option>
+                                            <option value="บ่อน้ำ">บ่อน้ำ</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="plotLocation" class="form-label">ที่ตั้งแปลง</label>
+                                        <input type="text" class="form-control" id="plotLocation" required>
+                                    </div>
+                                    <div class="col-12 mb-3">
+                                        <label for="plotHistory" class="form-label">ประวัติการใช้แปลง</label>
+                                        <textarea class="form-control" id="plotHistory" rows="3"></textarea>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label">รูปถ่ายแปลง</label>
+                                        <div class="file-upload-area" onclick="document.getElementById('plotImages').click()">
+                                            <i class="fas fa-cloud-upload-alt fs-1 text-muted mb-3"></i>
+                                            <p class="mb-0">คลิกเพื่ออัปโหลดรูปภาพ หรือลากไฟล์มาวาง</p>
+                                            <small class="text-muted">รองรับไฟล์ JPG, PNG ขนาดไม่เกิน 5MB</small>
+                                        </div>
+                                        <input type="file" id="plotImages" class="d-none" multiple accept="image/*">
+                                        <div id="plotImagesPreview" class="mt-3"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 2: การเตรียมดิน -->
+                    <div class="form-section" id="section2">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-tractor me-2"></i>ส่วนที่ 2: การเตรียมดิน
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="soilPrepDate" class="form-label">วันที่เตรียมดิน</label>
+                                        <input type="date" class="form-control" id="soilPrepDate" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="soilPrepMethod" class="form-label">วิธีการเตรียมดิน</label>
+                                        <select class="form-select" id="soilPrepMethod" required>
+                                            <option value="">เลือกวิธีการ</option>
+                                            <option value="ไถกลบตอซัง">ไถกลบตอซัง</option>
+                                            <option value="ไถแปร">ไถแปร</option>
+                                            <option value="ใช้จอบ">ใช้จอบ</option>
+                                            <option value="ไถแล้วตากดิน">ไถแล้วตากดิน</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="organicMatter" class="form-label">ปุ์ยอินทรีย์ที่ใช้</label>
+                                        <input type="text" class="form-control" id="organicMatter">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="organicAmount" class="form-label">ปริมาณปุ่ยอินทรีย์ (กก./ไร่)</label>
+                                        <input type="number" class="form-control" id="organicAmount" step="0.1">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="soilPH" class="form-label">ค่า pH ของดิน</label>
+                                        <input type="number" class="form-control" id="soilPH" step="0.1" min="0" max="14">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="liming" class="form-label">การใส่ปูนขาว</label>
+                                        <select class="form-select" id="liming">
+                                            <option value="">เลือก</option>
+                                            <option value="ใส่">ใส่</option>
+                                            <option value="ไม่ใส่">ไม่ใส่</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-12 mb-3">
+                                        <label for="soilPrepNotes" class="form-label">หมายเหตุการเตรียมดิน</label>
+                                        <textarea class="form-control" id="soilPrepNotes" rows="3"></textarea>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label">รูปถ่ายการเตรียมดิน</label>
+                                        <div class="file-upload-area" onclick="document.getElementById('soilPrepImages').click()">
+                                            <i class="fas fa-cloud-upload-alt fs-1 text-muted mb-3"></i>
+                                            <p class="mb-0">คลิกเพื่ออัปโหลดรูปภาพ</p>
+                                        </div>
+                                        <input type="file" id="soilPrepImages" class="d-none" multiple accept="image/*">
+                                        <div id="soilPrepImagesPreview" class="mt-3"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 3: การปลูก -->
+                    <div class="form-section" id="section3">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-seedling me-2"></i>ส่วนที่ 3: การปลูก
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="plantingDate" class="form-label">วันที่ปลูก</label>
+                                        <input type="date" class="form-control" id="plantingDate" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="vegetableType" class="form-label">ชนิดผัก</label>
+                                        <select class="form-select" id="vegetableType" required>
+                                            <option value="">เลือกชนิดผัก</option>
+                                            <option value="ผักกาดขาว">ผักกาดขาว</option>
+                                            <option value="ผักโขม">ผักโขม</option>
+                                            <option value="คะน้า">คะน้า</option>
+                                            <option value="ผักกาดหอม">ผักกาดหอม</option>
+                                            <option value="กิมจี">กิมจี</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="variety" class="form-label">พันธุ์</label>
+                                        <input type="text" class="form-control" id="variety" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="seedSource" class="form-label">แหล่งที่มาของเมล็ดพันธุ์</label>
+                                        <input type="text" class="form-control" id="seedSource" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="plantingMethod" class="form-label">วิธีการปลูก</label>
+                                        <select class="form-select" id="plantingMethod" required>
+                                            <option value="">เลือกวิธีการ</option>
+                                            <option value="หว่านเมล็ด">หว่านเมล็ด</option>
+                                            <option value="ปลูกเป็นแถว">ปลูกเป็นแถว</option>
+                                            <option value="ปลูกเป็นหลุม">ปลูกเป็นหลุม</option>
+                                            <option value="ย้ายกล้า">ย้ายกล้า</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="plantSpacing" class="form-label">ระยะปลูก (ซม.)</label>
+                                        <input type="text" class="form-control" id="plantSpacing">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="plantDensity" class="form-label">ความหนาแน่นการปลูก (ต้น/ไร่)</label>
+                                        <input type="number" class="form-control" id="plantDensity">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="mulching" class="form-label">การคลุมดิน</label>
+                                        <select class="form-select" id="mulching">
+                                            <option value="">เลือก</option>
+                                            <option value="คลุมด้วยฟาง">คลุมด้วยฟาง</option>
+                                            <option value="คลุมด้วยใบไม้">คลุมด้วยใบไม้</option>
+                                            <option value="คลุมด้วยพลาสติก">คลุมด้วยพลาสติก</option>
+                                            <option value="ไม่คลุม">ไม่คลุม</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-12 mb-3">
+                                        <label for="plantingNotes" class="form-label">หมายเหตุการปลูก</label>
+                                        <textarea class="form-control" id="plantingNotes" rows="3"></textarea>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label">รูปถ่ายการปลูก</label>
+                                        <div class="file-upload-area" onclick="document.getElementById('plantingImages').click()">
+                                            <i class="fas fa-cloud-upload-alt fs-1 text-muted mb-3"></i>
+                                            <p class="mb-0">คลิกเพื่ออัปโหลดรูปภาพ</p>
+                                        </div>
+                                        <input type="file" id="plantingImages" class="d-none" multiple accept="image/*">
+                                        <div id="plantingImagesPreview" class="mt-3"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 4: การดูแลรักษา -->
+                    <div class="form-section" id="section4">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-tools me-2"></i>ส่วนที่ 4: การดูแลรักษา
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="wateringFreq" class="form-label">ความถี่การรดน้ำ</label>
+                                        <select class="form-select" id="wateringFreq">
+                                            <option value="">เลือกความถี่</option>
+                                            <option value="วันละครั้ง">วันละครั้ง</option>
+                                            <option value="วันเว้นวัน">วันเว้นวัน</option>
+                                            <option value="2-3 วันต่อครั้ง">2-3 วันต่อครั้ง</option>
+                                            <option value="สัปดาห์ละครั้ง">สัปดาห์ละครั้ง</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="wateringMethod" class="form-label">วิธีการรดน้ำ</label>
+                                        <select class="form-select" id="wateringMethod">
+                                            <option value="">เลือกวิธีการ</option>
+                                            <option value="รดด้วยมือ">รดด้วยมือ</option>
+                                            <option value="ระบบสปริงเกอร์">ระบบสปริงเกอร์</option>
+                                            <option value="ระบบน้ำหยด">ระบบน้ำหยด</option>
+                                            <option value="ท่อน้ำ">ท่อน้ำ</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-12 mb-4">
+                                        <label class="form-label fw-bold">การใส่ปุ่ย</label>
+                                        <div class="row">
+                                            <div class="col-md-4 mb-3">
+                                                <label for="fertilizerType1" class="form-label">ปุ่ยชนิดที่ 1</label>
+                                                <input type="text" class="form-control" id="fertilizerType1">
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <label for="fertilizerAmount1" class="form-label">ปริมาณ (กก./ไร่)</label>
+                                                <input type="number" class="form-control" id="fertilizerAmount1" step="0.1">
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <label for="fertilizerDate1" class="form-label">วันที่ใส่</label>
+                                                <input type="date" class="form-control" id="fertilizerDate1">
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <label for="fertilizerType2" class="form-label">ปุ่ยชนิดที่ 2</label>
+                                                <input type="text" class="form-control" id="fertilizerType2">
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <label for="fertilizerAmount2" class="form-label">ปริมาณ (กก./ไร่)</label>
+                                                <input type="number" class="form-control" id="fertilizerAmount2" step="0.1">
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <label for="fertilizerDate2" class="form-label">วันที่ใส่</label>
+                                                <input type="date" class="form-control" id="fertilizerDate2">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 mb-4">
+                                        <label class="form-label fw-bold">การป้องกันโรคและแมลง</label>
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label for="pestProblem" class="form-label">ปัญหาที่พบ</label>
+                                                <input type="text" class="form-control" id="pestProblem">
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label for="pestSolution" class="form-label">วิธีการแก้ไข</label>
+                                                <input type="text" class="form-control" id="pestSolution">
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label for="chemicalUsed" class="form-label">สารเคมีที่ใช้ (ถ้ามี)</label>
+                                                <input type="text" class="form-control" id="chemicalUsed">
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label for="chemicalDate" class="form-label">วันที่ใช้สารเคมี</label>
+                                                <input type="date" class="form-control" id="chemicalDate">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 mb-3">
+                                        <label for="careNotes" class="form-label">หมายเหตุการดูแลรักษา</label>
+                                        <textarea class="form-control" id="careNotes" rows="3"></textarea>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label">รูปถ่ายการดูแลรักษา</label>
+                                        <div class="file-upload-area" onclick="document.getElementById('careImages').click()">
+                                            <i class="fas fa-cloud-upload-alt fs-1 text-muted mb-3"></i>
+                                            <p class="mb-0">คลิกเพื่ออัปโหลดรูปภาพ</p>
+                                        </div>
+                                        <input type="file" id="careImages" class="d-none" multiple accept="image/*">
+                                        <div id="careImagesPreview" class="mt-3"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 5: การเก็บเกี่ยว -->
+                    <div class="form-section" id="section5">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-cut me-2"></i>ส่วนที่ 5: การเก็บเกี่ยว
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="harvestDate" class="form-label">วันที่เก็บเกี่ยว</label>
+                                        <input type="date" class="form-control" id="harvestDate" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="harvestMethod" class="form-label">วิธีการเก็บเกี่ยว</label>
+                                        <select class="form-select" id="harvestMethod">
+                                            <option value="">เลือกวิธีการ</option>
+                                            <option value="ตัดด้วยมีด">ตัดด้วยมีด</option>
+                                            <option value="เด็ดด้วยมือ">เด็ดด้วยมือ</option>
+                                            <option value="ใช้กรรไกร">ใช้กรรไกร</option>
+                                            <option value="ถอนทั้งต้น">ถอนทั้งต้น</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="harvestQuantity" class="form-label">ปริมาณผลผลิต (กก.)</label>
+                                        <input type="number" class="form-control" id="harvestQuantity" step="0.1" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="harvestTime" class="form-label">เวลาที่เก็บเกี่ยว</label>
+                                        <select class="form-select" id="harvestTime">
+                                            <option value="">เลือกเวลา</option>
+                                            <option value="เช้า (6:00-9:00)">เช้า (6:00-9:00)</option>
+                                            <option value="สาย (9:00-12:00)">สาย (9:00-12:00)</option>
+                                            <option value="บ่าย (12:00-15:00)">บ่าย (12:00-15:00)</option>
+                                            <option value="เย็น (15:00-18:00)">เย็น (15:00-18:00)</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="harvestCondition" class="form-label">สภาพอากาศขณะเก็บเกี่ยว</label>
+                                        <select class="form-select" id="harvestCondition">
+                                            <option value="">เลือกสภาพอากาศ</option>
+                                            <option value="แจ่มใส">แจ่มใส</option>
+                                            <option value="มีเมฆ">มีเมฆ</option>
+                                            <option value="ฝนฟ้าคะนอง">ฝนฟ้าคะนอง</option>
+                                            <option value="หลังฝนตก">หลังฝนตก</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="plantAge" class="form-label">อายุพืช (วัน)</label>
+                                        <input type="number" class="form-control" id="plantAge">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="qualityGrade" class="form-label">เกรดคุณภาพ</label>
+                                        <select class="form-select" id="qualityGrade">
+                                            <option value="">เลือกเกรด</option>
+                                            <option value="A">A (ดีเยี่ยม)</option>
+                                            <option value="B">B (ดี)</option>
+                                            <option value="C">C (ปานกลาง)</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="packaging" class="form-label">การบรรจุ</label>
+                                        <select class="form-select" id="packaging">
+                                            <option value="">เลือกการบรรจุ</option>
+                                            <option value="ถุงพลาสติก">ถุงพลาสติก</option>
+                                            <option value="กล่องโฟม">กล่องโฟม</option>
+                                            <option value="ตะกร้า">ตะกร้า</option>
+                                            <option value="กล่องกระดาษ">กล่องกระดาษ</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-12 mb-3">
+                                        <label for="harvestNotes" class="form-label">หมายเหตุการเก็บเกี่ยว</label>
+                                        <textarea class="form-control" id="harvestNotes" rows="3"></textarea>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label">รูปถ่ายการเก็บเกี่ยว</label>
+                                        <div class="file-upload-area" onclick="document.getElementById('harvestImages').click()">
+                                            <i class="fas fa-cloud-upload-alt fs-1 text-muted mb-3"></i>
+                                            <p class="mb-0">คลิกเพื่ออัปโหลดรูปภาพ</p>
+                                        </div>
+                                        <input type="file" id="harvestImages" class="d-none" multiple accept="image/*">
+                                        <div id="harvestImagesPreview" class="mt-3"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 6: หลังการเก็บเกี่ยว -->
+                    <div class="form-section" id="section6">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-shipping-fast me-2"></i>ส่วนที่ 6: หลังการเก็บเกี่ยว
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="washingMethod" class="form-label">วิธีการล้าง</label>
+                                        <select class="form-select" id="washingMethod">
+                                            <option value="">เลือกวิธีการ</option>
+                                            <option value="ล้างด้วยน้ำสะอาด">ล้างด้วยน้ำสะอาด</option>
+                                            <option value="แช่น้ำเกลือ">แช่น้ำเกลือ</option>
+                                            <option value="ไม่ล้าง">ไม่ล้าง</option>
+                                            <option value="อื่นๆ">อื่นๆ</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="dryingMethod" class="form-label">วิธีการควบคุมความชื้น</label>
+                                        <select class="form-select" id="dryingMethod">
+                                            <option value="">เลือกวิธีการ</option>
+                                            <option value="ตากลม">ตากลม</option>
+                                            <option value="เช็ดแห้ง">เช็ดแห้ง</option>
+                                            <option value="ห้องเย็น">ห้องเย็น</option>
+                                            <option value="พัดลมระบายอากาศ">พัดลมระบายอากาศ</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="storageMethod" class="form-label">วิธีการเก็บรักษา</label>
+                                        <select class="form-select" id="storageMethod">
+                                            <option value="">เลือกวิธีการ</option>
+                                            <option value="ตู้เย็น">ตู้เย็น</option>
+                                            <option value="ห้องปรับอากาศ">ห้องปรับอากาศ</option>
+                                            <option value="ที่ร่ม">ที่ร่ม</option>
+                                            <option value="ห้องเย็น">ห้องเย็น</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="storageTemp" class="form-label">อุณหภูมิการเก็บรักษา (°C)</label>
+                                        <input type="number" class="form-control" id="storageTemp" step="0.1">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="transportMethod" class="form-label">วิธีการขนส่ง</label>
+                                        <select class="form-select" id="transportMethod">
+                                            <option value="">เลือกวิธีการ</option>
+                                            <option value="รถกระบะ">รถกระบะ</option>
+                                            <option value="รถตู้เย็น">รถตู้เย็น</option>
+                                            <option value="มอเตอร์ไซค์">มอเตอร์ไซค์</option>
+                                            <option value="จักรยาน">จักรยาน</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="destination" class="form-label">จุดหมายปลายทาง</label>
+                                        <input type="text" class="form-control" id="destination">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="shippingDate" class="form-label">วันที่จัดส่ง</label>
+                                        <input type="date" class="form-control" id="shippingDate">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="shelfLife" class="form-label">อายุการเก็บรักษา (วัน)</label>
+                                        <input type="number" class="form-control" id="shelfLife">
+                                    </div>
+                                    <div class="col-12 mb-3">
+                                        <label for="postHarvestNotes" class="form-label">หมายเหตุหลังการเก็บเกี่ยว</label>
+                                        <textarea class="form-control" id="postHarvestNotes" rows="3"></textarea>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label">รูปถ่ายหลังการเก็บเกี่ยว</label>
+                                        <div class="file-upload-area" onclick="document.getElementById('postHarvestImages').click()">
+                                            <i class="fas fa-cloud-upload-alt fs-1 text-muted mb-3"></i>
+                                            <p class="mb-0">คลิกเพื่ออัปโหลดรูปภาพ</p>
+                                        </div>
+                                        <input type="file" id="postHarvestImages" class="d-none" multiple accept="image/*">
+                                        <div id="postHarvestImagesPreview" class="mt-3"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <button type="button" class="btn btn-outline-secondary" id="prevBtn" onclick="previousSection()">
+                                            <i class="fas fa-chevron-left me-1"></i>ก่อนหน้า
+                                        </button>
+                                        
+                                        <div class="text-center">
+                                            <button type="button" class="btn btn-outline-primary me-2" onclick="saveDraft()">
+                                                <i class="fas fa-save me-1"></i>บันทึกแบบร่าง
+                                            </button>
+                                            <button type="button" class="btn btn-success" onclick="saveSection()">
+                                                <i class="fas fa-check me-1"></i>บันทึกส่วนนี้
+                                            </button>
+                                        </div>
+                                        
+                                        <button type="button" class="btn btn-primary" id="nextBtn" onclick="nextSection()">
+                                            ถัดไป<i class="fas fa-chevron-right ms-1"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div id="loadingSpinner" class="d-none">
+        <div class="spinner-overlay">
+            <div class="spinner-border text-success" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="../assets/js/utils.js"></script>
+    <script src="../assets/js/auth.js"></script>
+    <script src="../assets/js/api.js"></script>
+    
+    <script>
+        let currentSection = 1;
+        let farmerData = null;
+        
+        const sectionNames = [
+            'ข้อมูลพื้นฐานแปลง',
+            'การเตรียมดิน', 
+            'การปลูก',
+            'การดูแลรักษา',
+            'การเก็บเกี่ยว',
+            'หลังการเก็บเกี่ยว'
+        ];
+
+        // Page initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            initializePage();
+        });
+
+        async function initializePage() {
+            try {
+                // Check authentication
+                if (!AuthAPI.isLoggedIn()) {
+                    window.location.href = '../login.html';
+                    return;
+                }
+
+                const user = AuthAPI.getCurrentUser();
+                if (user.role !== 'farmer') {
+                    AuthAPI.logout();
+                    return;
+                }
+
+                // Update user info
+                updateUserInfo(user);
+                
+                // Load farmer data
+                await loadFarmerData();
+                
+                // Initialize navigation
+                initializeNavigation();
+                
+                // Show first section
+                showSection(1);
+                
+                // Initialize file upload handlers
+                initializeFileUploads();
+
+            } catch (error) {
+                console.error('Initialization error:', error);
+                Utils.showError('ข้อผิดพลาด', 'ไม่สามารถโหลดข้อมูลได้ กรุณาลองใหม่อีกครั้ง');
+            }
+        }
+
+        function updateUserInfo(user) {
+            document.getElementById('userName').textContent = user.fullName || user.username;
+            document.getElementById('farmerName').textContent = user.fullName || user.username;
+            document.getElementById('plotCode').textContent = user.plotCode || '-';
+        }
+
+        async function loadFarmerData() {
+            try {
+                const user = AuthAPI.getCurrentUser();
+                const result = await FarmerAPI.getFarmerData(user.farmerId);
+                
+                if (result.success) {
+                    farmerData = result.data;
+                    
+                    // Update last update time
+                    if (farmerData.lastUpdate) {
+                        document.getElementById('lastUpdate').textContent = 
+                            new Date(farmerData.lastUpdate).toLocaleDateString('th-TH');
+                    }
+                    
+                    // Load existing section data
+                    loadSectionData();
+                    updateProgress();
+                }
+            } catch (error) {
+                console.error('Load farmer data error:', error);
+            }
+        }
+
+        function initializeNavigation() {
+            let navHtml = '';
+            
+            for (let i = 1; i <= 6; i++) {
+                const isCompleted = farmerData?.sections?.[`section${i}`]?.completed || false;
+                const progress = farmerData?.sections?.[`section${i}`]?.progress || 0;
+                
+                navHtml += `
+                    <div class="section-card ${i === currentSection ? 'active' : ''} ${isCompleted ? 'completed' : ''} mb-2 p-2 rounded cursor-pointer" 
+                         onclick="showSection(${i})">
+                        <div class="d-flex align-items-center">
+                            <div class="step-indicator ${i === currentSection ? 'active' : ''} ${isCompleted ? 'completed' : ''} me-3">
+                                ${isCompleted ? '<i class="fas fa-check"></i>' : i}
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="fw-medium">ส่วนที่ ${i}</div>
+                                <div class="small text-muted">${sectionNames[i-1]}</div>
+                                <div class="progress progress-bar-custom mt-1">
+                                    <div class="progress-bar ${isCompleted ? 'bg-success' : 'bg-primary'}" 
+                                         style="width: ${progress}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            document.getElementById('sectionNavigation').innerHTML = navHtml;
+        }
+
+        function showSection(sectionNumber) {
+            // Hide all sections
+            document.querySelectorAll('.form-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Show target section
+            document.getElementById(`section${sectionNumber}`).classList.add('active');
+            
+            // Update current section
+            currentSection = sectionNumber;
+            
+            // Update navigation
+            updateNavigationState();
+            
+            // Update button states
+            updateButtonStates();
+            
+            // Scroll to top
+            window.scrollTo(0, 0);
+        }
+
+        function updateNavigationState() {
+            document.querySelectorAll('.section-card').forEach((card, index) => {
+                card.classList.remove('active');
+                if (index + 1 === currentSection) {
+                    card.classList.add('active');
+                }
+            });
+            
+            document.querySelectorAll('.step-indicator').forEach((indicator, index) => {
+                indicator.classList.remove('active');
+                if (index + 1 === currentSection) {
+                    indicator.classList.add('active');
+                }
+            });
+        }
+
+        function updateButtonStates() {
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            
+            prevBtn.disabled = currentSection === 1;
+            
+            if (currentSection === 6) {
+                nextBtn.innerHTML = '<i class="fas fa-check me-1"></i>เสร็จสิ้น';
+                nextBtn.className = 'btn btn-success';
+            } else {
+                nextBtn.innerHTML = 'ถัดไป<i class="fas fa-chevron-right ms-1"></i>';
+                nextBtn.className = 'btn btn-primary';
+            }
+        }
+
+        function nextSection() {
+            if (currentSection < 6) {
+                showSection(currentSection + 1);
+            } else {
+                // Complete all sections
+                completeAllSections();
+            }
+        }
+
+        function previousSection() {
+            if (currentSection > 1) {
+                showSection(currentSection - 1);
+            }
+        }
+
+        async function saveSection() {
+            try {
+                Utils.showLoading('กำลังบันทึกข้อมูล...');
+                
+                const sectionData = collectSectionData(currentSection);
+                const user = AuthAPI.getCurrentUser();
+                
+                const result = await FarmerAPI.saveFarmerSection(
+                    user.farmerId, 
+                    currentSection, 
+                    sectionData
+                );
+                
+                Utils.hideLoading();
+                
+                if (result.success) {
+                    Utils.showSuccess('สำเร็จ', 'บันทึกข้อมูลส่วนที่ ' + currentSection + ' เรียบร้อยแล้ว');
+                    
+                    // Update local data
+                    if (!farmerData.sections) farmerData.sections = {};
+                    farmerData.sections[`section${currentSection}`] = {
+                        ...sectionData,
+                        completed: true,
+                        progress: 100,
+                        lastUpdate: new Date().toISOString()
+                    };
+                    
+                    // Update navigation and progress
+                    initializeNavigation();
+                    updateProgress();
+                    
+                } else {
+                    Utils.showError('ข้อผิดพลาด', result.message || 'ไม่สามารถบันทึกข้อมูลได้');
+                }
+                
+            } catch (error) {
+                Utils.hideLoading();
+                handleAPIError(error, 'ไม่สามารถบันทึกข้อมูลได้');
+            }
+        }
+
+        async function saveDraft() {
+            try {
+                Utils.showLoading('กำลังบันทึกแบบร่าง...');
+                
+                const sectionData = collectSectionData(currentSection);
+                const user = AuthAPI.getCurrentUser();
+                
+                // Calculate progress based on filled fields
+                const progress = calculateSectionProgress(sectionData);
+                sectionData.progress = progress;
+                sectionData.completed = false;
+                
+                const result = await FarmerAPI.saveFarmerSection(
+                    user.farmerId, 
+                    currentSection, 
+                    sectionData
+                );
+                
+                Utils.hideLoading();
+                
+                if (result.success) {
+                    Utils.showSuccess('สำเร็จ', 'บันทึกแบบร่างเรียบร้อยแล้ว');
+                    
+                    // Update local data
+                    if (!farmerData.sections) farmerData.sections = {};
+                    farmerData.sections[`section${currentSection}`] = {
+                        ...sectionData,
+                        lastUpdate: new Date().toISOString()
+                    };
+                    
+                    // Update navigation and progress
+                    initializeNavigation();
+                    updateProgress();
+                    
+                } else {
+                    Utils.showError('ข้อผิดพลาด', result.message || 'ไม่สามารถบันทึกแบบร่างได้');
+                }
+                
+            } catch (error) {
+                Utils.hideLoading();
+                handleAPIError(error, 'ไม่สามารถบันทึกแบบร่างได้');
+            }
+        }
+
+        function collectSectionData(sectionNumber) {
+            const data = {};
+            const section = document.getElementById(`section${sectionNumber}`);
+            
+            // Collect all input values
+            section.querySelectorAll('input, select, textarea').forEach(input => {
+                if (input.type === 'file') {
+                    // Handle file inputs separately
+                    return;
+                }
+                data[input.id] = input.value;
+            });
+            
+            return data;
+        }
+
+        function calculateSectionProgress(sectionData) {
+            const totalFields = Object.keys(sectionData).length;
+            const filledFields = Object.values(sectionData).filter(value => value && value.trim() !== '').length;
+            
+            return Math.round((filledFields / totalFields) * 100);
+        }
+
+        function loadSectionData() {
+            if (!farmerData || !farmerData.sections) return;
+            
+            for (let i = 1; i <= 6; i++) {
+                const sectionData = farmerData.sections[`section${i}`];
+                if (sectionData) {
+                    loadSectionFields(i, sectionData);
+                }
+            }
+        }
+
+        function loadSectionFields(sectionNumber, sectionData) {
+            const section = document.getElementById(`section${sectionNumber}`);
+            
+            Object.keys(sectionData).forEach(fieldId => {
+                const field = section.querySelector(`#${fieldId}`);
+                if (field && sectionData[fieldId]) {
+                    field.value = sectionData[fieldId];
+                }
+            });
+        }
+
+        function updateProgress() {
+            if (!farmerData || !farmerData.sections) return;
+            
+            let completedCount = 0;
+            let totalProgress = 0;
+            
+            for (let i = 1; i <= 6; i++) {
+                const section = farmerData.sections[`section${i}`];
+                if (section) {
+                    if (section.completed) completedCount++;
+                    totalProgress += (section.progress || 0);
+                }
+            }
+            
+            const overallProgress = Math.round(totalProgress / 6);
+            
+            document.getElementById('completedSections').textContent = completedCount;
+            document.getElementById('overallProgress').textContent = overallProgress;
+            document.getElementById('progressBar').style.width = overallProgress + '%';
+        }
+
+        function initializeFileUploads() {
+            const fileInputs = document.querySelectorAll('input[type="file"]');
+            
+            fileInputs.forEach(input => {
+                input.addEventListener('change', function(e) {
+                    handleFileUpload(e.target);
+                });
+            });
+            
+            // Add drag and drop functionality
+            const uploadAreas = document.querySelectorAll('.file-upload-area');
+            uploadAreas.forEach(area => {
+                area.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    this.classList.add('dragover');
+                });
+                
+                area.addEventListener('dragleave', function(e) {
+                    e.preventDefault();
+                    this.classList.remove('dragover');
+                });
+                
+                area.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    this.classList.remove('dragover');
+                    
+                    const fileInput = this.parentElement.querySelector('input[type="file"]');
+                    fileInput.files = e.dataTransfer.files;
+                    handleFileUpload(fileInput);
+                });
+            });
+        }
+
+        function handleFileUpload(input) {
+            const files = input.files;
+            const previewId = input.id + 'Preview';
+            const previewContainer = document.getElementById(previewId);
+            
+            if (previewContainer) {
+                let previewHtml = '';
+                
+                Array.from(files).forEach((file, index) => {
+                    if (file.type.startsWith('image/')) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            previewHtml += `
+                                <div class="d-inline-block me-2 mb-2">
+                                    <img src="${e.target.result}" alt="Preview" class="img-thumbnail" style="width: 100px; height: 100px; object-fit: cover;">
+                                    <div class="small text-center">${file.name}</div>
+                                </div>
+                            `;
+                            previewContainer.innerHTML = previewHtml;
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+        }
+
+        async function completeAllSections() {
+            try {
+                Utils.showLoading('กำลังตรวจสอบข้อมูล...');
+                
+                // Check if all sections are completed
+                let allCompleted = true;
+                for (let i = 1; i <= 6; i++) {
+                    const section = farmerData?.sections?.[`section${i}`];
+                    if (!section || !section.completed) {
+                        allCompleted = false;
+                        break;
+                    }
+                }
+                
+                Utils.hideLoading();
+                
+                if (!allCompleted) {
+                    Utils.showWarning('แจ้งเตือน', 'กรุณากรอกข้อมูลให้ครบทั้ง 6 ส่วนก่อนเสร็จสิ้น');
+                    return;
+                }
+                
+                Utils.showSuccess('เสร็จสิ้น', 'บันทึกข้อมูลทั้ง 6 ส่วนเรียบร้อยแล้ว');
+                
+                // Redirect to view data page
+                setTimeout(() => {
+                    window.location.href = 'view-data.html';
+                }, 2000);
+                
+            } catch (error) {
+                Utils.hideLoading();
+                handleAPIError(error);
+            }
+        }
+
+        function logout() {
+            AuthAPI.logout();
+        }
+    </script>
+</body>
+</html>
