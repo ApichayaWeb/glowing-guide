@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบสอบย้อนกลับผักอุดร</title>
+    <title>ระบบสอบย้อนกลับผักอุดร - ตรวจสอบที่มาผลิตภัณฑ์</title>
     
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -28,6 +28,11 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
+                        <a class="nav-link" href="#how-to-use">
+                            <i class="fas fa-question-circle me-1"></i>วิธีใช้งาน
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" href="search.html">
                             <i class="fas fa-search me-1"></i>ค้นหาเชิงลึก
                         </a>
@@ -48,19 +53,27 @@
             <div class="row align-items-center min-vh-100">
                 <div class="col-lg-6">
                     <div class="hero-content animate__animated animate__fadeInLeft">
+                        <div class="hero-badge mb-4">
+                            <span class="badge bg-success fs-6 px-3 py-2">
+                                <i class="fas fa-seedling me-2"></i>
+                                ระบบสอบย้อนกลับผักอุดรธานี
+                            </span>
+                        </div>
                         <h1 class="display-4 fw-bold text-success mb-4">
-                            <i class="fas fa-qrcode me-3"></i>
-                            ตรวจสอบที่มาผลิตภัณฑ์
+                            ตรวจสอบที่มา<br>
+                            <span class="text-gradient">ผลิตภัณฑ์เกษตร</span><br>
+                            ด้วย QR Code
                         </h1>
                         <p class="lead text-muted mb-4">
-                            สแกน QR Code บนผลิตภัณฑ์เพื่อดูข้อมูลการผลิต แหล่งที่มา และการรับรองคุณภาพของผักจากเกษตรกรในจังหวัดอุดรธานี
+                            สแกน QR Code บนผลิตภัณฑ์เพื่อตรวจสอบข้อมูลการผลิต แหล่งที่มา 
+                            และการรับรองคุณภาพของผักปลอดภัยจากเกษตรกรในจังหวัดอุดรธานี
                         </p>
                         
-                        <!-- QR Scanner Button -->
-                        <div class="mb-4">
-                            <button class="btn btn-success btn-lg me-3" id="startScanBtn">
+                        <!-- Main Action Buttons -->
+                        <div class="hero-actions mb-5">
+                            <button class="btn btn-success btn-lg me-3 pulse" id="startScanBtn">
                                 <i class="fas fa-camera me-2"></i>
-                                เปิดกล้องสแกน QR Code
+                                เริ่มสแกน QR Code
                             </button>
                             <button class="btn btn-outline-success btn-lg" data-bs-toggle="modal" data-bs-target="#manualSearchModal">
                                 <i class="fas fa-keyboard me-2"></i>
@@ -68,27 +81,38 @@
                             </button>
                         </div>
 
-                        <!-- Features -->
-                        <div class="features-list">
-                            <div class="feature-item mb-3">
-                                <i class="fas fa-check-circle text-success me-2"></i>
-                                <span>ตรวจสอบที่มาผลิตภัณฑ์ได้ทันที</span>
-                            </div>
-                            <div class="feature-item mb-3">
-                                <i class="fas fa-check-circle text-success me-2"></i>
-                                <span>ข้อมูลการผลิตและการรับรองคุณภาพ</span>
-                            </div>
-                            <div class="feature-item mb-3">
-                                <i class="fas fa-check-circle text-success me-2"></i>
-                                <span>ปลอดภัยและเชื่อถือได้</span>
+                        <!-- Trust Indicators -->
+                        <div class="trust-indicators">
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <div class="trust-item">
+                                        <i class="fas fa-shield-alt text-success mb-2"></i>
+                                        <h6>มาตรฐาน GAP</h6>
+                                        <small class="text-muted">การปฏิบัติทางการเกษตรที่ดี</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="trust-item">
+                                        <i class="fas fa-leaf text-success mb-2"></i>
+                                        <h6>ปลอดสารเคมี</h6>
+                                        <small class="text-muted">ผลิตภัณฑ์ปลอดภัย</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="trust-item">
+                                        <i class="fas fa-search text-success mb-2"></i>
+                                        <h6>ตรวจสอบได้</h6>
+                                        <small class="text-muted">โปร่งใสทุกขั้นตอน</small>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="col-lg-6">
-                    <div class="scanner-container animate__animated animate__fadeInRight">
+                    <div class="hero-image animate__animated animate__fadeInRight">
                         <!-- QR Scanner Area -->
-                        <div class="scanner-area" id="scannerArea" style="display: none;">
+                        <div class="scanner-container" id="scannerArea" style="display: none;">
                             <div class="scanner-frame">
                                 <video id="qrVideo" autoplay playsinline></video>
                                 <div class="scanner-overlay">
@@ -100,31 +124,252 @@
                                     </div>
                                 </div>
                             </div>
-                            <p class="text-center mt-3 text-muted">
-                                <i class="fas fa-info-circle me-1"></i>
-                                นำกล้องไปที่ QR Code บนผลิตภัณฑ์
-                            </p>
-                            <button class="btn btn-outline-danger" id="stopScanBtn">
-                                <i class="fas fa-stop me-1"></i>หยุดสแกน
-                            </button>
-                        </div>
-
-                        <!-- Demo QR Code -->
-                        <div class="demo-section text-center" id="demoSection">
-                            <div class="demo-qr-card">
-                                <h5 class="text-muted mb-3">ตัวอย่าง QR Code</h5>
-                                <div class="qr-demo" id="demoQRCode">
-                                    <!-- QR Code จะถูกสร้างที่นี่ -->
-                                </div>
-                                <p class="small text-muted mt-2">
-                                    รหัส: 01-4102010502568<br>
-                                    (สำหรับทดสอบระบบ)
+                            <div class="scanner-controls text-center mt-3">
+                                <p class="text-muted mb-3">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    นำกล้องไปที่ QR Code บนผลิตภัณฑ์
                                 </p>
-                                <button class="btn btn-sm btn-outline-primary" onclick="testQRCode('01-4102010502568')">
-                                    ทดสอบรหัสนี้
+                                <button class="btn btn-outline-danger" id="stopScanBtn">
+                                    <i class="fas fa-stop me-1"></i>หยุดสแกน
                                 </button>
                             </div>
                         </div>
+
+                        <!-- Hero Image/Illustration -->
+                        <div class="hero-illustration" id="heroIllustration">
+                            <div class="illustration-card">
+                                <div class="product-showcase">
+                                    <div class="product-image">
+                                        <i class="fas fa-carrot text-success"></i>
+                                        <div class="qr-badge">
+                                            <i class="fas fa-qrcode"></i>
+                                        </div>
+                                    </div>
+                                    <div class="scan-animation">
+                                        <div class="scan-line"></div>
+                                    </div>
+                                </div>
+                                <div class="demo-info text-center mt-4">
+                                    <h6 class="text-success mb-2">ตัวอย่าง QR Code</h6>
+                                    <div class="demo-qr" id="demoQRCode">
+                                        <!-- QR Code จะถูกสร้างที่นี่ -->
+                                    </div>
+                                    <p class="small text-muted mt-2">
+                                        รหัส: 01-4102010502568<br>
+                                        <button class="btn btn-sm btn-outline-primary mt-1" onclick="testQRCode('01-4102010502568')">
+                                            ทดสอบรหัสนี้
+                                        </button>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How to Use Section -->
+    <section class="how-to-use-section py-5" id="how-to-use">
+        <div class="container">
+            <div class="row mb-5">
+                <div class="col-12 text-center">
+                    <h2 class="fw-bold text-success mb-3">วิธีการสืบค้นข้อมูลผักอุดร</h2>
+                    <p class="lead text-muted">เรียนรู้การใช้งานระบบในขั้นตอนง่ายๆ</p>
+                </div>
+            </div>
+            
+            <div class="row g-4">
+                <!-- Step 1 -->
+                <div class="col-lg-4">
+                    <div class="step-card text-center h-100">
+                        <div class="step-number">1</div>
+                        <div class="step-icon">
+                            <i class="fas fa-search text-success"></i>
+                        </div>
+                        <h5>ค้นหา QR Code</h5>
+                        <p class="text-muted">
+                            มองหา QR Code บนบรรจุภัณฑ์ของผลิตภัณฑ์ผัก 
+                            มักจะอยู่ด้านหลังหรือด้านข้างของบรรจุภัณฑ์
+                        </p>
+                        <div class="step-image">
+                            <div class="package-demo">
+                                <div class="package-front">
+                                    <i class="fas fa-leaf"></i>
+                                    <span>ผักใส</span>
+                                </div>
+                                <div class="qr-position">
+                                    <i class="fas fa-qrcode"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="col-lg-4">
+                    <div class="step-card text-center h-100">
+                        <div class="step-number">2</div>
+                        <div class="step-icon">
+                            <i class="fas fa-camera text-success"></i>
+                        </div>
+                        <h5>สแกนด้วยกล้อง</h5>
+                        <p class="text-muted">
+                            กดปุ่ม "เริ่มสแกน" เพื่อเปิดกล้อง 
+                            จากนั้นนำกล้องไปสแกน QR Code บนผลิตภัณฑ์
+                        </p>
+                        <div class="step-image">
+                            <div class="scan-demo">
+                                <div class="phone-frame">
+                                    <div class="camera-view">
+                                        <div class="scan-target">
+                                            <i class="fas fa-qrcode"></i>
+                                        </div>
+                                        <div class="scan-overlay">
+                                            <div class="scan-corners"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="col-lg-4">
+                    <div class="step-card text-center h-100">
+                        <div class="step-number">3</div>
+                        <div class="step-icon">
+                            <i class="fas fa-info-circle text-success"></i>
+                        </div>
+                        <h5>ดูข้อมูลผลิตภัณฑ์</h5>
+                        <p class="text-muted">
+                            ระบบจะแสดงข้อมูลเกษตรกร แปลงปลูก 
+                            และการรับรองคุณภาพของผลิตภัณฑ์
+                        </p>
+                        <div class="step-image">
+                            <div class="result-demo">
+                                <div class="result-card">
+                                    <div class="farmer-info">
+                                        <i class="fas fa-user-tie"></i>
+                                        <span>นายสมชาย ใจดี</span>
+                                    </div>
+                                    <div class="location-info">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                        <span>อุดรธานี</span>
+                                    </div>
+                                    <div class="cert-info">
+                                        <i class="fas fa-certificate text-success"></i>
+                                        <span>GAP</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Info -->
+            <div class="row mt-5">
+                <div class="col-lg-6">
+                    <div class="info-card">
+                        <h5 class="text-success mb-3">
+                            <i class="fas fa-search-plus me-2"></i>
+                            ต้องการข้อมูลเชิงลึก?
+                        </h5>
+                        <p class="text-muted mb-3">
+                            หากต้องการดูข้อมูลการผลิต การเก็บเกี่ยว การขนส่ง และเอกสารการรับรองแบบละเอียด 
+                            สามารถใช้ฟีเจอร์ "ค้นหาเชิงลึก" ด้วยรหัสจัดส่งที่ระบุบนผลิตภัณฑ์
+                        </p>
+                        <a href="search.html" class="btn btn-outline-success">
+                            <i class="fas fa-search me-2"></i>ค้นหาเชิงลึก
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="info-card">
+                        <h5 class="text-success mb-3">
+                            <i class="fas fa-mobile-alt me-2"></i>
+                            ใช้งานบนมือถือ
+                        </h5>
+                        <p class="text-muted mb-3">
+                            ระบบรองรับการใช้งานบนโทรศัพท์มือถือทุกรุ่น 
+                            สามารถเข้าถึงได้ผ่านเว็บเบราว์เซอร์โดยไม่ต้องติดตั้งแอปพลิเคชัน
+                        </p>
+                        <div class="mobile-features">
+                            <span class="badge bg-light text-dark me-2 mb-2">
+                                <i class="fab fa-android me-1"></i>Android
+                            </span>
+                            <span class="badge bg-light text-dark me-2 mb-2">
+                                <i class="fab fa-apple me-1"></i>iOS
+                            </span>
+                            <span class="badge bg-light text-dark me-2 mb-2">
+                                <i class="fas fa-camera me-1"></i>Camera
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section py-5 bg-light">
+        <div class="container">
+            <div class="row mb-5">
+                <div class="col-12 text-center">
+                    <h2 class="fw-bold text-success mb-3">ความปลอดภัยและความน่าเชื่อถือ</h2>
+                    <p class="lead text-muted">ระบบที่ออกแบบเพื่อความโปร่งใสและความปลอดภัยของผู้บริโภค</p>
+                </div>
+            </div>
+            
+            <div class="row g-4">
+                <div class="col-lg-3 col-md-6">
+                    <div class="feature-card text-center h-100">
+                        <div class="feature-icon bg-success text-white">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h5>มาตรฐาน GAP</h5>
+                        <p class="text-muted">
+                            ผลิตภัณฑ์ทุกชิ้นผ่านการรับรองมาตรฐาน GAP 
+                            (Good Agricultural Practice)
+                        </p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="feature-card text-center h-100">
+                        <div class="feature-icon bg-info text-white">
+                            <i class="fas fa-microscope"></i>
+                        </div>
+                        <h5>ตรวจสอบคุณภาพ</h5>
+                        <p class="text-muted">
+                            ระบบตรวจสอบคุณภาพตั้งแต่กระบวนการปลูก 
+                            จนถึงผู้บริโภค
+                        </p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="feature-card text-center h-100">
+                        <div class="feature-icon bg-warning text-white">
+                            <i class="fas fa-route"></i>
+                        </div>
+                        <h5>ติดตามได้ทุกขั้นตอน</h5>
+                        <p class="text-muted">
+                            สามารถติดตามการเดินทางของผลิตภัณฑ์ 
+                            ตั้งแต่ฟาร์มจนถึงมือผู้บริโภค
+                        </p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="feature-card text-center h-100">
+                        <div class="feature-icon bg-danger text-white">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <h5>ข้อมูลแบบเรียลไทม์</h5>
+                        <p class="text-muted">
+                            ข้อมูลที่แสดงเป็นข้อมูลล่าสุด 
+                            อัพเดทแบบเรียลไทม์
+                        </p>
                     </div>
                 </div>
             </div>
@@ -194,19 +439,410 @@
     <script src="assets/js/qr-scanner.js"></script>
     <script src="assets/js/app.js"></script>
 
+    <style>
+        /* Hero Section Styles */
+        .hero-section {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            min-height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="%23198754" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            opacity: 0.5;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-badge {
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .text-gradient {
+            background: linear-gradient(135deg, #198754, #20c997);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .trust-indicators {
+            margin-top: 2rem;
+        }
+
+        .trust-item {
+            text-align: center;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .trust-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .trust-item i {
+            font-size: 2rem;
+        }
+
+        /* Hero Image Styles */
+        .hero-image {
+            position: relative;
+            z-index: 2;
+        }
+
+        .illustration-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .product-showcase {
+            position: relative;
+            margin-bottom: 2rem;
+        }
+
+        .product-image {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, #198754, #20c997);
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: white;
+            position: relative;
+            margin: 0 auto;
+        }
+
+        .qr-badge {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            width: 40px;
+            height: 40px;
+            background: #ffc107;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            animation: pulse 2s infinite;
+        }
+
+        .scan-animation {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 140px;
+            height: 140px;
+            border: 2px solid #198754;
+            border-radius: 20px;
+            opacity: 0.6;
+        }
+
+        .scan-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #198754;
+            animation: scanLine 2s infinite;
+        }
+
+        @keyframes scanLine {
+            0% { transform: translateY(0); opacity: 1; }
+            50% { transform: translateY(136px); opacity: 0.5; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+
+        .demo-qr canvas {
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        /* How to Use Section */
+        .how-to-use-section {
+            background: white;
+        }
+
+        .step-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .step-card:hover {
+            transform: translateY(-5px);
+            border-color: #198754;
+        }
+
+        .step-number {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #198754, #20c997);
+            color: white;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .step-icon i {
+            font-size: 3rem;
+            margin: 1rem 0;
+        }
+
+        .step-image {
+            margin-top: 2rem;
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Step Demos */
+        .package-demo {
+            position: relative;
+            width: 80px;
+            height: 100px;
+        }
+
+        .package-front {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #198754, #20c997);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.8rem;
+        }
+
+        .package-front i {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .qr-position {
+            position: absolute;
+            top: 5px;
+            right: -15px;
+            width: 25px;
+            height: 25px;
+            background: white;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #198754;
+            animation: bounce 2s infinite;
+        }
+
+        .scan-demo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .phone-frame {
+            width: 80px;
+            height: 120px;
+            background: #333;
+            border-radius: 12px;
+            padding: 8px;
+        }
+
+        .camera-view {
+            width: 100%;
+            height: 100%;
+            background: #000;
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .scan-target {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #198754;
+            font-size: 1.5rem;
+        }
+
+        .scan-overlay {
+            position: absolute;
+            top: 20%;
+            left: 20%;
+            right: 20%;
+            bottom: 20%;
+            border: 2px solid #198754;
+            border-radius: 4px;
+        }
+
+        .scan-corners::before,
+        .scan-corners::after {
+            content: '';
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            border: 2px solid #ffc107;
+        }
+
+        .scan-corners::before {
+            top: -2px;
+            left: -2px;
+            border-right: none;
+            border-bottom: none;
+        }
+
+        .scan-corners::after {
+            bottom: -2px;
+            right: -2px;
+            border-left: none;
+            border-top: none;
+        }
+
+        .result-demo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .result-card {
+            background: white;
+            border: 2px solid #198754;
+            border-radius: 8px;
+            padding: 1rem;
+            min-width: 120px;
+        }
+
+        .farmer-info,
+        .location-info,
+        .cert-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            font-size: 0.8rem;
+        }
+
+        .farmer-info i,
+        .location-info i,
+        .cert-info i {
+            margin-right: 0.5rem;
+            width: 16px;
+        }
+
+        /* Info Cards */
+        .info-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            height: 100%;
+        }
+
+        /* Features Section */
+        .feature-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Animations */
+        @keyframes bounce {
+            0%, 20%, 53%, 80%, 100% { transform: translateY(0); }
+            40%, 43% { transform: translateY(-10px); }
+            70% { transform: translateY(-5px); }
+            90% { transform: translateY(-2px); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero-section {
+                text-align: center;
+            }
+            
+            .hero-content h1 {
+                font-size: 2.5rem;
+            }
+            
+            .hero-actions .btn {
+                width: 100%;
+                margin-bottom: 1rem;
+            }
+            
+            .trust-indicators .col-md-4 {
+                margin-bottom: 1rem;
+            }
+            
+            .illustration-card {
+                margin-top: 2rem;
+            }
+            
+            .step-card {
+                margin-bottom: 2rem;
+            }
+        }
+    </style>
+
     <script>
-        // Initialize demo QR code on page load
+        // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
             generateDemoQR();
+            setupScrollEffects();
         });
 
         function generateDemoQR() {
             const qr = new QRious({
                 element: document.createElement('canvas'),
                 value: '01-4102010502568',
-                size: 150,
+                size: 120,
                 background: 'white',
-                foreground: 'black'
+                foreground: '#198754'
             });
             
             const qrContainer = document.getElementById('demoQRCode');
@@ -216,6 +852,22 @@
 
         function testQRCode(code) {
             processQRCode(code);
+        }
+
+        function setupScrollEffects() {
+            // Smooth scroll for navigation links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
         }
     </script>
 </body>
