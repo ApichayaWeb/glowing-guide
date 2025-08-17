@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เข้าสู่ระบบ - ระบบสอบย้อนกลับผักอุดร</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="assets/css/auth.css">
+    <link rel="stylesheet" href="assets/css/components.css">
+    <link rel="stylesheet" href="assets/css/responsive.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-success fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <i class="fas fa-leaf me-2"></i>
+                ระบบสอบย้อนกลับผักอุดร
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">
+                            <i class="fas fa-home me-1"></i>หน้าแรก
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="search.html">
+                            <i class="fas fa-search me-1"></i>ค้นหาเชิงลึก
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="login.html">
+                            <i class="fas fa-sign-in-alt me-1"></i>เข้าสู่ระบบ
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Login Section -->
+    <section class="auth-section">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-6 col-lg-5">
+                    <div class="auth-card">
+                        <!-- Alert Messages -->
+                        <div id="alertContainer"></div>
+                        
+                        <div class="auth-header">
+                            <div class="auth-icon">
+                                <i class="fas fa-user-circle"></i>
+                            </div>
+                            <h2>เข้าสู่ระบบ</h2>
+                            <p class="text-muted" id="authSubtitle">กรุณากรอกข้อมูลเพื่อเข้าสู่ระบบ</p>
+                        </div>
+                        
+                        <form id="loginForm" class="auth-form">
+                            <!-- Username Field -->
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" id="username" required autocomplete="username">
+                                <label for="username">
+                                    <i class="fas fa-user me-2"></i>ชื่อผู้ใช้
+                                </label>
+                                <div class="invalid-feedback"></div>
+                            </div>
+                            
+                            <!-- Password Field with Strength Indicator -->
+                            <div class="form-floating mb-3 position-relative">
+                                <input type="password" class="form-control" id="password" required autocomplete="current-password">
+                                <label for="password">
+                                    <i class="fas fa-lock me-2"></i>รหัสผ่าน
+                                </label>
+                                <button type="button" class="btn btn-link position-absolute top-50 end-0 translate-middle-y pe-3" 
+                                        id="togglePassword" style="z-index: 10; border: none; background: none;">
+                                    <i class="fas fa-eye" id="passwordToggleIcon"></i>
+                                </button>
+                                <div class="invalid-feedback"></div>
+                                <div class="password-strength-meter mt-2" id="passwordStrength" style="display: none;">
+                                    <div class="strength-bars d-flex gap-1 mb-1">
+                                        <div class="strength-bar flex-fill"></div>
+                                        <div class="strength-bar flex-fill"></div>
+                                        <div class="strength-bar flex-fill"></div>
+                                        <div class="strength-bar flex-fill"></div>
+                                    </div>
+                                    <small class="strength-text text-muted">ความแข็งแกร่งของรหัสผ่าน: <span class="strength-level">อ่อนแอ</span></small>
+                                </div>
+                            </div>
+                            
+                            <!-- Remember Me & Forgot Password -->
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="rememberMe">
+                                    <label class="form-check-label" for="rememberMe">
+                                        จดจำการเข้าสู่ระบบ
+                                    </label>
+                                </div>
+                                <a href="#" class="text-decoration-none" data-bs-toggle="modal" data-bs-target="#forgotPasswordModal">
+                                    <small>ลืมรหัสผ่าน?</small>
+                                </a>
+                            </div>
+                            
+                            <!-- Login Button -->
+                            <div class="d-grid mb-3">
+                                <button type="submit" class="btn btn-success btn-lg" id="loginButton" data-loading="กำลังเข้าสู่ระบบ...">
+                                    <span class="btn-text">
+                                        <i class="fas fa-sign-in-alt me-2"></i>เข้าสู่ระบบ
+                                    </span>
+                                    <span class="btn-loading" style="display: none;">
+                                        <div class="spinner-border spinner-border-sm me-2" role="status"></div>กำลังเข้าสู่ระบบ...
+                                    </span>
+                                </button>
+                            </div>
+                        </form>
+                        
+                        <div class="auth-footer">
+                            <div class="demo-accounts" id="demoAccountsContainer">
+                                <div class="divider my-3">
+                                    <span class="divider-text">หรือลองใช้บัญชีทดสอบ</span>
+                                </div>
+                                <div class="demo-grid">
+                                    <button class="demo-account-btn" data-role="admin" onclick="fillDemoAccount('admin')">
+                                        <div class="demo-icon admin">
+                                            <i class="fas fa-crown"></i>
+                                        </div>
+                                        <div class="demo-info">
+                                            <div class="demo-title">ผู้ดูแลระบบ</div>
+                                            <div class="demo-subtitle">จัดการระบบทั้งหมด</div>
+                                        </div>
+                                        <div class="demo-arrow">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </div>
+                                    </button>
+                                    
+                                    <button class="demo-account-btn" data-role="group" onclick="fillDemoAccount('group')">
+                                        <div class="demo-icon group">
+                                            <i class="fas fa-users"></i>
+                                        </div>
+                                        <div class="demo-info">
+                                            <div class="demo-title">ผู้จัดการกลุ่ม</div>
+                                            <div class="demo-subtitle">จัดการกลุ่มเกษตรกร</div>
+                                        </div>
+                                        <div class="demo-arrow">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </div>
+                                    </button>
+                                    
+                                    <button class="demo-account-btn" data-role="farmer" onclick="fillDemoAccount('farmer')">
+                                        <div class="demo-icon farmer">
+                                            <i class="fas fa-leaf"></i>
+                                        </div>
+                                        <div class="demo-info">
+                                            <div class="demo-title">เกษตรกร</div>
+                                            <div class="demo-subtitle">บันทึกข้อมูลผลผลิต</div>
+                                        </div>
+                                        <div class="demo-arrow">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </div>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Forgot Password Modal -->
+    <div class="modal fade" id="forgotPasswordModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-key me-2"></i>รีเซ็ตรหัสผ่าน
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted mb-3">กรุณากรอกอีเมลหรือชื่อผู้ใช้ของคุณ เราจะส่งลิงก์สำหรับรีเซ็ตรหัสผ่านให้คุณ</p>
+                    <form id="forgotPasswordForm">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="resetEmail" required>
+                            <label for="resetEmail">
+                                <i class="fas fa-envelope me-2"></i>อีเมลหรือชื่อผู้ใช้
+                            </label>
+                        </div>
+                        <div class="alert alert-info" role="alert">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>หมายเหตุ:</strong> ในระบบทดสอบนี้ การรีเซ็ตรหัสผ่านจะแสดงข้อความยืนยันเท่านั้น
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
+                    <button type="button" class="btn btn-primary" onclick="handleForgotPassword()">
+                        <i class="fas fa-paper-plane me-2"></i>ส่งลิงก์รีเซ็ต
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Modal -->
+    <div class="modal fade" id="errorModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>เกิดข้อผิดพลาด
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="errorMessage">เกิดข้อผิดพลาดในการเข้าสู่ระบบ</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ปิด</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Modal -->
+    <div class="modal fade" id="loadingModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body text-center py-5">
+                    <div class="spinner-border text-success mb-3" role="status">
+                        <span class="visually-hidden">กำลังโหลด...</span>
+                    </div>
+                    <h5>กำลังเข้าสู่ระบบ...</h5>
+                    <p class="text-muted">กรุณารอสักครู่</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- Custom Scripts -->
+    <script src="assets/js/utils.js"></script>
+    <script src="assets/js/api.js"></script>
+    <script src="assets/js/auth.js"></script>
+
+    <script>
+        // Global variables
+        let urlParams = new URLSearchParams(window.location.search);
+        let returnUrl = urlParams.get('return_url') || '/';
+        let isExpired = urlParams.get('expired') === 'true';
+        let demoRole = urlParams.get('role');
+
+        // Demo account configurations
+        const demoAccounts = {
+            admin: {
+                username: 'admin',
+                password: 'admin_password',
+                redirect: 'admin/dashboard.html'
+            },
+            group: {
+                username: 'group01_manager', 
+                password: 'demo_password',
+                redirect: 'group/dashboard.html'
+            },
+            farmer: {
+                username: 'farmer_demo',
+                password: 'demo_password', 
+                redirect: 'farmer/dashboard.html'
+            }
+        };
+
+        // Demo account functions
+        function fillDemoAccount(role) {
+            const account = demoAccounts[role];
+            if (account) {
+                document.getElementById('username').value = account.username;
+                document.getElementById('password').value = account.password;
+                
+                // Add visual feedback
+                const button = document.querySelector(`[data-role="${role}"]`);
+                button.classList.add('selected');
+                setTimeout(() => button.classList.remove('selected'), 1000);
+            }
+        }
+
+        // Initialize page on load
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeURLParameters();
+            initializePasswordFeatures();
+            initializeFormValidation();
+            initializeErrorHandling();
+            initializeLoadingStates();
+        });
+
+        /**
+         * Initialize URL parameters and show appropriate messages
+         */
+        function initializeURLParameters() {
+            const alertContainer = document.getElementById('alertContainer');
+            
+            // Handle session expired
+            if (isExpired) {
+                showAlert('warning', 'เซสชันของคุณหมดอายุแล้ว กรุณาเข้าสู่ระบบอีกครั้ง', alertContainer);
+                document.getElementById('authSubtitle').textContent = 'เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่';
+            }
+            
+            // Handle demo role pre-fill
+            if (demoRole && demoAccounts[demoRole]) {
+                fillDemoAccount(demoRole);
+                showAlert('info', `กรอกข้อมูลบัญชีทดสอบ${getRoleDisplayName(demoRole)}แล้ว`, alertContainer);
+            }
+            
+            // Handle return URL
+            if (returnUrl && returnUrl !== '/') {
+                console.log('Will redirect to:', returnUrl);
+            }
+        }
+
+        /**
+         * Initialize password-related features
+         */
+        function initializePasswordFeatures() {
+            const passwordField = document.getElementById('password');
+            const toggleButton = document.getElementById('togglePassword');
+            const toggleIcon = document.getElementById('passwordToggleIcon');
+            const strengthMeter = document.getElementById('passwordStrength');
+
+            // Toggle password visibility
+            toggleButton.addEventListener('click', function() {
+                const isPassword = passwordField.type === 'password';
+                passwordField.type = isPassword ? 'text' : 'password';
+                toggleIcon.className = isPassword ? 'fas fa-eye-slash' : 'fas fa-eye';
+            });
+
+            // Password strength checking (only show for new passwords)
+            passwordField.addEventListener('input', function() {
+                const password = this.value;
+                if (password.length > 0 && password.length < 8) {
+                    updatePasswordStrength(password);
+                    strengthMeter.style.display = 'block';
+                } else {
+                    strengthMeter.style.display = 'none';
+                }
+            });
+        }
+
+        /**
+         * Update password strength indicator
+         */
+        function updatePasswordStrength(password) {
+            const strengthBars = document.querySelectorAll('.strength-bar');
+            const strengthText = document.querySelector('.strength-level');
+            
+            let score = 0;
+            let level = 'อ่อนแอ';
+            let color = '#dc3545';
+
+            // Calculate strength score
+            if (password.length >= 8) score++;
+            if (/[a-z]/.test(password)) score++;
+            if (/[A-Z]/.test(password)) score++;
+            if (/[0-9]/.test(password)) score++;
+            if (/[^A-Za-z0-9]/.test(password)) score++;
+
+            // Determine level and color
+            if (score >= 4) {
+                level = 'แข็งแกร่งมาก';
+                color = '#28a745';
+            } else if (score >= 3) {
+                level = 'แข็งแกร่ง';
+                color = '#20c997';
+            } else if (score >= 2) {
+                level = 'ปานกลาง';
+                color = '#ffc107';
+            }
+
+            // Update visual indicators
+            strengthBars.forEach((bar, index) => {
+                if (index < score) {
+                    bar.style.backgroundColor = color;
+                    bar.style.opacity = '1';
+                } else {
+                    bar.style.backgroundColor = '#e9ecef';
+                    bar.style.opacity = '0.3';
+                }
+            });
+
+            strengthText.textContent = level;
+            strengthText.style.color = color;
+        }
+
+        /**
+         * Initialize form validation
+         */
+        function initializeFormValidation() {
+            const loginForm = document.getElementById('loginForm');
+            const usernameField = document.getElementById('username');
+            const passwordField = document.getElementById('password');
+
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Clear previous validation
+                clearValidation();
+                
+                let isValid = true;
+
+                // Validate username
+                if (!usernameField.value.trim()) {
+                    showFieldError(usernameField, 'กรุณากรอกชื่อผู้ใช้');
+                    isValid = false;
+                }
+
+                // Validate password
+                if (!passwordField.value) {
+                    showFieldError(passwordField, 'กรุณากรอกรหัสผ่าน');
+                    isValid = false;
+                }
+
+                if (isValid) {
+                    handleLogin();
+                }
+            });
+        }
+
+        /**
+         * Handle login process
+         */
+        function handleLogin() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const rememberMe = document.getElementById('rememberMe').checked;
+            const loginButton = document.getElementById('loginButton');
+
+            // Show loading state
+            showLoadingButton(loginButton);
+
+            // Simulate login API call
+            setTimeout(() => {
+                // Check if it's a demo account
+                const demoRole = Object.keys(demoAccounts).find(role => 
+                    demoAccounts[role].username === username && 
+                    demoAccounts[role].password === password
+                );
+
+                if (demoRole) {
+                    // Successful demo login
+                    if (rememberMe) {
+                        localStorage.setItem('rememberLogin', 'true');
+                    }
+                    
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'เข้าสู่ระบบสำเร็จ',
+                        text: `ยินดีต้อนรับ ${getRoleDisplayName(demoRole)}`,
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => {
+                        // Redirect to appropriate dashboard
+                        const redirectUrl = returnUrl !== '/' ? returnUrl : demoAccounts[demoRole].redirect;
+                        window.location.href = redirectUrl;
+                    });
+                } else {
+                    // Login failed
+                    hideLoadingButton(loginButton);
+                    showAlert('danger', 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง');
+                }
+            }, 2000);
+        }
+
+        /**
+         * Handle forgot password
+         */
+        function handleForgotPassword() {
+            const resetEmail = document.getElementById('resetEmail').value;
+            
+            if (!resetEmail.trim()) {
+                showAlert('warning', 'กรุณากรอกอีเมลหรือชื่อผู้ใช้');
+                return;
+            }
+
+            // Close modal and show success message
+            bootstrap.Modal.getInstance(document.getElementById('forgotPasswordModal')).hide();
+            
+            Swal.fire({
+                icon: 'info',
+                title: 'ส่งลิงก์รีเซ็ตแล้ว',
+                text: `ในระบบจริง ลิงก์รีเซ็ตรหัสผ่านจะถูกส่งไปยัง ${resetEmail}`,
+                confirmButtonColor: '#198754'
+            });
+        }
+
+        /**
+         * Utility functions
+         */
+        function getRoleDisplayName(role) {
+            const roleNames = {
+                admin: 'ผู้ดูแลระบบ',
+                group: 'ผู้จัดการกลุ่ม', 
+                farmer: 'เกษตรกร'
+            };
+            return roleNames[role] || role;
+        }
+
+        function showAlert(type, message, container = null) {
+            const alertContainer = container || document.getElementById('alertContainer');
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+            alertDiv.innerHTML = `
+                <i class="fas fa-${getAlertIcon(type)} me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            alertContainer.appendChild(alertDiv);
+            
+            // Auto-dismiss after 5 seconds
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 5000);
+        }
+
+        function getAlertIcon(type) {
+            const icons = {
+                success: 'check-circle',
+                danger: 'exclamation-triangle',
+                warning: 'exclamation-triangle',
+                info: 'info-circle'
+            };
+            return icons[type] || 'info-circle';
+        }
+
+        function showFieldError(field, message) {
+            field.classList.add('is-invalid');
+            const feedback = field.parentNode.querySelector('.invalid-feedback');
+            if (feedback) {
+                feedback.textContent = message;
+            }
+        }
+
+        function clearValidation() {
+            document.querySelectorAll('.is-invalid').forEach(field => {
+                field.classList.remove('is-invalid');
+            });
+        }
+
+        function showLoadingButton(button) {
+            button.disabled = true;
+            button.querySelector('.btn-text').style.display = 'none';
+            button.querySelector('.btn-loading').style.display = 'inline-flex';
+        }
+
+        function hideLoadingButton(button) {
+            button.disabled = false;
+            button.querySelector('.btn-text').style.display = 'inline-flex';
+            button.querySelector('.btn-loading').style.display = 'none';
+        }
+
+        /**
+         * Initialize global error handling
+         */
+        function initializeErrorHandling() {
+            window.addEventListener('unhandledrejection', function(event) {
+                console.error('Unhandled promise rejection:', event.reason);
+                event.preventDefault();
+                
+                if (!document.querySelector('.swal2-container')) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'เกิดข้อผิดพลาด',
+                        text: 'เกิดข้อผิดพลาดที่ไม่คาดคิด กรุณาลองใหม่อีกครั้ง',
+                        confirmButtonColor: '#198754'
+                    });
+                }
+            });
+
+            window.addEventListener('error', function(event) {
+                console.error('JavaScript error:', event.error);
+            });
+        }
+
+        /**
+         * Initialize loading states
+         */
+        function initializeLoadingStates() {
+            // Additional loading state handlers can be added here
+        }
+    </script>
+</body>
+</html>

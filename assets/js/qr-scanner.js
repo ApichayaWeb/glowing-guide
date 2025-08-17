@@ -201,16 +201,73 @@ class QRScanner {
     }
 
     /**
-     * Process QR Code data
+     * Process QR Code from URL parameter
+     * @param {string} code - QR code from URL parameter
+     * @return {Promise<Object>} Processing result
      */
-    async processQRCode(qrData) {
+    async processQRCodeFromURL(code) {
         try {
-            // Validate QR Code format
-            if (!Utils.validateQRCode(qrData)) {
-                Utils.showWarning(
-                    'รูปแบบ QR Code ไม่ถูกต้อง', 
-                    'QR Code นี้ไม่ใช่รหัสผลิตภัณฑ์ในระบบ'
-                );
+            // Validate QR Code format (XX-XXXXXXXXXXXXX)
+            if (!this.validateSystemQRCode(code)) {
+                return {
+                    success: false,
+                    error: 'INVALID_FORMAT',
+                    message: 'รูปแบบรหัสไม่ถูกต้อง'
+                };
+            }
+
+            // Call API to search
+            const result = await QRAPI.searchByQRCode(code);
+
+            if (result.success) {
+                // Add URL parameter for tracking
+                this.addCodeToURL(code);
+                
+                // Navigate to result page
+                const params = new URLSearchParams({
+                    code: code,
+                    type: 'url',
+                    source: 'direct'
+                });
+                
+                window.location.href = `public/qr-result.html?${params.toString()}`;
+                
+                return {
+                    success: true,
+                    data: result.data,
+                    redirected: true
+                };
+            } else {
+                return {
+                    success: false,
+                    error: 'NOT_FOUND',
+                    message: result.message || 'ไม่พบข้อมูลสำหรับรหัสนี้'
+                };
+            }
+
+        } catch (error) {
+            console.error('Process QR code from URL error:', error);
+            return {
+                success: false,
+                error: 'API_ERROR',
+                message: 'เกิดข้อผิดพลาดในการเชื่อมต่อ'
+            };
+        }
+    }
+
+    /**
+     * Process QR Code data (enhanced version)
+     * @param {string} qrData - QR code data
+     * @param {string} source - Source of QR code (camera|url|manual)
+     */
+    async processQRCode(qrData, source = 'camera') {
+        try {
+            console.log('Processing QR Code:', qrData, 'Source:', source);
+
+            // Validate system QR Code format first
+            if (!this.validateSystemQRCode(qrData)) {
+                // Handle non-system QR codes
+                this.handleNonSystemQRCode(qrData, source);
                 return;
             }
 
@@ -221,20 +278,278 @@ class QRScanner {
             const result = await QRAPI.searchByQRCode(qrData);
 
             if (result.success) {
+                // Add to URL for sharing (only if from camera scan)
+                if (source === 'camera') {
+                    this.addCodeToURL(qrData);
+                }
+                
+                // Log successful scan
+                this.logQRCodeScan(qrData, source, 'success');
+
                 // Navigate to result page
                 const params = new URLSearchParams({
                     code: qrData,
-                    type: 'qr'
+                    type: source,
+                    timestamp: Date.now()
                 });
+                
                 window.location.href = `public/qr-result.html?${params.toString()}`;
             } else {
                 Utils.hideLoading();
-                Utils.showWarning('ไม่พบข้อมูล', 'ไม่พบข้อมูลสำหรับ QR Code นี้');
+                this.showNotFoundMessage(qrData, source);
+                this.logQRCodeScan(qrData, source, 'not_found');
             }
 
         } catch (error) {
             Utils.hideLoading();
-            handleAPIError(error, 'ไม่สามารถค้นหาข้อมูลได้');
+            console.error('Process QR code error:', error);
+            this.handleQRCodeError(error, qrData, source);
+            this.logQRCodeScan(qrData, source, 'error', error.message);
+        }
+    }
+
+    /**
+     * Validate system QR code format (XX-XXXXXXXXXXXXX)
+     * @param {string} code - QR code to validate
+     * @return {boolean} Whether code is valid system format
+     */
+    validateSystemQRCode(code) {
+        if (!code || typeof code !== 'string') return false;
+        
+        // Check pattern: 2-3 digits, dash, 13 digits
+        const systemPattern = /^(\d{2,3})-(\d{13})$/;
+        return systemPattern.test(code.trim());
+    }
+
+    /**
+     * Handle non-system QR codes
+     * @param {string} qrData - QR code data
+     * @param {string} source - Source of scan
+     */
+    handleNonSystemQRCode(qrData, source) {
+        console.log('Non-system QR code detected:', qrData);
+        
+        Swal.fire({
+            icon: 'info',
+            title: 'QR Code ไม่ใช่ของระบบ',
+            html: `
+                <p class="mb-3">QR Code นี้ไม่ใช่รหัสผลิตภัณฑ์ในระบบสอบย้อนกลับผักอุดร</p>
+                <div class="alert alert-info small text-start">
+                    <strong>ข้อมูลที่สแกนได้:</strong><br>
+                    <code>${Utils.escapeHtml(qrData.substring(0, 100))}${qrData.length > 100 ? '...' : ''}</code>
+                </div>
+                <p class="small text-muted">
+                    หากคุณมีรหัสผลิตภัณฑ์ กรุณาใช้ปุ่มค้นหาด้วยตัวเลข
+                </p>
+            `,
+            showCancelButton: true,
+            confirmButtonText: '<i class="fas fa-search me-1"></i>ค้นหาด้วยตัวเลข',
+            cancelButtonText: 'ปิด',
+            confirmButtonColor: '#198754',
+            cancelButtonColor: '#6c757d'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Open manual search modal
+                const modal = new bootstrap.Modal(document.getElementById('manualSearchModal'));
+                modal.show();
+                
+                // Pre-fill if it looks like a product code
+                const searchInput = document.getElementById('searchCode');
+                if (searchInput && this.couldBeProductCode(qrData)) {
+                    searchInput.value = qrData;
+                }
+            }
+        });
+    }
+
+    /**
+     * Check if QR data could be a product code
+     * @param {string} data - QR data
+     * @return {boolean} Whether it could be a product code
+     */
+    couldBeProductCode(data) {
+        // Check if it contains only numbers and dashes
+        return /^[\d-]+$/.test(data) && data.includes('-');
+    }
+
+    /**
+     * Show not found message with options
+     * @param {string} qrData - QR code data
+     * @param {string} source - Source of scan
+     */
+    showNotFoundMessage(qrData, source) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'ไม่พบข้อมูล',
+            html: `
+                <p class="mb-3">ไม่พบข้อมูลสำหรับรหัส: <code>${Utils.escapeHtml(qrData)}</code></p>
+                <div class="alert alert-warning small">
+                    <i class="fas fa-exclamation-triangle me-1"></i>
+                    รหัสนี้อาจยังไม่ได้ลงทะเบียนในระบบ หรือข้อมูลอาจถูกลบ
+                </div>
+            `,
+            showCancelButton: true,
+            confirmButtonText: '<i class="fas fa-redo me-1"></i>ลองใหม่',
+            cancelButtonText: 'ปิด',
+            confirmButtonColor: '#198754',
+            cancelButtonColor: '#6c757d'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Retry the same code
+                this.processQRCode(qrData, source);
+            }
+        });
+    }
+
+    /**
+     * Handle QR code processing error
+     * @param {Error} error - Error object
+     * @param {string} qrData - QR code data
+     * @param {string} source - Source of scan
+     */
+    handleQRCodeError(error, qrData, source) {
+        let errorMessage = 'เกิดข้อผิดพลาดในการค้นหาข้อมูล';
+        
+        if (error.name === 'NetworkError' || error.message.includes('network')) {
+            errorMessage = 'ไม่สามารถเชื่อมต่อเครือข่ายได้ กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต';
+        } else if (error.name === 'TimeoutError') {
+            errorMessage = 'การเชื่อมต่อใช้เวลานานเกินไป กรุณาลองใหม่อีกครั้ง';
+        }
+
+        Swal.fire({
+            icon: 'error',
+            title: 'เกิดข้อผิดพลาด',
+            text: errorMessage,
+            showCancelButton: true,
+            confirmButtonText: '<i class="fas fa-redo me-1"></i>ลองใหม่',
+            cancelButtonText: 'ปิด',
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Retry processing
+                this.processQRCode(qrData, source);
+            }
+        });
+    }
+
+    /**
+     * Add QR code to current URL for sharing
+     * @param {string} code - QR code to add
+     */
+    addCodeToURL(code) {
+        try {
+            const url = new URL(window.location.href);
+            url.searchParams.set('code', code);
+            url.searchParams.set('shared', 'true');
+            
+            // Update URL without reloading page
+            window.history.pushState({}, '', url.toString());
+            
+            console.log('Added code to URL for sharing:', code);
+        } catch (error) {
+            console.error('Error adding code to URL:', error);
+        }
+    }
+
+    /**
+     * Get shareable URL for QR code
+     * @param {string} code - QR code
+     * @return {string} Shareable URL
+     */
+    getShareableURL(code) {
+        try {
+            const url = new URL(window.location.origin + window.location.pathname);
+            url.searchParams.set('code', code);
+            return url.toString();
+        } catch (error) {
+            console.error('Error creating shareable URL:', error);
+            return window.location.href;
+        }
+    }
+
+    /**
+     * Share QR code functionality
+     * @param {string} code - QR code to share
+     * @param {Object} productData - Product data (optional)
+     */
+    async shareQRCode(code, productData = null) {
+        try {
+            const shareUrl = this.getShareableURL(code);
+            const shareTitle = productData ? 
+                `ตรวจสอบผลิตภัณฑ์: ${productData.productName || 'ผักปลอดภัย'}` : 
+                'ตรวจสอบที่มาผลิตภัณฑ์ผักปลอดภัย';
+            const shareText = `ตรวจสอบที่มาและความปลอดภัยของผลิตภัณฑ์ผัก\nรหัส: ${code}`;
+
+            // Check if Web Share API is supported
+            if (navigator.share) {
+                await navigator.share({
+                    title: shareTitle,
+                    text: shareText,
+                    url: shareUrl
+                });
+                
+                Utils.showSuccess('แชร์สำเร็จ', 'ลิงก์ถูกแชร์เรียบร้อยแล้ว');
+            } else {
+                // Fallback: Copy to clipboard
+                await navigator.clipboard.writeText(shareUrl);
+                
+                Swal.fire({
+                    icon: 'success',
+                    title: 'คัดลอกลิงก์แล้ว',
+                    html: `
+                        <p class="mb-3">ลิงก์ถูกคัดลอกไปยังคลิปบอร์ดแล้ว</p>
+                        <div class="alert alert-info small">
+                            <code>${shareUrl}</code>
+                        </div>
+                        <p class="small text-muted">นำลิงก์นี้ไปแชร์ในแอพอื่นๆ ได้</p>
+                    `,
+                    confirmButtonText: 'ตกลง',
+                    confirmButtonColor: '#198754'
+                });
+            }
+            
+            this.logQRCodeScan(code, 'share', 'success');
+            
+        } catch (error) {
+            console.error('Error sharing QR code:', error);
+            Utils.showError('ไม่สามารถแชร์ได้', 'เกิดข้อผิดพลาดในการแชร์ลิงก์');
+        }
+    }
+
+    /**
+     * Log QR code scan for analytics
+     * @param {string} code - QR code
+     * @param {string} source - Source of scan
+     * @param {string} status - Scan status
+     * @param {string} error - Error message (optional)
+     */
+    logQRCodeScan(code, source, status, error = null) {
+        try {
+            const logData = {
+                timestamp: new Date().toISOString(),
+                code: code,
+                source: source,
+                status: status,
+                error: error,
+                userAgent: navigator.userAgent,
+                url: window.location.href
+            };
+            
+            // Store in localStorage for analytics
+            const logs = JSON.parse(localStorage.getItem('qr_scan_logs') || '[]');
+            logs.push(logData);
+            
+            // Keep only last 100 logs
+            if (logs.length > 100) {
+                logs.splice(0, logs.length - 100);
+            }
+            
+            localStorage.setItem('qr_scan_logs', JSON.stringify(logs));
+            
+            console.log('QR scan logged:', logData);
+        } catch (error) {
+            console.error('Error logging QR scan:', error);
         }
     }
 
@@ -255,8 +570,57 @@ class QRScanner {
         const modal = bootstrap.Modal.getInstance(document.getElementById('manualSearchModal'));
         if (modal) modal.hide();
 
-        // Process the code
-        await this.processQRCode(searchCode);
+        // Process the code with manual source
+        await this.processQRCode(searchCode, 'manual');
+    }
+
+    /**
+     * Get QR scan analytics
+     * @return {Array} Array of scan logs
+     */
+    getQRScanAnalytics() {
+        try {
+            return JSON.parse(localStorage.getItem('qr_scan_logs') || '[]');
+        } catch (error) {
+            console.error('Error getting QR scan analytics:', error);
+            return [];
+        }
+    }
+
+    /**
+     * Clear QR scan logs
+     */
+    clearQRScanLogs() {
+        try {
+            localStorage.removeItem('qr_scan_logs');
+            console.log('QR scan logs cleared');
+        } catch (error) {
+            console.error('Error clearing QR scan logs:', error);
+        }
+    }
+
+    /**
+     * Get scan statistics
+     * @return {Object} Scan statistics
+     */
+    getScanStatistics() {
+        const logs = this.getQRScanAnalytics();
+        
+        const stats = {
+            total: logs.length,
+            successful: logs.filter(log => log.status === 'success').length,
+            failed: logs.filter(log => log.status === 'error').length,
+            notFound: logs.filter(log => log.status === 'not_found').length,
+            bySource: {
+                camera: logs.filter(log => log.source === 'camera').length,
+                url: logs.filter(log => log.source === 'url').length,
+                manual: logs.filter(log => log.source === 'manual').length,
+                share: logs.filter(log => log.source === 'share').length
+            },
+            recent: logs.slice(-10) // Last 10 scans
+        };
+        
+        return stats;
     }
 
     /**
@@ -349,15 +713,90 @@ class QRScanner {
 }
 
 /**
- * Global function to process QR Code (for testing)
+ * Global function to process QR Code (enhanced)
+ * @param {string} qrData - QR code data
+ * @param {string} source - Source of QR code
  */
-async function processQRCode(qrData) {
+async function processQRCode(qrData, source = 'external') {
     if (window.qrScannerInstance) {
-        await window.qrScannerInstance.processQRCode(qrData);
+        await window.qrScannerInstance.processQRCode(qrData, source);
     } else {
         // Create temporary instance
         const tempScanner = new QRScanner();
-        await tempScanner.processQRCode(qrData);
+        await tempScanner.processQRCode(qrData, source);
+    }
+}
+
+/**
+ * Process QR Code from URL parameter
+ * @param {string} code - QR code from URL
+ */
+async function processQRCodeFromURL(code) {
+    if (window.qrScannerInstance) {
+        return await window.qrScannerInstance.processQRCodeFromURL(code);
+    } else {
+        // Create temporary instance
+        const tempScanner = new QRScanner();
+        return await tempScanner.processQRCodeFromURL(code);
+    }
+}
+
+/**
+ * Share QR Code functionality
+ * @param {string} code - QR code to share
+ * @param {Object} productData - Product data (optional)
+ */
+async function shareQRCode(code, productData = null) {
+    if (window.qrScannerInstance) {
+        await window.qrScannerInstance.shareQRCode(code, productData);
+    } else {
+        // Create temporary instance
+        const tempScanner = new QRScanner();
+        await tempScanner.shareQRCode(code, productData);
+    }
+}
+
+/**
+ * Get shareable URL for QR code
+ * @param {string} code - QR code
+ * @return {string} Shareable URL
+ */
+function getShareableURL(code) {
+    if (window.qrScannerInstance) {
+        return window.qrScannerInstance.getShareableURL(code);
+    } else {
+        // Create temporary instance
+        const tempScanner = new QRScanner();
+        return tempScanner.getShareableURL(code);
+    }
+}
+
+/**
+ * Get QR scan statistics
+ * @return {Object} Scan statistics
+ */
+function getQRScanStatistics() {
+    if (window.qrScannerInstance) {
+        return window.qrScannerInstance.getScanStatistics();
+    } else {
+        // Create temporary instance
+        const tempScanner = new QRScanner();
+        return tempScanner.getScanStatistics();
+    }
+}
+
+/**
+ * Validate system QR code format
+ * @param {string} code - QR code to validate
+ * @return {boolean} Whether code is valid
+ */
+function validateSystemQRCode(code) {
+    if (window.qrScannerInstance) {
+        return window.qrScannerInstance.validateSystemQRCode(code);
+    } else {
+        // Use inline validation
+        const systemPattern = /^(\d{2,3})-(\d{13})$/;
+        return systemPattern.test(code?.trim() || '');
     }
 }
 
@@ -368,9 +807,26 @@ document.addEventListener('DOMContentLoaded', function() {
     // Only initialize on pages with QR scanner elements
     if (document.getElementById('qrVideo')) {
         window.qrScannerInstance = new QRScanner();
+        
+        // Check for URL parameter on initialization
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('code');
+        
+        if (code && !window.mainApp?.isProcessingURL) {
+            // Process URL parameter if mainApp is not handling it
+            console.log('QR Scanner: Processing URL parameter:', code);
+            setTimeout(() => {
+                processQRCodeFromURL(code);
+            }, 1000);
+        }
     }
 });
 
 // Export for global use
 window.QRScanner = QRScanner;
 window.processQRCode = processQRCode;
+window.processQRCodeFromURL = processQRCodeFromURL;
+window.shareQRCode = shareQRCode;
+window.getShareableURL = getShareableURL;
+window.getQRScanStatistics = getQRScanStatistics;
+window.validateSystemQRCode = validateSystemQRCode;

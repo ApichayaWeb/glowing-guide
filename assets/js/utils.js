@@ -6,10 +6,10 @@
 // Global Constants
 const CONFIG = {
     // Google Apps Script Web App URL (จะต้องแทนที่ด้วย URL จริงภายหลัง)
-    API_BASE_URL: 'https://script.google.com/macros/s/AKfycbyPbBxuGd70aTBllL65yDn-iQIJ4hfFS_zwYrF8UOOOGkGStHJA9Lvd8UAT88zdnnXX/exec',
+    API_BASE_URL: 'https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec',
     
     // QR Code patterns
-    QR_CODE_PATTERN: /^(\d{2})-(\d{10,})$/,
+    QR_CODE_PATTERN: /^(\d{2})-(\d{13})$/,
     SEARCH_CODE_PATTERN: /^(\d{8})-(\d{3})$/,
     
     // Roles
@@ -408,6 +408,46 @@ const Utils = {
                 { timeout: 10000, enableHighAccuracy: true }
             );
         });
+    },
+    
+    /**
+     * Escape HTML to prevent XSS
+     */
+    escapeHtml: function(text) {
+        if (!text) return '';
+        
+        const map = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
+        };
+        
+        return text.replace(/[&<>"']/g, function(m) { 
+            return map[m]; 
+        });
+    },
+    
+    /**
+     * Get time ago string
+     */
+    getTimeAgo: function(date) {
+        if (!date) return '';
+        
+        const now = new Date();
+        const past = new Date(date);
+        const diffMs = now - past;
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffHours = Math.floor(diffMs / 3600000);
+        const diffDays = Math.floor(diffMs / 86400000);
+        
+        if (diffMins < 1) return 'เมื่อกี้นี้';
+        if (diffMins < 60) return `${diffMins} นาทีที่แล้ว`;
+        if (diffHours < 24) return `${diffHours} ชั่วโมงที่แล้ว`;
+        if (diffDays < 7) return `${diffDays} วันที่แล้ว`;
+        
+        return this.formatDateThai(date);
     }
 };
 

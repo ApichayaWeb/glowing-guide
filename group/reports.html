@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>รายงานและสถิติ - ระบบสอบย้อนกลับผักอุดร</title>
+    <title>รายงานกลุ่มเกษตรกร - ระบบสอบย้อนกลับผักอุดร</title>
     
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -33,24 +33,24 @@
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
                         <a class="nav-link" href="dashboard.html">
-                            <i class="fas fa-tachometer-alt me-1"></i>แดชบอร์ด
+                            <i class="fas fa-tachometer-alt me-1"></i>แดชบอร์ดกลุ่ม
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="manage-groups.html">
-                            <i class="fas fa-users me-1"></i>จัดการกลุ่ม
+                        <a class="nav-link" href="manage-members.html">
+                            <i class="fas fa-user-friends me-1"></i>จัดการสมาชิก
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link active" href="reports.html">
-                            <i class="fas fa-chart-bar me-1"></i>รายงาน
+                            <i class="fas fa-chart-bar me-1"></i>รายงานกลุ่ม
                         </a>
                     </li>
                 </ul>
                 <ul class="navbar-nav">
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-user-circle me-1"></i>ผู้ดูแลระบบ
+                            <i class="fas fa-user-circle me-1"></i>หัวหน้ากลุ่ม
                         </a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="../index.html">
@@ -71,14 +71,86 @@
                 <div class="row align-items-center">
                     <div class="col">
                         <h1 class="page-title">
-                            <i class="fas fa-chart-bar me-3"></i>รายงานและสถิติ
+                            <i class="fas fa-chart-bar me-3"></i>รายงานกลุ่มเกษตรกร
                         </h1>
-                        <p class="page-subtitle">วิเคราะห์ข้อมูลและสร้างรายงานระบบ</p>
+                        <p class="page-subtitle">
+                            <span class="badge bg-success me-2" id="groupBadge">กลุ่มที่ 01</span>
+                            <span id="groupName">เกษตรกรผักปลอดภัย</span>
+                        </p>
                     </div>
                     <div class="col-auto">
-                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exportModal">
-                            <i class="fas fa-download me-2"></i>ส่งออกรายงาน
-                        </button>
+                        <div class="btn-group">
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exportModal">
+                                <i class="fas fa-download me-2"></i>ส่งออกรายงาน
+                            </button>
+                            <button class="btn btn-outline-primary" onclick="refreshData()">
+                                <i class="fas fa-sync-alt me-2"></i>รีเฟรช
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Stats Cards -->
+            <div class="row mb-4">
+                <div class="col-xl-3 col-md-6">
+                    <div class="card stat-card border-0 shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div class="stat-icon bg-primary bg-opacity-10 text-primary rounded-circle p-3 me-3">
+                                    <i class="fas fa-users fa-lg"></i>
+                                </div>
+                                <div>
+                                    <h3 class="stat-number mb-1" id="totalMembers">24</h3>
+                                    <p class="stat-label text-muted mb-0">สมาชิกทั้งหมด</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6">
+                    <div class="card stat-card border-0 shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div class="stat-icon bg-success bg-opacity-10 text-success rounded-circle p-3 me-3">
+                                    <i class="fas fa-check-circle fa-lg"></i>
+                                </div>
+                                <div>
+                                    <h3 class="stat-number mb-1" id="completedMembers">18</h3>
+                                    <p class="stat-label text-muted mb-0">กรอกข้อมูลครบ</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6">
+                    <div class="card stat-card border-0 shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div class="stat-icon bg-warning bg-opacity-10 text-warning rounded-circle p-3 me-3">
+                                    <i class="fas fa-qrcode fa-lg"></i>
+                                </div>
+                                <div>
+                                    <h3 class="stat-number mb-1" id="totalQRCodes">156</h3>
+                                    <p class="stat-label text-muted mb-0">QR Code สร้างแล้ว</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6">
+                    <div class="card stat-card border-0 shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div class="stat-icon bg-info bg-opacity-10 text-info rounded-circle p-3 me-3">
+                                    <i class="fas fa-seedling fa-lg"></i>
+                                </div>
+                                <div>
+                                    <h3 class="stat-number mb-1" id="totalProducts">89</h3>
+                                    <p class="stat-label text-muted mb-0">ผลิตภัณฑ์ลงทะเบียน</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -107,37 +179,25 @@
                                 </div>
                             </div>
 
-                            <!-- Group Filter -->
+                            <!-- Member Status Filter -->
                             <div class="col-md-3">
                                 <label class="form-label">
-                                    <i class="fas fa-users me-1"></i>กลุ่มเกษตรกร
+                                    <i class="fas fa-user-check me-1"></i>สถานะสมาชิก
                                 </label>
-                                <select class="form-select" id="groupFilter">
-                                    <option value="">ทุกกลุ่ม</option>
-                                    <option value="group01">กลุ่มที่ 01 - เกษตรกรผักปลอดภัย</option>
-                                    <option value="group02">กลุ่มที่ 02 - เกษตรกรอินทรีย์</option>
-                                    <option value="group03">กลุ่มที่ 03 - เกษตรกรเศรษฐกิจพอเพียง</option>
-                                </select>
-                            </div>
-
-                            <!-- Status Filter -->
-                            <div class="col-md-2">
-                                <label class="form-label">
-                                    <i class="fas fa-toggle-on me-1"></i>สถานะ
-                                </label>
-                                <select class="form-select" id="statusFilter">
-                                    <option value="">ทั้งหมด</option>
-                                    <option value="active">เปิดใช้งาน</option>
-                                    <option value="inactive">ปิดใช้งาน</option>
+                                <select class="form-select" id="memberStatusFilter">
+                                    <option value="">ทุกสถานะ</option>
+                                    <option value="completed">กรอกข้อมูลครบ</option>
+                                    <option value="incomplete">กรอกข้อมูลไม่ครบ</option>
+                                    <option value="not_started">ยังไม่เริ่มกรอก</option>
                                 </select>
                             </div>
 
                             <!-- Crop Type Filter -->
-                            <div class="col-md-2">
+                            <div class="col-md-3">
                                 <label class="form-label">
                                     <i class="fas fa-seedling me-1"></i>ประเภทผัก
                                 </label>
-                                <select class="form-select" id="cropFilter">
+                                <select class="form-select" id="cropTypeFilter">
                                     <option value="">ทุกประเภท</option>
                                     <option value="leafy">ผักใบ</option>
                                     <option value="fruit">ผักผล</option>
@@ -147,7 +207,7 @@
                             </div>
 
                             <!-- Apply Button -->
-                            <div class="col-md-1">
+                            <div class="col-md-2">
                                 <label class="form-label">&nbsp;</label>
                                 <button type="submit" class="btn btn-success w-100" data-loading="กำลังโหลด...">
                                     <i class="fas fa-search"></i>
@@ -158,151 +218,65 @@
                 </div>
             </div>
 
-            <!-- Report Categories -->
-            <div class="row mb-4">
-                <div class="col-12">
-                    <div class="card">
+            <!-- Report Content -->
+            <div class="row">
+                <!-- Left Column: Charts and Performance -->
+                <div class="col-lg-8">
+                    <!-- Group Performance Reports -->
+                    <div class="card mb-4">
                         <div class="card-header">
-                            <h5 class="card-title mb-0">หมวดหมู่รายงาน</h5>
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-chart-line me-2"></i>รายงานผลการดำเนินงานกลุ่ม
+                            </h5>
                         </div>
                         <div class="card-body">
-                            <div class="row g-3">
-                                <!-- System Overview -->
-                                <div class="col-lg-2 col-md-4 col-sm-6">
-                                    <div class="report-category-card" data-report="system">
-                                        <div class="report-icon">
-                                            <i class="fas fa-chart-pie"></i>
-                                        </div>
-                                        <h6>รายงานสรุประบบ</h6>
-                                        <p class="small text-muted">ภาพรวมระบบทั้งหมด</p>
+                            <!-- Charts Row 1 -->
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <div class="chart-container">
+                                        <h6 class="chart-title">
+                                            <i class="fas fa-chart-pie me-2 text-primary"></i>ความสมบูรณ์ของข้อมูล
+                                        </h6>
+                                        <canvas id="dataCompletenessChart" height="200"></canvas>
                                     </div>
                                 </div>
-
-                                <!-- Groups Report -->
-                                <div class="col-lg-2 col-md-4 col-sm-6">
-                                    <div class="report-category-card" data-report="groups">
-                                        <div class="report-icon">
-                                            <i class="fas fa-users"></i>
-                                        </div>
-                                        <h6>รายงานกลุ่มเกษตรกร</h6>
-                                        <p class="small text-muted">ข้อมูลกลุ่มเกษตรกร</p>
+                                <div class="col-md-6">
+                                    <div class="chart-container">
+                                        <h6 class="chart-title">
+                                            <i class="fas fa-chart-bar me-2 text-success"></i>QR Code ที่สร้างแล้ว
+                                        </h6>
+                                        <canvas id="qrCodeChart" height="200"></canvas>
                                     </div>
                                 </div>
+                            </div>
 
-                                <!-- Farmers Report -->
-                                <div class="col-lg-2 col-md-4 col-sm-6">
-                                    <div class="report-category-card" data-report="farmers">
-                                        <div class="report-icon">
-                                            <i class="fas fa-user-friends"></i>
-                                        </div>
-                                        <h6>รายงานเกษตรกร</h6>
-                                        <p class="small text-muted">ข้อมูลเกษตรกรรายย่อย</p>
+                            <!-- Charts Row 2 -->
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="chart-container">
+                                        <h6 class="chart-title">
+                                            <i class="fas fa-chart-area me-2 text-warning"></i>การส่งออกผลิตภัณฑ์
+                                        </h6>
+                                        <canvas id="productExportChart" height="200"></canvas>
                                     </div>
                                 </div>
-
-                                <!-- QR Codes Report -->
-                                <div class="col-lg-2 col-md-4 col-sm-6">
-                                    <div class="report-category-card" data-report="qrcodes">
-                                        <div class="report-icon">
-                                            <i class="fas fa-qrcode"></i>
-                                        </div>
-                                        <h6>รายงาน QR Code</h6>
-                                        <p class="small text-muted">สถิติ QR Code</p>
-                                    </div>
-                                </div>
-
-                                <!-- Usage Analytics -->
-                                <div class="col-lg-2 col-md-4 col-sm-6">
-                                    <div class="report-category-card" data-report="usage">
-                                        <div class="report-icon">
-                                            <i class="fas fa-chart-line"></i>
-                                        </div>
-                                        <h6>รายงานการใช้งาน</h6>
-                                        <p class="small text-muted">สถิติการใช้งานระบบ</p>
-                                    </div>
-                                </div>
-
-                                <!-- Scan Analytics -->
-                                <div class="col-lg-2 col-md-4 col-sm-6">
-                                    <div class="report-category-card" data-report="scans">
-                                        <div class="report-icon">
-                                            <i class="fas fa-search"></i>
-                                        </div>
-                                        <h6>รายงานการสแกน</h6>
-                                        <p class="small text-muted">สถิติการสแกน QR</p>
+                                <div class="col-md-6">
+                                    <div class="chart-container">
+                                        <h6 class="chart-title">
+                                            <i class="fas fa-chart-doughnut me-2 text-info"></i>สถิติการปลูกพืช
+                                        </h6>
+                                        <canvas id="cropStatsChart" height="200"></canvas>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
 
-            <!-- Report Content Area -->
-            <div class="row">
-                <!-- Charts Section -->
-                <div class="col-lg-8">
-                    <!-- Charts Row 1 -->
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <div class="card h-100">
-                                <div class="card-header">
-                                    <h6 class="card-title mb-0">
-                                        <i class="fas fa-chart-bar me-2"></i>จำนวนกลุ่มเกษตรกร
-                                    </h6>
-                                </div>
-                                <div class="card-body">
-                                    <canvas id="groupsChart" height="200"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="card h-100">
-                                <div class="card-header">
-                                    <h6 class="card-title mb-0">
-                                        <i class="fas fa-chart-line me-2"></i>การเติบโตรายเดือน
-                                    </h6>
-                                </div>
-                                <div class="card-body">
-                                    <canvas id="growthChart" height="200"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Charts Row 2 -->
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <div class="card h-100">
-                                <div class="card-header">
-                                    <h6 class="card-title mb-0">
-                                        <i class="fas fa-chart-pie me-2"></i>สัดส่วนประเภทผัก
-                                    </h6>
-                                </div>
-                                <div class="card-body">
-                                    <canvas id="cropTypesChart" height="200"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="card h-100">
-                                <div class="card-header">
-                                    <h6 class="card-title mb-0">
-                                        <i class="fas fa-chart-area me-2"></i>สถิติการสแกน QR
-                                    </h6>
-                                </div>
-                                <div class="card-body">
-                                    <canvas id="scanStatsChart" height="200"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Data Table -->
+                    <!-- Member Details Table -->
                     <div class="card">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <h6 class="card-title mb-0">
-                                <i class="fas fa-table me-2"></i>รายละเอียดข้อมูล
+                                <i class="fas fa-table me-2"></i>รายละเอียดสมาชิกในกลุ่ม
                             </h6>
                             <div class="dropdown">
                                 <button class="btn btn-sm btn-outline-secondary dropdown-toggle" 
@@ -310,13 +284,13 @@
                                     <i class="fas fa-cog me-1"></i>ตัวเลือก
                                 </button>
                                 <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="#" onclick="exportTableData('pdf')">
+                                    <li><a class="dropdown-item" href="#" onclick="exportMemberData('pdf')">
                                         <i class="fas fa-file-pdf me-2"></i>ส่งออก PDF
                                     </a></li>
-                                    <li><a class="dropdown-item" href="#" onclick="exportTableData('excel')">
+                                    <li><a class="dropdown-item" href="#" onclick="exportMemberData('excel')">
                                         <i class="fas fa-file-excel me-2"></i>ส่งออก Excel
                                     </a></li>
-                                    <li><a class="dropdown-item" href="#" onclick="exportTableData('csv')">
+                                    <li><a class="dropdown-item" href="#" onclick="exportMemberData('csv')">
                                         <i class="fas fa-file-csv me-2"></i>ส่งออก CSV
                                     </a></li>
                                 </ul>
@@ -324,20 +298,20 @@
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
-                                <table class="table table-striped table-hover" id="reportTable">
+                                <table class="table table-striped table-hover" id="membersTable">
                                     <thead class="table-dark">
                                         <tr>
                                             <th>ลำดับ</th>
-                                            <th>กลุ่มเกษตรกร</th>
-                                            <th>จำนวนเกษตรกร</th>
+                                            <th>ชื่อ-นามสกุล</th>
+                                            <th>แปลงที่</th>
+                                            <th>สถานะข้อมูล</th>
                                             <th>QR Code</th>
-                                            <th>การสแกน</th>
-                                            <th>สถานะ</th>
-                                            <th>วันที่สร้าง</th>
+                                            <th>ผลิตภัณฑ์</th>
+                                            <th>วันที่ลงทะเบียน</th>
                                             <th>การดำเนินการ</th>
                                         </tr>
                                     </thead>
-                                    <tbody id="reportTableBody">
+                                    <tbody id="membersTableBody">
                                         <!-- Data will be loaded here -->
                                     </tbody>
                                 </table>
@@ -345,7 +319,7 @@
                             
                             <!-- Pagination -->
                             <nav aria-label="Table pagination">
-                                <ul class="pagination justify-content-center mt-3" id="tablePagination">
+                                <ul class="pagination justify-content-center mt-3" id="membersPagination">
                                     <!-- Pagination will be generated here -->
                                 </ul>
                             </nav>
@@ -353,77 +327,86 @@
                     </div>
                 </div>
 
-                <!-- Statistics Sidebar -->
+                <!-- Right Column: Member Status Dashboard -->
                 <div class="col-lg-4">
-                    <!-- Quick Stats -->
+                    <!-- Member Status Overview -->
                     <div class="card mb-4">
                         <div class="card-header">
                             <h6 class="card-title mb-0">
-                                <i class="fas fa-tachometer-alt me-2"></i>สถิติด่วน
+                                <i class="fas fa-users me-2"></i>สรุปสถานะสมาชิก
                             </h6>
                         </div>
                         <div class="card-body">
-                            <div class="row g-3">
-                                <div class="col-6">
-                                    <div class="stat-item text-center">
-                                        <div class="stat-value text-primary">
-                                            <span id="totalGroups">12</span>
-                                        </div>
-                                        <div class="stat-label">กลุ่มเกษตรกร</div>
+                            <div class="member-status-overview">
+                                <!-- Completed Members -->
+                                <div class="status-item mb-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="status-label">
+                                            <i class="fas fa-circle text-success me-2"></i>กรอกข้อมูลครบ
+                                        </span>
+                                        <span class="status-count text-success fw-bold" id="completedCount">18</span>
                                     </div>
+                                    <div class="progress mb-1" style="height: 8px;">
+                                        <div class="progress-bar bg-success" id="completedProgress" style="width: 75%"></div>
+                                    </div>
+                                    <small class="text-muted">75% ของสมาชิกทั้งหมด</small>
                                 </div>
-                                <div class="col-6">
-                                    <div class="stat-item text-center">
-                                        <div class="stat-value text-success">
-                                            <span id="totalFarmers">248</span>
-                                        </div>
-                                        <div class="stat-label">เกษตรกร</div>
+
+                                <!-- Incomplete Members -->
+                                <div class="status-item mb-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="status-label">
+                                            <i class="fas fa-circle text-warning me-2"></i>กรอกข้อมูลไม่ครบ
+                                        </span>
+                                        <span class="status-count text-warning fw-bold" id="incompleteCount">4</span>
                                     </div>
+                                    <div class="progress mb-1" style="height: 8px;">
+                                        <div class="progress-bar bg-warning" id="incompleteProgress" style="width: 17%"></div>
+                                    </div>
+                                    <small class="text-muted">17% ของสมาชิกทั้งหมด</small>
                                 </div>
-                                <div class="col-6">
-                                    <div class="stat-item text-center">
-                                        <div class="stat-value text-warning">
-                                            <span id="totalQRCodes">186</span>
-                                        </div>
-                                        <div class="stat-label">QR Codes</div>
+
+                                <!-- Not Started Members -->
+                                <div class="status-item">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="status-label">
+                                            <i class="fas fa-circle text-danger me-2"></i>ยังไม่เริ่มกรอก
+                                        </span>
+                                        <span class="status-count text-danger fw-bold" id="notStartedCount">2</span>
                                     </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="stat-item text-center">
-                                        <div class="stat-value text-info">
-                                            <span id="totalScans">1,245</span>
-                                        </div>
-                                        <div class="stat-label">การสแกน</div>
+                                    <div class="progress mb-1" style="height: 8px;">
+                                        <div class="progress-bar bg-danger" id="notStartedProgress" style="width: 8%"></div>
                                     </div>
+                                    <small class="text-muted">8% ของสมาชิกทั้งหมด</small>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Recent Activity -->
+                    <!-- Individual Member Progress -->
                     <div class="card mb-4">
+                        <div class="card-header">
+                            <h6 class="card-title mb-0">
+                                <i class="fas fa-tasks me-2"></i>ความคืบหน้าแต่ละคน
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="member-progress-list" id="memberProgressList">
+                                <!-- Member progress items will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activities -->
+                    <div class="card">
                         <div class="card-header">
                             <h6 class="card-title mb-0">
                                 <i class="fas fa-clock me-2"></i>กิจกรรมล่าสุด
                             </h6>
                         </div>
                         <div class="card-body">
-                            <div class="activity-list" id="recentActivity">
-                                <!-- Activity items will be loaded here -->
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Top Performing Groups -->
-                    <div class="card">
-                        <div class="card-header">
-                            <h6 class="card-title mb-0">
-                                <i class="fas fa-trophy me-2"></i>กลุ่มยอดนิยม
-                            </h6>
-                        </div>
-                        <div class="card-body">
-                            <div class="top-groups-list" id="topGroups">
-                                <!-- Top groups will be loaded here -->
+                            <div class="activity-list" id="recentActivities">
+                                <!-- Recent activities will be loaded here -->
                             </div>
                         </div>
                     </div>
@@ -438,7 +421,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">
-                        <i class="fas fa-download me-2"></i>ส่งออกรายงาน
+                        <i class="fas fa-download me-2"></i>ส่งออกรายงานกลุ่ม
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
@@ -454,7 +437,7 @@
                                         <div class="card-content">
                                             <i class="fas fa-file-pdf text-danger"></i>
                                             <span>PDF Report</span>
-                                            <small>รายงานพร้อมกราฟ</small>
+                                            <small>รายงานกลุ่มพร้อมกราฟ</small>
                                         </div>
                                     </label>
                                     <label class="export-type-card">
@@ -462,7 +445,7 @@
                                         <div class="card-content">
                                             <i class="fas fa-file-excel text-success"></i>
                                             <span>Excel</span>
-                                            <small>สเปรดชีต</small>
+                                            <small>สเปรดชีตสมาชิก</small>
                                         </div>
                                     </label>
                                     <label class="export-type-card">
@@ -470,15 +453,7 @@
                                         <div class="card-content">
                                             <i class="fas fa-file-csv text-primary"></i>
                                             <span>CSV</span>
-                                            <small>ข้อมูลดิบ</small>
-                                        </div>
-                                    </label>
-                                    <label class="export-type-card">
-                                        <input type="radio" name="exportType" value="email">
-                                        <div class="card-content">
-                                            <i class="fas fa-envelope text-warning"></i>
-                                            <span>Email</span>
-                                            <small>ส่งทางอีเมล</small>
+                                            <small>รายชื่อสมาชิก</small>
                                         </div>
                                     </label>
                                 </div>
@@ -492,59 +467,36 @@
                                         <input class="form-check-input" type="checkbox" value="overview" 
                                                id="includeOverview" checked>
                                         <label class="form-check-label" for="includeOverview">
-                                            ภาพรวมระบบ
+                                            ภาพรวมกลุ่ม
                                         </label>
                                     </div>
                                     <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" value="groups" 
-                                               id="includeGroups" checked>
-                                        <label class="form-check-label" for="includeGroups">
-                                            ข้อมูลกลุ่มเกษตรกร
+                                        <input class="form-check-input" type="checkbox" value="members" 
+                                               id="includeMembers" checked>
+                                        <label class="form-check-label" for="includeMembers">
+                                            รายชื่อสมาชิก
                                         </label>
                                     </div>
                                     <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" value="farmers" 
-                                               id="includeFarmers">
-                                        <label class="form-check-label" for="includeFarmers">
-                                            ข้อมูลเกษตรกร
+                                        <input class="form-check-input" type="checkbox" value="performance" 
+                                               id="includePerformance">
+                                        <label class="form-check-label" for="includePerformance">
+                                            ผลการดำเนินงาน
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="products" 
+                                               id="includeProducts">
+                                        <label class="form-check-label" for="includeProducts">
+                                            ข้อมูลผลิตภัณฑ์
                                         </label>
                                     </div>
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" value="qrcodes" 
                                                id="includeQRCodes">
                                         <label class="form-check-label" for="includeQRCodes">
-                                            สถิติ QR Code
+                                            รายการ QR Code
                                         </label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" value="analytics" 
-                                               id="includeAnalytics">
-                                        <label class="form-check-label" for="includeAnalytics">
-                                            การวิเคราะห์
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Email Options (shown when email is selected) -->
-                            <div class="col-12" id="emailOptions" style="display: none;">
-                                <hr>
-                                <h6>ตัวเลือกการส่งอีเมล</h6>
-                                <div class="row g-3">
-                                    <div class="col-md-6">
-                                        <label class="form-label">อีเมลผู้รับ</label>
-                                        <input type="email" class="form-control" id="recipientEmail" 
-                                               placeholder="example@email.com">
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label">หัวข้ออีเมล</label>
-                                        <input type="text" class="form-control" id="emailSubject" 
-                                               value="รายงานระบบสอบย้อนกลับผักอุดร">
-                                    </div>
-                                    <div class="col-12">
-                                        <label class="form-label">ข้อความ</label>
-                                        <textarea class="form-control" id="emailMessage" rows="3"
-                                                  placeholder="เรียน ท่านผู้รับ กรุณาตรวจสอบรายงานในไฟล์แนบ"></textarea>
                                     </div>
                                 </div>
                             </div>
@@ -553,7 +505,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
-                    <button type="button" class="btn btn-primary" onclick="executeExport()" data-loading="กำลังส่งออก...">
+                    <button type="button" class="btn btn-primary" onclick="executeGroupExport()" data-loading="กำลังส่งออก...">
                         <i class="fas fa-download me-2"></i>ส่งออก
                     </button>
                 </div>
@@ -567,7 +519,7 @@
             <div class="spinner-border text-primary mb-3" role="status">
                 <span class="visually-hidden">กำลังโหลด...</span>
             </div>
-            <h5>กำลังสร้างรายงาน...</h5>
+            <h5>กำลังโหลดข้อมูลกลุ่ม...</h5>
             <p class="text-muted">กรุณารอสักครู่</p>
         </div>
     </div>
@@ -590,7 +542,7 @@
     <script src="../assets/js/utils.js"></script>
     <script src="../assets/js/api.js"></script>
     <script src="../assets/js/mobile-optimizations.js"></script>
-    <script src="../assets/js/admin-reports.js"></script>
+    <script src="../assets/js/group-reports.js"></script>
 
     <script>
         // Initialize page on load
@@ -598,11 +550,10 @@
             // Initialize date range picker
             initializeDateRangePicker();
             
-            // Initialize charts
-            initializeCharts();
-            
-            // Load initial data
-            loadReportData();
+            // Initialize Group Reports Manager
+            if (typeof GroupReportsManager !== 'undefined') {
+                window.groupReportsManager = new GroupReportsManager();
+            }
             
             // Setup event listeners
             setupEventListeners();
@@ -610,7 +561,7 @@
             // Initialize error handling
             initializeErrorHandling();
             
-            console.log('Admin Reports page initialized');
+            console.log('Group Reports page initialized');
         });
 
         /**
@@ -618,7 +569,7 @@
          */
         function initializeDateRangePicker() {
             const dateRangeInput = document.getElementById('dateRange');
-            if (dateRangeInput) {
+            if (dateRangeInput && typeof $ !== 'undefined') {
                 $(dateRangeInput).daterangepicker({
                     locale: {
                         format: 'DD/MM/YYYY',
@@ -649,7 +600,25 @@
                 });
 
                 $(dateRangeInput).on('apply.daterangepicker', function(ev, picker) {
-                    loadReportData();
+                    if (window.groupReportsManager) {
+                        window.groupReportsManager.applyFilters();
+                    }
+                });
+            }
+        }
+
+        /**
+         * Setup event listeners
+         */
+        function setupEventListeners() {
+            // Filter form submission
+            const filterForm = document.getElementById('filterForm');
+            if (filterForm) {
+                filterForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    if (window.groupReportsManager) {
+                        window.groupReportsManager.applyFilters();
+                    }
                 });
             }
         }
@@ -671,6 +640,33 @@
                     });
                 }
             });
+        }
+
+        /**
+         * Refresh data
+         */
+        function refreshData() {
+            if (window.groupReportsManager) {
+                window.groupReportsManager.loadGroupData();
+            }
+        }
+
+        /**
+         * Export member data
+         */
+        function exportMemberData(format) {
+            if (window.groupReportsManager && window.groupReportsManager.exportManager) {
+                window.groupReportsManager.exportManager.exportMemberData(format);
+            }
+        }
+
+        /**
+         * Execute group export
+         */
+        function executeGroupExport() {
+            if (window.groupReportsManager && window.groupReportsManager.exportManager) {
+                window.groupReportsManager.exportManager.executeGroupExport();
+            }
         }
     </script>
 </body>

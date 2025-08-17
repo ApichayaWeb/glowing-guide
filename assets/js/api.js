@@ -100,6 +100,163 @@ class APIHandler {
             reader.onerror = error => reject(error);
         });
     }
+
+    /**
+     * Upload file to specific folder based on farmer ID and file type
+     */
+    async uploadFileToSpecificFolder(file, farmerID, fileType, onProgress = null) {
+        try {
+            // Validate file first
+            this.validateFile(file, fileType);
+            
+            // Compress image if needed
+            let processedFile = file;
+            if (fileType === 'farm_photo' || fileType === 'product_photo') {
+                processedFile = await this.compressImage(file);
+            }
+            
+            // Determine folder based on file type
+            const folderMapping = {
+                'farm_photo': 'รูปภาพแปลงปลูก',
+                'certificate': 'เอกสารการรับรอง',
+                'product_photo': 'รูปภาพผลิตภัณฑ์'
+            };
+            
+            const folderName = folderMapping[fileType];
+            if (!folderName) {
+                throw new Error('ประเภทไฟล์ไม่ถูกต้อง');
+            }
+            
+            // Convert to base64
+            const base64 = await this.fileToBase64(processedFile);
+            
+            const data = {
+                fileName: processedFile.name,
+                fileContent: base64,
+                mimeType: processedFile.type,
+                farmerID: farmerID,
+                fileType: fileType,
+                folderName: folderName
+            };
+
+            // Create progress handler if provided
+            if (onProgress) {
+                onProgress(0); // Start progress
+            }
+
+            const result = await this.makeRequest('uploadFileToFarmerFolder', data);
+            
+            if (onProgress) {
+                onProgress(100); // Complete progress
+            }
+            
+            return result;
+        } catch (error) {
+            console.error('File upload to specific folder error:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Validate file size and type
+     */
+    validateFile(file, fileType) {
+        // Check file size (max 10MB)
+        const maxSize = 10 * 1024 * 1024; // 10MB in bytes
+        if (file.size > maxSize) {
+            throw new Error('ขนาดไฟล์เกิน 10MB กรุณาเลือกไฟล์ที่มีขนาดเล็กกว่า');
+        }
+        
+        // Check file type based on fileType parameter
+        const allowedTypes = {
+            'farm_photo': ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'],
+            'certificate': ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'],
+            'product_photo': ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
+        };
+        
+        const allowed = allowedTypes[fileType];
+        if (!allowed || !allowed.includes(file.type)) {
+            const typeNames = {
+                'farm_photo': 'รูปภาพ (JPEG, PNG, WebP)',
+                'certificate': 'เอกสาร PDF หรือรูปภาพ (PDF, JPEG, PNG)',
+                'product_photo': 'รูปภาพ (JPEG, PNG, WebP)'
+            };
+            throw new Error(`ประเภทไฟล์ไม่ถูกต้อง กรุณาเลือก${typeNames[fileType]}`);
+        }
+    }
+
+    /**
+     * Compress image before upload
+     */
+    async compressImage(file, maxWidth = 1920, maxHeight = 1080, quality = 0.8) {
+        return new Promise((resolve) => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const img = new Image();
+            
+            img.onload = () => {
+                // Calculate new dimensions
+                let { width, height } = img;
+                
+                if (width > maxWidth || height > maxHeight) {
+                    const ratio = Math.min(maxWidth / width, maxHeight / height);
+                    width *= ratio;
+                    height *= ratio;
+                }
+                
+                // Set canvas size
+                canvas.width = width;
+                canvas.height = height;
+                
+                // Draw and compress
+                ctx.drawImage(img, 0, 0, width, height);
+                
+                canvas.toBlob((blob) => {
+                    // Create new File object with compressed data
+                    const compressedFile = new File([blob], file.name, {
+                        type: file.type,
+                        lastModified: Date.now()
+                    });
+                    resolve(compressedFile);
+                }, file.type, quality);
+            };
+            
+            img.src = URL.createObjectURL(file);
+        });
+    }
+
+    /**
+     * Create progress indicator for file upload
+     */
+    createProgressIndicator(containerId) {
+        const container = document.getElementById(containerId);
+        if (!container) return null;
+        
+        const progressDiv = document.createElement('div');
+        progressDiv.className = 'upload-progress';
+        progressDiv.innerHTML = `
+            <div class="progress-bar-container">
+                <div class="progress-bar" style="width: 0%"></div>
+            </div>
+            <div class="progress-text">เตรียมอัพโหลด...</div>
+        `;
+        
+        container.appendChild(progressDiv);
+        
+        return {
+            update: (percent, text) => {
+                const bar = progressDiv.querySelector('.progress-bar');
+                const textEl = progressDiv.querySelector('.progress-text');
+                if (bar) bar.style.width = percent + '%';
+                if (textEl && text) textEl.textContent = text;
+            },
+            remove: () => {
+                if (progressDiv.parentNode) {
+                    progressDiv.parentNode.removeChild(progressDiv);
+                }
+            }
+        };
+    }
 }
 
 // Create global API instance
@@ -319,16 +476,16 @@ const GroupAPI = {
     /**
      * Upload group documents
      */
-    async uploadGroupDocument(file, documentType, groupId) {
+    async uploadGroupDocument(file, documentType) {
         try {
             const uploadResult = await API.uploadFile(file, 'group-documents');
             
             return await API.makeRequest('saveGroupDocument', {
-                groupId: groupId,
+                groupId: groupData.groupId,
                 documentType: documentType,
                 fileName: file.name,
-                fileUrl: uploadResult.file.fileUrl,
-                fileId: uploadResult.file.fileId
+                fileUrl: uploadResult.fileUrl,
+                fileId: uploadResult.fileId
             });
         } catch (error) {
             console.error('Group document upload error:', error);
@@ -378,23 +535,6 @@ const GroupAPI = {
      */
     async getGroupStats(groupId) {
         return await API.makeRequest('getGroupStats', { groupId: groupId });
-    },
-
-    /**
-     * List files in group folder
-     */
-    async listGroupFiles(groupId, folderType = 'all') {
-        return await API.makeRequest('listGroupFiles', { 
-            groupId: groupId, 
-            folderType: folderType 
-        });
-    },
-
-    /**
-     * Create folder for existing group
-     */
-    async createFolderForGroup(groupId) {
-        return await API.makeRequest('createFolderForGroup', { groupId: groupId });
     }
 };
 
