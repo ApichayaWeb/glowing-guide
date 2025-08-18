@@ -408,9 +408,74 @@
 
         // Initialize dashboard
         document.addEventListener('DOMContentLoaded', function() {
-            loadDashboardData();
-            setupEventListeners();
+            console.log('Admin dashboard DOM loaded');
+            
+            // Protect admin page - only admin can access
+            if (!PageProtection.protectAdminPage()) {
+                console.error('Access denied - not admin or not logged in');
+                return;
+            }
+            
+            console.log('Admin access granted');
+            
+            // Setup page with user info and navigation
+            if (AuthAPI.setupPage({ setupNavigation: true })) {
+                console.log('Page setup completed successfully');
+                
+                // Update user display in navigation
+                updateUserNavigation();
+                
+                loadDashboardData();
+                setupEventListeners();
+            } else {
+                console.error('Page setup failed');
+            }
         });
+        
+        // Update user display in navigation
+        function updateUserNavigation() {
+            const currentUser = AuthAPI.getCurrentUser();
+            console.log('Updating user navigation with:', currentUser);
+            
+            if (currentUser) {
+                // Update user display name
+                const userDisplayElement = document.querySelector('.user-display');
+                if (userDisplayElement) {
+                    userDisplayElement.textContent = currentUser.fullName || currentUser.username || 'Admin';
+                    console.log('Updated user display to:', userDisplayElement.textContent);
+                }
+                
+                // Add user role display if element exists
+                let userRoleElement = document.querySelector('.user-role');
+                if (!userRoleElement) {
+                    // Create user role element if it doesn't exist
+                    const dropdownToggle = document.querySelector('.nav-link.dropdown-toggle');
+                    if (dropdownToggle) {
+                        userRoleElement = document.createElement('small');
+                        userRoleElement.className = 'user-role text-light d-block';
+                        userRoleElement.style.fontSize = '0.75rem';
+                        dropdownToggle.appendChild(userRoleElement);
+                    }
+                }
+                
+                if (userRoleElement) {
+                    const roleText = currentUser.role === 'admin' ? 'ผู้ดูแลระบบ' : 
+                                   currentUser.role === 'group' ? 'ผู้จัดการกลุ่ม' : 
+                                   currentUser.role === 'farmer' ? 'เกษตรกร' : 'ผู้ใช้';
+                    userRoleElement.textContent = roleText;
+                    console.log('Updated user role to:', roleText);
+                }
+                
+                // Add login time info
+                if (currentUser.loginTime) {
+                    const loginTime = new Date(currentUser.loginTime);
+                    const timeString = loginTime.toLocaleString('th-TH');
+                    console.log('User logged in at:', timeString);
+                }
+            } else {
+                console.warn('No current user found for navigation update');
+            }
+        }
 
         // Setup event listeners
         function setupEventListeners() {
@@ -419,10 +484,63 @@
             
             // Change password form
             document.getElementById('changePasswordForm').addEventListener('submit', handleChangePassword);
+            
+            // Logout button
+            const logoutBtn = document.querySelector('.logout-btn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', handleLogout);
+                console.log('Logout button event listener added');
+            } else {
+                console.warn('Logout button not found');
+            }
+        }
+        
+        // Handle logout
+        function handleLogout(event) {
+            event.preventDefault();
+            console.log('Logout button clicked');
+            
+            // Show confirmation dialog
+            Swal.fire({
+                title: 'ออกจากระบบ',
+                text: 'คุณต้องการออกจากระบบใช่หรือไม่?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'ออกจากระบบ',
+                cancelButtonText: 'ยกเลิก'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Perform logout
+                    AuthAPI.logout();
+                    
+                    // Show success message and redirect
+                    Swal.fire({
+                        title: 'ออกจากระบบสำเร็จ',
+                        text: 'กำลังนำคุณไปยังหน้าเข้าสู่ระบบ...',
+                        icon: 'success',
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => {
+                        // Redirect to login page
+                        window.location.href = '../login.html';
+                    });
+                }
+            });
         }
 
         // Load dashboard data
         async function loadDashboardData() {
+            // Check admin permission before loading data
+            const currentUser = AuthAPI.getCurrentUser();
+            if (!currentUser || currentUser.role !== 'admin') {
+                console.error('Permission denied: Admin role required');
+                Utils.showError('ไม่มีสิทธิ์', 'คุณต้องมีสิทธิ์ผู้ดูแลระบบเท่านั้น');
+                setTimeout(() => window.location.href = '../login.html', 2000);
+                return;
+            }
+            
             try {
                 Utils.showLoading('กำลังโหลดข้อมูล...');
                 
@@ -704,6 +822,13 @@
         async function handleAddGroup(event) {
             event.preventDefault();
             
+            // Check admin permission
+            const currentUser = AuthAPI.getCurrentUser();
+            if (!currentUser || currentUser.role !== 'admin') {
+                Utils.showError('ไม่มีสิทธิ์', 'คุณต้องมีสิทธิ์ผู้ดูแลระบบเท่านั้น');
+                return;
+            }
+            
             const formData = {
                 groupName: document.getElementById('groupName').value.trim(),
                 managerName: document.getElementById('managerName').value.trim(),
@@ -754,6 +879,13 @@
         async function handleChangePassword(event) {
             event.preventDefault();
             
+            // Check admin permission
+            const currentUser = AuthAPI.getCurrentUser();
+            if (!currentUser || currentUser.role !== 'admin') {
+                Utils.showError('ไม่มีสิทธิ์', 'คุณต้องมีสิทธิ์ผู้ดูแลระบบเท่านั้น');
+                return;
+            }
+            
             const oldPassword = document.getElementById('oldPassword').value;
             const newPassword = document.getElementById('newPassword').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
@@ -768,6 +900,11 @@
                 
                 const modal = bootstrap.Modal.getInstance(document.getElementById('changePasswordModal'));
                 modal.hide();
+                
+                Utils.showSuccess('เปลี่ยนรหัสผ่านสำเร็จ', 'รหัสผ่านของคุณได้ถูกเปลี่ยนเรียบร้อยแล้ว');
+                
+                // Clear form
+                document.getElementById('changePasswordForm').reset();
                 
             } catch (error) {
                 handleAPIError(error, 'เกิดข้อผิดพลาดในการเปลี่ยนรหัสผ่าน');

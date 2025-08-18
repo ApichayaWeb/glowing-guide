@@ -1,0 +1,160 @@
+{
+  "name": "Mobile Auto Logout System",
+  "short_name": "AutoLogout",
+  "description": "Advanced mobile auto logout system with device state monitoring",
+  "version": "1.0.0",
+  "manifest_version": 2,
+  
+  "start_url": "mobile-auto-logout.html",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#198754",
+  "background_color": "#ffffff",
+  
+  "icons": [
+    {
+      "src": "https://via.placeholder.com/72x72/198754/ffffff?text=AL",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://via.placeholder.com/96x96/198754/ffffff?text=AL",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://via.placeholder.com/128x128/198754/ffffff?text=AL",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://via.placeholder.com/144x144/198754/ffffff?text=AL",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://via.placeholder.com/152x152/198754/ffffff?text=AL",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://via.placeholder.com/192x192/198754/ffffff?text=AL",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://via.placeholder.com/384x384/198754/ffffff?text=AL",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://via.placeholder.com/512x512/198754/ffffff?text=AL",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  
+  "shortcuts": [
+    {
+      "name": "Logout",
+      "short_name": "Logout",
+      "description": "Logout from the application",
+      "url": "mobile-auto-logout.html?action=logout",
+      "icons": [
+        {
+          "src": "https://via.placeholder.com/96x96/dc3545/ffffff?text=LO",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Session Status",
+      "short_name": "Status",
+      "description": "View current session status",
+      "url": "mobile-auto-logout.html?action=status",
+      "icons": [
+        {
+          "src": "https://via.placeholder.com/96x96/0dcaf0/ffffff?text=ST",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  
+  "categories": ["security", "utilities", "productivity"],
+  "lang": "th",
+  "dir": "ltr",
+  
+  "prefer_related_applications": false,
+  
+  "screenshots": [
+    {
+      "src": "https://via.placeholder.com/390x844/198754/ffffff?text=Mobile+Auto+Logout",
+      "sizes": "390x844",
+      "type": "image/png",
+      "platform": "narrow",
+      "label": "Mobile Auto Logout main interface"
+    },
+    {
+      "src": "https://via.placeholder.com/844x390/198754/ffffff?text=Landscape+View",
+      "sizes": "844x390",
+      "type": "image/png",
+      "platform": "wide",
+      "label": "Landscape view of the application"
+    }
+  ],
+  
+  "scope": "/",
+  "id": "mobile-auto-logout",
+  
+  "protocol_handlers": [
+    {
+      "protocol": "web+autologout",
+      "url": "mobile-auto-logout.html?action=%s"
+    }
+  ],
+  
+  "permissions": [
+    "background-sync",
+    "push",
+    "notifications",
+    "storage"
+  ],
+  
+  "display_override": ["window-controls-overlay", "minimal-ui", "browser"],
+  
+  "launch_handler": {
+    "client_mode": ["navigate-existing", "auto"]
+  },
+  
+  "handle_links": "preferred",
+  
+  "edge_side_panel": {
+    "preferred_width": 320
+  },
+  
+  "file_handlers": [
+    {
+      "action": "mobile-auto-logout.html?action=import",
+      "accept": {
+        "application/json": [".json"],
+        "text/plain": [".log"]
+      },
+      "icons": [
+        {
+          "src": "https://via.placeholder.com/96x96/198754/ffffff?text=IM",
+          "sizes": "96x96"
+        }
+      ],
+      "launch_type": "single-client"
+    }
+  ]
+}

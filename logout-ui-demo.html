@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบ Logout และ Auto Logout UI/UX</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="logout-styles.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-success-subtle">
+        <div class="container">
+            <a class="navbar-brand text-success fw-bold" href="#"><i class="fas fa-shield-alt me-2"></i>Security System</a>
+            
+            <!-- Desktop Navigation -->
+            <div class="navbar-nav ms-auto d-none d-lg-flex">
+                <div class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle text-success" href="#" role="button" data-bs-toggle="dropdown">
+                        <img src="https://via.placeholder.com/32" alt="User" class="rounded-circle me-2" width="32" height="32">
+                        สวัสดี, ผู้ใช้งาน
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i>โปรไฟล์</a></li>
+                        <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i>ตั้งค่า</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" href="#" onclick="showLogoutModal()"><i class="fas fa-sign-out-alt me-2"></i>ออกจากระบบ</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Mobile Toggle -->
+            <button class="navbar-toggler d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#mobileNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Mobile Navigation -->
+    <div class="collapse navbar-collapse d-lg-none" id="mobileNav">
+        <div class="navbar-nav p-3">
+            <a class="nav-link" href="#"><i class="fas fa-user me-2"></i>โปรไฟล์</a>
+            <a class="nav-link" href="#"><i class="fas fa-cog me-2"></i>ตั้งค่า</a>
+            <hr>
+            <a class="nav-link text-danger" href="#" onclick="showLogoutModal()"><i class="fas fa-sign-out-alt me-2"></i>ออกจากระบบ</a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container my-5">
+        <div class="row">
+            <div class="col-12">
+                <h1 class="text-center text-success mb-5">ระบบ Logout และ Auto Logout UI/UX Demo</h1>
+                
+                <!-- Session Info -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <h5 class="card-title text-success">ข้อมูลเซสชัน</h5>
+                                <p class="card-text mb-1"><strong>เวลาเข้าสู่ระบบ:</strong> <span id="loginTime">10:30 AM</span></p>
+                                <p class="card-text mb-1"><strong>เวลาที่เหลือ:</strong> <span id="sessionTime" class="text-success fw-bold">29:45</span></p>
+                                <p class="card-text mb-0"><strong>สถานะ:</strong> <span class="badge bg-success">กำลังใช้งาน</span></p>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <div class="session-progress mb-3">
+                                    <div class="circular-progress" data-progress="75">
+                                        <svg class="circular-chart green" viewBox="0 0 36 36">
+                                            <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
+                                            <path class="circle" stroke-dasharray="75, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
+                                            <text x="18" y="20.35" class="percentage">75%</text>
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Logout Button Variations -->
+                <div class="row mb-5">
+                    <div class="col-12">
+                        <h3 class="text-success mb-4">รูปแบบปุ่ม Logout ต่างๆ</h3>
+                        
+                        <div class="row g-3">
+                            <!-- Standard Logout Button -->
+                            <div class="col-md-6 col-lg-3">
+                                <div class="card h-100">
+                                    <div class="card-body text-center">
+                                        <h6 class="card-title">ปุ่มมาตรฐาน</h6>
+                                        <button class="btn btn-outline-danger btn-logout-standard" onclick="showLogoutModal()">
+                                            <i class="fas fa-sign-out-alt me-2"></i>ออกจากระบบ
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Icon Only Button -->
+                            <div class="col-md-6 col-lg-3">
+                                <div class="card h-100">
+                                    <div class="card-body text-center">
+                                        <h6 class="card-title">ปุ่มไอคอน</h6>
+                                        <button class="btn btn-danger btn-logout-icon" onclick="showLogoutModal()" title="ออกจากระบบ">
+                                            <i class="fas fa-sign-out-alt"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Floating Action Button -->
+                            <div class="col-md-6 col-lg-3">
+                                <div class="card h-100">
+                                    <div class="card-body text-center">
+                                        <h6 class="card-title">ปุ่มลอย</h6>
+                                        <button class="btn btn-danger btn-logout-fab" onclick="showLogoutModal()">
+                                            <i class="fas fa-power-off"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Emergency Logout -->
+                            <div class="col-md-6 col-lg-3">
+                                <div class="card h-100">
+                                    <div class="card-body text-center">
+                                        <h6 class="card-title">ปุ่มฉุกเฉิน</h6>
+                                        <button class="btn btn-danger btn-logout-emergency" onclick="showEmergencyLogout()">
+                                            <i class="fas fa-exclamation-triangle me-2"></i>ออกจากระบบด่วน
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Auto Logout Demo -->
+                <div class="row mb-5">
+                    <div class="col-12">
+                        <h3 class="text-success mb-4">การทดสอบ Auto Logout</h3>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <button class="btn btn-warning" onclick="startIdleTimer(10)">
+                                <i class="fas fa-clock me-2"></i>จำลอง Idle 10 วินาที
+                            </button>
+                            <button class="btn btn-info" onclick="showSessionExpiry(15)">
+                                <i class="fas fa-hourglass-end me-2"></i>จำลองเซสชันหมดอายุ 15 วินาที
+                            </button>
+                            <button class="btn btn-secondary" onclick="resetSession()">
+                                <i class="fas fa-refresh me-2"></i>รีเซ็ตเซสชัน
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logout Success Page (Hidden by default) -->
+    <div id="logoutSuccessPage" class="logout-success-page d-none">
+        <div class="container">
+            <div class="row justify-content-center align-items-center min-vh-100">
+                <div class="col-md-6 text-center">
+                    <div class="success-animation mb-4">
+                        <div class="checkmark-circle">
+                            <div class="checkmark"></div>
+                        </div>
+                    </div>
+                    <h2 class="text-success mb-3">ออกจากระบบเรียบร้อยแล้ว</h2>
+                    <p class="text-muted mb-4">ขอบคุณที่ใช้บริการ เซสชันของคุณได้รับการปิดอย่างปลอดภัย</p>
+                    
+                    <div class="session-summary mb-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="card-title text-success">สรุปการใช้งาน</h6>
+                                <div class="row text-start">
+                                    <div class="col-6">
+                                        <small class="text-muted">เวลาเข้าสู่ระบบ:</small><br>
+                                        <span id="summaryLoginTime">10:30 AM</span>
+                                    </div>
+                                    <div class="col-6">
+                                        <small class="text-muted">เวลาออกจากระบบ:</small><br>
+                                        <span id="summaryLogoutTime">2:45 PM</span>
+                                    </div>
+                                    <div class="col-12 mt-2">
+                                        <small class="text-muted">ระยะเวลาใช้งาน:</small><br>
+                                        <span id="summaryDuration" class="text-success fw-bold">4 ชั่วโมง 15 นาที</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="redirect-info mb-4">
+                        <p class="mb-2">กำลังเปลี่ยนเส้นทางไปหน้าล็อกอิน ใน</p>
+                        <div class="countdown-display">
+                            <span id="redirectCountdown" class="display-6 text-success fw-bold">5</span>
+                            <small class="text-muted">วินาที</small>
+                        </div>
+                    </div>
+
+                    <div class="quick-actions">
+                        <button class="btn btn-success me-2" onclick="redirectToLogin()">
+                            <i class="fas fa-sign-in-alt me-2"></i>เข้าสู่ระบบอีกครั้ง
+                        </button>
+                        <button class="btn btn-outline-secondary" onclick="goToHomepage()">
+                            <i class="fas fa-home me-2"></i>กลับหน้าหลัก
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Standard Logout Modal -->
+    <div class="modal fade" id="logoutModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title text-danger">
+                        <i class="fas fa-sign-out-alt me-2"></i>ยืนยันการออกจากระบบ
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <div class="mb-3">
+                        <i class="fas fa-question-circle text-warning" style="font-size: 3rem;"></i>
+                    </div>
+                    <h6 class="mb-3">คุณต้องการออกจากระบบหรือไม่?</h6>
+                    <p class="text-muted">งานที่ยังไม่ได้บันทึกอาจสูญหาย</p>
+                </div>
+                <div class="modal-footer border-0 justify-content-center">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>ยกเลิก
+                    </button>
+                    <button type="button" class="btn btn-danger" onclick="performLogout()">
+                        <i class="fas fa-sign-out-alt me-2"></i>ออกจากระบบ
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Session Expiry Warning Modal -->
+    <div class="modal fade" id="sessionExpiryModal" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-warning">
+                <div class="modal-header bg-warning bg-opacity-10 border-0">
+                    <h5 class="modal-title text-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>แจ้งเตือนเซสชันหมดอายุ
+                    </h5>
+                </div>
+                <div class="modal-body text-center">
+                    <div class="mb-3">
+                        <i class="fas fa-hourglass-end text-warning" style="font-size: 3rem;"></i>
+                    </div>
+                    <h6 class="mb-3">เซสชันของคุณกำลังจะหมดอายุ</h6>
+                    <p class="text-muted mb-4">เซสชันจะหมดอายุใน <strong id="expiryCountdown" class="text-danger">60</strong> วินาที</p>
+                    
+                    <div class="progress mb-3" style="height: 8px;">
+                        <div id="expiryProgress" class="progress-bar bg-warning" role="progressbar" style="width: 100%"></div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 justify-content-center">
+                    <button type="button" class="btn btn-success" onclick="extendSession()">
+                        <i class="fas fa-refresh me-2"></i>ขยายเซสชัน
+                    </button>
+                    <button type="button" class="btn btn-outline-danger" onclick="performLogout()">
+                        <i class="fas fa-sign-out-alt me-2"></i>ออกจากระบบ
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Idle Warning Modal -->
+    <div class="modal fade" id="idleWarningModal" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-info">
+                <div class="modal-header bg-info bg-opacity-10 border-0">
+                    <h5 class="modal-title text-info">
+                        <i class="fas fa-clock me-2"></i>แจ้งเตือนการไม่ได้ใช้งาน
+                    </h5>
+                </div>
+                <div class="modal-body text-center">
+                    <div class="mb-3">
+                        <i class="fas fa-user-clock text-info" style="font-size: 3rem;"></i>
+                    </div>
+                    <h6 class="mb-3">ตรวจพบการไม่ได้ใช้งาน</h6>
+                    <p class="text-muted mb-4">คุณจะถูกออกจากระบบอัตโนมัติใน <strong id="idleCountdown" class="text-danger">30</strong> วินาที</p>
+                    
+                    <div class="circular-progress mb-3" data-progress="100">
+                        <svg class="circular-chart blue" viewBox="0 0 36 36" style="max-width: 80px;">
+                            <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
+                            <path id="idleCircle" class="circle" stroke-dasharray="100, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
+                            <text x="18" y="20.35" class="percentage" id="idlePercentage">100%</text>
+                        </svg>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 justify-content-center">
+                    <button type="button" class="btn btn-primary" onclick="continueSession()">
+                        <i class="fas fa-mouse me-2"></i>ใช้งานต่อ
+                    </button>
+                    <button type="button" class="btn btn-outline-danger" onclick="performLogout()">
+                        <i class="fas fa-sign-out-alt me-2"></i>ออกจากระบบ
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Emergency Logout Modal -->
+    <div class="modal fade" id="emergencyLogoutModal" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content border-danger">
+                <div class="modal-header bg-danger bg-opacity-10 border-0 text-center">
+                    <h5 class="modal-title text-danger w-100">
+                        <i class="fas fa-exclamation-triangle me-2"></i>ออกจากระบบฉุกเฉิน
+                    </h5>
+                </div>
+                <div class="modal-body text-center">
+                    <div class="mb-3">
+                        <i class="fas fa-shield-alt text-danger" style="font-size: 3rem;"></i>
+                    </div>
+                    <h6 class="mb-3 text-danger">กำลังออกจากระบบ...</h6>
+                    <div class="progress mb-3">
+                        <div id="emergencyProgress" class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
+                    </div>
+                    <p class="small text-muted">ระบบจะปิดการเชื่อมต่อทันที</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container position-fixed top-0 end-0 p-3">
+        <div id="logoutToast" class="toast" role="alert">
+            <div class="toast-header">
+                <i class="fas fa-sign-out-alt text-danger me-2"></i>
+                <strong class="me-auto">การออกจากระบบ</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body">
+                ออกจากระบบเรียบร้อยแล้ว
+            </div>
+        </div>
+
+        <div id="sessionToast" class="toast" role="alert">
+            <div class="toast-header">
+                <i class="fas fa-clock text-warning me-2"></i>
+                <strong class="me-auto">เซสชัน</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body" id="sessionToastBody">
+                เซสชันถูกขยายเวลาแล้ว
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="logout-script.js"></script>
+</body>
+</html>

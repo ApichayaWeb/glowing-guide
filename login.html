@@ -323,10 +323,34 @@
     <script>
         // Initialize login page
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('Login page DOM loaded');
+            
             // Check if user is already logged in
-            if (AuthAPI.isLoggedIn()) {
-                redirectBasedOnRole();
+            const isLoggedIn = AuthAPI.isLoggedIn();
+            console.log('User logged in status:', isLoggedIn);
+            
+            if (isLoggedIn) {
+                const currentUser = AuthAPI.getCurrentUser();
+                console.log('Current user found:', currentUser);
+                
+                if (currentUser && currentUser.role) {
+                    console.log('User already logged in, redirecting to dashboard');
+                    
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'คุณเข้าสู่ระบบอยู่แล้ว',
+                        text: 'กำลังนำคุณไปยังหน้าหลัก...',
+                        timer: 2000,
+                        showConfirmButton: false
+                    }).then(() => {
+                        redirectBasedOnRole(currentUser.role);
+                    });
+                    return;
+                }
             }
+
+            // Show login form if not logged in
+            console.log('User not logged in, showing login form');
 
             // Bind form submit
             document.getElementById('loginForm').addEventListener('submit', handleLogin);
@@ -341,60 +365,151 @@
         // Handle login form submission
         async function handleLogin(event) {
             event.preventDefault();
+            console.log('Login form submitted');
             
             const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value;
             const rememberMe = document.getElementById('rememberMe').checked;
+            
+            console.log('Login attempt:', { username, hasPassword: !!password, rememberMe });
             
             if (!username || !password) {
                 Utils.showWarning('ข้อมูลไม่ครบ', 'กรุณาใส่ชื่อผู้ใช้และรหัสผ่าน');
                 return;
             }
 
+            // Disable login button
+            const loginBtn = document.getElementById('loginBtn');
+            loginBtn.disabled = true;
+            loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>กำลังเข้าสู่ระบบ...';
+
             try {
-                Utils.showLoading('กำลังเข้าสู่ระบบ...');
+                console.log('Starting login process...');
                 
+                // Show loading modal
+                const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
+                loadingModal.show();
+                
+                // Call AuthAPI login
                 const user = await AuthAPI.login(username, password);
+                console.log('Login successful, user data:', user);
                 
-                Utils.hideLoading();
+                // Hide loading modal
+                loadingModal.hide();
                 
+                // Store remember me preference
                 if (rememberMe) {
                     Storage.set('remember_login', true);
+                    console.log('Remember me enabled');
                 }
                 
-                Utils.showSuccess('เข้าสู่ระบบสำเร็จ', `ยินดีต้อนรับ ${user.username}`);
+                // Verify user data is stored
+                const storedUser = AuthAPI.getCurrentUser();
+                console.log('Stored user data verification:', storedUser);
                 
-                // Redirect based on user role
-                setTimeout(() => {
-                    redirectBasedOnRole(user.role);
-                }, 1500);
+                if (!storedUser || !storedUser.role) {
+                    console.error('User data not properly stored, attempting to store again');
+                    
+                    // Try to store user data again
+                    const userData = {
+                        username: user.username || username,
+                        role: user.role,
+                        fullName: user.fullName || user.username,
+                        loginTime: new Date().toISOString(),
+                        sessionId: 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)
+                    };
+                    
+                    // Store with multiple methods to ensure persistence
+                    Storage.set(CONFIG.STORAGE_KEYS.USER_DATA, userData);
+                    Storage.set('auth_token', 'token_' + Date.now());
+                    Storage.set('session_id', userData.sessionId);
+                    Storage.set(CONFIG.STORAGE_KEYS.LAST_LOGIN, userData.loginTime);
+                    
+                    // Verify storage again
+                    const reStoredUser = AuthAPI.getCurrentUser();
+                    console.log('Re-stored user data verification:', reStoredUser);
+                    
+                    if (!reStoredUser || !reStoredUser.role) {
+                        throw new Error('Critical: Unable to store user data in localStorage');
+                    }
+                }
+                
+                // Show success message
+                Swal.fire({
+                    icon: 'success',
+                    title: 'เข้าสู่ระบบสำเร็จ',
+                    text: `ยินดีต้อนรับ ${user.username || user.fullName}`,
+                    timer: 1500,
+                    showConfirmButton: false
+                }).then(() => {
+                    // Redirect based on user role
+                    console.log('Redirecting user with role:', storedUser.role);
+                    redirectBasedOnRole(storedUser.role);
+                });
                 
             } catch (error) {
-                Utils.hideLoading();
-                handleAPIError(error, 'เข้าสู่ระบบไม่สำเร็จ');
+                console.error('Login error:', error);
+                
+                // Hide loading modal
+                const loadingModal = bootstrap.Modal.getInstance(document.getElementById('loadingModal'));
+                if (loadingModal) {
+                    loadingModal.hide();
+                }
+                
+                // Show error message
+                Swal.fire({
+                    icon: 'error',
+                    title: 'เข้าสู่ระบบไม่สำเร็จ',
+                    text: error.message || 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ',
+                    confirmButtonColor: '#198754'
+                });
+                
+            } finally {
+                // Re-enable login button
+                loginBtn.disabled = false;
+                loginBtn.innerHTML = '<i class="fas fa-sign-in-alt me-2"></i>เข้าสู่ระบบ';
             }
         }
 
         // Redirect user based on their role
         function redirectBasedOnRole(role = null) {
+            console.log('redirectBasedOnRole called with role:', role);
+            
             if (!role) {
                 const user = AuthAPI.getCurrentUser();
+                console.log('No role provided, getting from stored user:', user);
                 role = user ? user.role : null;
             }
+            
+            if (!role) {
+                console.error('No role found, redirecting to home');
+                window.location.href = 'index.html';
+                return;
+            }
 
+            let targetUrl = '';
+            
             switch (role) {
                 case 'admin':
-                    window.location.href = 'admin/dashboard.html';
+                    targetUrl = './admin/dashboard.html';
                     break;
                 case 'group':
-                    window.location.href = 'group/dashboard.html';
+                    targetUrl = './group/dashboard.html';
                     break;
                 case 'farmer':
-                    window.location.href = 'farmer/dashboard.html';
+                    targetUrl = './farmer/dashboard.html';
                     break;
                 default:
-                    window.location.href = 'index.html';
+                    console.warn('Unknown role:', role, 'redirecting to home');
+                    targetUrl = './index.html';
             }
+            
+            console.log('Redirecting to:', targetUrl);
+            
+            // Add delay to ensure data is properly saved
+            setTimeout(() => {
+                window.location.href = targetUrl;
+            }, 100);
         }
 
         // Toggle password visibility
@@ -423,6 +538,80 @@
             // Focus on login button
             document.getElementById('loginBtn').focus();
         }
+
+        // Validate test credentials and provide proper mapping
+        function validateAndMapCredentials(username, password) {
+            console.log('Validating credentials for:', username);
+            
+            // Mock user database for testing
+            const testUsers = {
+                'admin': {
+                    password: 'admin_password',
+                    role: 'admin',
+                    fullName: 'System Administrator',
+                    groupId: null
+                },
+                'group01_manager': {
+                    password: 'demo1234',
+                    role: 'group',
+                    fullName: 'Group Manager 01',
+                    groupId: 'group01'
+                },
+                '0812345678': {
+                    password: '2345678',
+                    role: 'farmer',
+                    fullName: 'Farmer Test User',
+                    groupId: 'group01'
+                }
+            };
+            
+            const user = testUsers[username];
+            if (user && user.password === password) {
+                return {
+                    username: username,
+                    role: user.role,
+                    fullName: user.fullName,
+                    groupId: user.groupId
+                };
+            }
+            
+            return null;
+        }
+        
+        // Override AuthAPI.login for testing purposes
+        const originalLogin = AuthAPI.login;
+        AuthAPI.login = async function(username, password) {
+            console.log('Mock login called with:', username);
+            
+            // Simulate network delay
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            // Validate credentials
+            const user = validateAndMapCredentials(username, password);
+            
+            if (!user) {
+                throw new Error('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
+            }
+            
+            // Create full user data
+            const userData = {
+                ...user,
+                loginTime: new Date().toISOString(),
+                sessionId: 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+                lastActivity: Date.now(),
+                sessionCount: 1
+            };
+            
+            console.log('Storing user data:', userData);
+            
+            // Store user data
+            Storage.set(CONFIG.STORAGE_KEYS.USER_DATA, userData);
+            Storage.set(CONFIG.STORAGE_KEYS.LAST_LOGIN, userData.loginTime);
+            Storage.set('auth_token', 'token_' + Date.now());
+            Storage.set('session_id', userData.sessionId);
+            
+            return userData;
+        };
     </script>
 </body>
 </html>

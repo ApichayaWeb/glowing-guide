@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>แดชบอร์ดเกษตรกร - ระบบสอบย้อนกลับผักอุดร</title>
+    <title>แผงควบคุมเกษตรกร - ระบบสอบย้อนกลับผักอุดร</title>
     
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -14,21 +14,20 @@
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
-        <div class="container">
-            <a class="navbar-brand text-success" href="../index.html">
-                <i class="fas fa-leaf me-2"></i>ผักอุดรคลีน
+    <nav class="navbar navbar-expand-lg navbar-dark bg-success fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="../index.html">
+                <i class="fas fa-leaf me-2"></i>
+                ระบบสอบย้อนกลับผักอุดร
             </a>
-            
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
                         <a class="nav-link active" href="dashboard.html">
-                            <i class="fas fa-home me-1"></i>แดชบอร์ด
+                            <i class="fas fa-tachometer-alt me-1"></i>แผงควบคุม
                         </a>
                     </li>
                     <li class="nav-item">
@@ -42,18 +41,21 @@
                         </a>
                     </li>
                 </ul>
-                
                 <ul class="navbar-nav">
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-user me-1"></i><span id="userName">เกษตรกร</span>
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-circle me-1"></i>
+                            <span class="user-display">เกษตรกร</span>
                         </a>
                         <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#" onclick="editProfile()">
+                                <i class="fas fa-user-edit me-2"></i>แก้ไขข้อมูลส่วนตัว
+                            </a></li>
                             <li><a class="dropdown-item" href="#" onclick="changePassword()">
                                 <i class="fas fa-key me-2"></i>เปลี่ยนรหัสผ่าน
                             </a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="#" onclick="logout()">
+                            <li><a class="dropdown-item logout-btn" href="#">
                                 <i class="fas fa-sign-out-alt me-2"></i>ออกจากระบบ
                             </a></li>
                         </ul>
@@ -64,91 +66,28 @@
     </nav>
 
     <!-- Main Content -->
-    <div class="container-fluid py-4">
+    <main class="main-content">
+        <div class="container-fluid">
         <div class="row">
-            <!-- Welcome Section -->
-            <div class="col-12 mb-4">
-                <div class="card border-0 shadow-sm">
-                    <div class="card-body bg-success text-white rounded">
-                        <div class="row align-items-center">
-                            <div class="col-md-8">
-                                <h2 class="mb-2">
-                                    <i class="fas fa-seedling me-2"></i>
-                                    ยินดีต้อนรับ <span id="farmerName">คุณเกษตรกร</span>
-                                </h2>
-                                <p class="mb-0 fs-5">
-                                    กลุ่ม: <span id="groupName">-</span> | 
-                                    รหัสแปลง: <span id="plotCode">-</span>
-                                </p>
-                            </div>
-                            <div class="col-md-4 text-end">
-                                <div class="fs-6">
-                                    <i class="fas fa-calendar me-1"></i>
-                                    วันที่: <span id="currentDate"></span>
-                                </div>
-                            </div>
+            <!-- Header -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="page-header">
+                        <h1 class="h3 mb-3 fw-bold text-success">
+                            <i class="fas fa-seedling me-3"></i>
+                            แผงควบคุมเกษตรกร
+                        </h1>
+                        <p class="text-muted">จัดการข้อมูลการผลิตและแปลงปลูกของคุณ</p>
+                        <div class="farmer-info mt-3" id="farmerInfo">
+                            <!-- Farmer info will be loaded here -->
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Quick Stats -->
-            <div class="col-12 mb-4">
-                <div class="row g-3">
-                    <div class="col-md-3 col-sm-6">
-                        <div class="card text-center border-0 shadow-sm h-100">
-                            <div class="card-body">
-                                <div class="text-primary fs-1 mb-2">
-                                    <i class="fas fa-percentage"></i>
-                                </div>
-                                <h5 class="card-title">ความสมบูรณ์ข้อมูล</h5>
-                                <h3 class="text-primary mb-0">
-                                    <span id="dataCompleteness">0</span>%
-                                </h3>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-md-3 col-sm-6">
-                        <div class="card text-center border-0 shadow-sm h-100">
-                            <div class="card-body">
-                                <div class="text-success fs-1 mb-2">
-                                    <i class="fas fa-check-circle"></i>
-                                </div>
-                                <h5 class="card-title">ส่วนที่เสร็จแล้ว</h5>
-                                <h3 class="text-success mb-0">
-                                    <span id="completedSections">0</span>/6
-                                </h3>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-md-3 col-sm-6">
-                        <div class="card text-center border-0 shadow-sm h-100">
-                            <div class="card-body">
-                                <div class="text-info fs-1 mb-2">
-                                    <i class="fas fa-qrcode"></i>
-                                </div>
-                                <h5 class="card-title">QR Code</h5>
-                                <button class="btn btn-info btn-sm" onclick="showQRCode()">
-                                    <i class="fas fa-eye me-1"></i>ดู QR Code
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-md-3 col-sm-6">
-                        <div class="card text-center border-0 shadow-sm h-100">
-                            <div class="card-body">
-                                <div class="text-warning fs-1 mb-2">
-                                    <i class="fas fa-clock"></i>
-                                </div>
-                                <h5 class="card-title">อัปเดตล่าสุด</h5>
-                                <small class="text-muted" id="lastUpdate">-</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <!-- Statistics Cards -->
+            <div class="row mb-4" id="statsCards">
+                <!-- Stats will be loaded here -->
             </div>
 
             <!-- Data Sections Progress -->

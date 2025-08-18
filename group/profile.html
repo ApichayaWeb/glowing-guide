@@ -603,15 +603,16 @@
 
         async function initializePage() {
             try {
-                // Check authentication
-                if (!AuthAPI.isLoggedIn()) {
-                    window.location.href = '../login.html';
+                // Protect group page - only group managers can access
+                if (!PageProtection.protectGroupPage()) {
+                    console.error('Access denied - not group manager or not logged in');
                     return;
                 }
 
                 const user = AuthAPI.getCurrentUser();
-                if (user.role !== 'group') {
-                    AuthAPI.logout();
+                if (!user || user.role !== 'group') {
+                    Utils.showError('ไม่มีสิทธิ์', 'คุณต้องมีสิทธิ์ผู้จัดการกลุ่มเท่านั้น');
+                    setTimeout(() => window.location.href = '../login.html', 2000);
                     return;
                 }
 

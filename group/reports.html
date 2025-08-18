@@ -541,12 +541,28 @@
     <!-- Custom Scripts -->
     <script src="../assets/js/utils.js"></script>
     <script src="../assets/js/api.js"></script>
+    <script src="../assets/js/auth.js"></script>
     <script src="../assets/js/mobile-optimizations.js"></script>
     <script src="../assets/js/group-reports.js"></script>
 
     <script>
         // Initialize page on load
         document.addEventListener('DOMContentLoaded', function() {
+            // Protect group page - only group managers can access
+            if (!PageProtection.protectGroupPage()) {
+                console.error('Access denied - not group manager or not logged in');
+                return;
+            }
+            
+            const user = AuthAPI.getCurrentUser();
+            if (!user || user.role !== 'group') {
+                Utils.showError('ไม่มีสิทธิ์', 'คุณต้องมีสิทธิ์ผู้จัดการกลุ่มเท่านั้น');
+                setTimeout(() => window.location.href = '../login.html', 2000);
+                return;
+            }
+            
+            console.log('Group manager access granted for reports');
+            
             // Initialize date range picker
             initializeDateRangePicker();
             
