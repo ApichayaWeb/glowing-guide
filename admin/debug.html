@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Helper - ระบบสอบย้อนกลับผักอุดร</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center mb-5">🛠️ Debug Helper</h1>
+        
+        <!-- API Connection Test -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5><i class="fas fa-plug me-2"></i>ทดสอบการเชื่อมต่อ API</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="apiUrl" class="form-label">Google Apps Script URL:</label>
+                    <input type="text" class="form-control" id="apiUrl" 
+                           placeholder="https://script.google.com/macros/s/YOUR_ID/exec">
+                    <div class="form-text">ใส่ URL ที่ได้จาก Google Apps Script Deploy</div>
+                </div>
+                <button class="btn btn-primary" onclick="testApiConnection()">
+                    <i class="fas fa-test-tube me-2"></i>ทดสอบการเชื่อมต่อ
+                </button>
+                <div id="apiTestResult" class="mt-3"></div>
+            </div>
+        </div>
+
+        <!-- JavaScript Dependencies Test -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5><i class="fas fa-code me-2"></i>ทดสอบ JavaScript Dependencies</h5>
+            </div>
+            <div class="card-body">
+                <button class="btn btn-info" onclick="testJSDependencies()">
+                    <i class="fas fa-check-circle me-2"></i>ตรวจสอบ Dependencies
+                </button>
+                <div id="jsTestResult" class="mt-3"></div>
+            </div>
+        </div>
+
+        <!-- Login Test -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5><i class="fas fa-sign-in-alt me-2"></i>ทดสอบ Login</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="testUsername" class="form-label">Username:</label>
+                            <input type="text" class="form-control" id="testUsername" value="admin">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="testPassword" class="form-label">Password:</label>
+                            <input type="password" class="form-control" id="testPassword" value="admin_password">
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-success" onclick="testLogin()">
+                    <i class="fas fa-user-check me-2"></i>ทดสอบ Login
+                </button>
+                <div id="loginTestResult" class="mt-3"></div>
+            </div>
+        </div>
+
+        <!-- QR Code Test -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5><i class="fas fa-qrcode me-2"></i>ทดสอบ QR Code</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="testQRCode" class="form-label">QR Code:</label>
+                    <input type="text" class="form-control" id="testQRCode" value="01-4102010502568">
+                    <div class="form-text">ใส่รหัส QR Code ที่ต้องการทดสอบ</div>
+                </div>
+                <button class="btn btn-warning" onclick="testQRCode()">
+                    <i class="fas fa-search me-2"></i>ทดสอบ QR Code
+                </button>
+                <div id="qrTestResult" class="mt-3"></div>
+            </div>
+        </div>
+
+        <!-- Console Log -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5><i class="fas fa-terminal me-2"></i>Console Log</h5>
+            </div>
+            <div class="card-body">
+                <div id="consoleLog" style="background: #2d3748; color: #e2e8f0; border-radius: 4px; padding: 1rem; font-family: monospace; height: 300px; overflow-y: auto;">
+                    <!-- Console output will appear here -->
+                </div>
+                <button class="btn btn-secondary mt-2" onclick="clearConsole()">
+                    <i class="fas fa-trash me-2"></i>Clear Console
+                </button>
+            </div>
+        </div>
+
+        <!-- System Status -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5><i class="fas fa-chart-line me-2"></i>System Status</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="status-item">
+                            <div class="status-label">API Connection:</div>
+                            <div class="status-value" id="apiStatus">❓ Unknown</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="status-item">
+                            <div class="status-label">JavaScript:</div>
+                            <div class="status-value" id="jsStatus">❓ Unknown</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="status-item">
+                            <div class="status-label">Authentication:</div>
+                            <div class="status-value" id="authStatus">❓ Unknown</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="status-item">
+                            <div class="status-label">QR Scanner:</div>
+                            <div class="status-value" id="qrStatus">❓ Unknown</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.4.0/dist/axios.min.js"></script>
+    
+    <!-- Load system scripts for testing -->
+    <script src="assets/js/utils.js"></script>
+    <script src="assets/js/api.js"></script>
+    <script src="assets/js/auth.js"></script>
+
+    <style>
+        .status-item {
+            text-align: center;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+        .status-label {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        .status-value {
+            font-size: 1.2rem;
+        }
+    </style>
+
+    <script>
+        // Console logging
+        function log(message, type = 'info') {
+            const consoleEl = document.getElementById('consoleLog');
+            const timestamp = new Date().toLocaleTimeString();
+            const color = {
+                'info': '#e2e8f0',
+                'success': '#48bb78',
+                'error': '#f56565',
+                'warning': '#ed8936'
+            }[type] || '#e2e8f0';
+            
+            consoleEl.innerHTML += `<div style="color: ${color};">[${timestamp}] ${message}</div>`;
+            consoleEl.scrollTop = consoleEl.scrollHeight;
+        }
+
+        function clearConsole() {
+            document.getElementById('consoleLog').innerHTML = '';
+        }
+
+        // Test API Connection
+        async function testApiConnection() {
+            const apiUrl = document.getElementById('apiUrl').value.trim();
+            
+            if (!apiUrl) {
+                log('กรุณาใส่ API URL', 'error');
+                return;
+            }
+
+            try {
+                log('กำลังทดสอบการเชื่อมต่อ API...', 'info');
+                
+                // Update CONFIG
+                if (window.CONFIG) {
+                    window.CONFIG.API_BASE_URL = apiUrl;
+                }
+                
+                const response = await fetch(apiUrl + '?info=true');
+                const data = await response.json();
+                
+                log('✅ API Connection สำเร็จ', 'success');
+                log(`API Response: ${JSON.stringify(data)}`, 'info');
+                
+                document.getElementById('apiTestResult').innerHTML = `
+                    <div class="alert alert-success">
+                        <strong>✅ การเชื่อมต่อสำเร็จ!</strong><br>
+                        API Name: ${data.name || 'Unknown'}<br>
+                        Status: ${data.status || 'Unknown'}<br>
+                        Version: ${data.version || 'Unknown'}
+                    </div>
+                `;
+                
+                document.getElementById('apiStatus').innerHTML = '✅ Connected';
+                document.getElementById('apiStatus').className = 'status-value text-success';
+                
+            } catch (error) {
+                log(`❌ API Connection ล้มเหลว: ${error.message}`, 'error');
+                
+                document.getElementById('apiTestResult').innerHTML = `
+                    <div class="alert alert-danger">
+                        <strong>❌ การเชื่อมต่อล้มเหลว!</strong><br>
+                        Error: ${error.message}<br>
+                        ตรวจสอบ URL และ CORS settings
+                    </div>
+                `;
+                
+                document.getElementById('apiStatus').innerHTML = '❌ Failed';
+                document.getElementById('apiStatus').className = 'status-value text-danger';
+            }
+        }
+
+        // Test JavaScript Dependencies
+        function testJSDependencies() {
+            log('กำลังตรวจสอบ JavaScript Dependencies...', 'info');
+            
+            const dependencies = [
+                { name: 'Utils', object: window.Utils },
+                { name: 'CONFIG', object: window.CONFIG },
+                { name: 'Storage', object: window.Storage },
+                { name: 'API', object: window.API },
+                { name: 'AuthAPI', object: window.AuthAPI },
+                { name: 'QRAPI', object: window.QRAPI },
+                { name: 'AdminAPI', object: window.AdminAPI },
+                { name: 'GroupAPI', object: window.GroupAPI },
+                { name: 'FarmerAPI', object: window.FarmerAPI }
+            ];
+            
+            let allPassed = true;
+            let resultHtml = '<div class="list-group">';
+            
+            dependencies.forEach(dep => {
+                const exists = typeof dep.object !== 'undefined';
+                const status = exists ? '✅' : '❌';
+                const className = exists ? 'list-group-item-success' : 'list-group-item-danger';
+                
+                if (!exists) allPassed = false;
+                
+                resultHtml += `
+                    <div class="list-group-item ${className}">
+                        ${status} ${dep.name} ${exists ? 'โหลดแล้ว' : 'ไม่พบ'}
+                    </div>
+                `;
+                
+                log(`${status} ${dep.name}: ${exists ? 'โหลดแล้ว' : 'ไม่พบ'}`, exists ? 'success' : 'error');
+            });
+            
+            resultHtml += '</div>';
+            document.getElementById('jsTestResult').innerHTML = resultHtml;
+            
+            if (allPassed) {
+                document.getElementById('jsStatus').innerHTML = '✅ All Loaded';
+                document.getElementById('jsStatus').className = 'status-value text-success';
+                log('✅ JavaScript Dependencies ทั้งหมดโหลดเรียบร้อย', 'success');
+            } else {
+                document.getElementById('jsStatus').innerHTML = '❌ Missing';
+                document.getElementById('jsStatus').className = 'status-value text-danger';
+                log('❌ JavaScript Dependencies บางตัวไม่พบ', 'error');
+            }
+        }
+
+        // Test Login
+        async function testLogin() {
+            const username = document.getElementById('testUsername').value.trim();
+            const password = document.getElementById('testPassword').value.trim();
+            
+            if (!username || !password) {
+                log('กรุณาใส่ username และ password', 'error');
+                return;
+            }
+
+            try {
+                log(`กำลังทดสอบ Login: ${username}`, 'info');
+                
+                // Check if AuthAPI exists
+                if (!window.AuthAPI) {
+                    throw new Error('AuthAPI ไม่พบ - ตรวจสอบการโหลด auth.js');
+                }
+                
+                const user = await window.AuthAPI.login(username, password);
+                
+                log('✅ Login สำเร็จ', 'success');
+                log(`User: ${JSON.stringify(user)}`, 'info');
+                
+                document.getElementById('loginTestResult').innerHTML = `
+                    <div class="alert alert-success">
+                        <strong>✅ Login สำเร็จ!</strong><br>
+                        Username: ${user.username}<br>
+                        Role: ${user.role}<br>
+                        Group ID: ${user.groupId || 'N/A'}
+                    </div>
+                `;
+                
+                document.getElementById('authStatus').innerHTML = '✅ Working';
+                document.getElementById('authStatus').className = 'status-value text-success';
+                
+            } catch (error) {
+                log(`❌ Login ล้มเหลว: ${error.message}`, 'error');
+                
+                document.getElementById('loginTestResult').innerHTML = `
+                    <div class="alert alert-danger">
+                        <strong>❌ Login ล้มเหลว!</strong><br>
+                        Error: ${error.message}
+                    </div>
+                `;
+                
+                document.getElementById('authStatus').innerHTML = '❌ Failed';
+                document.getElementById('authStatus').className = 'status-value text-danger';
+            }
+        }
+
+        // Test QR Code
+        async function testQRCode() {
+            const qrCode = document.getElementById('testQRCode').value.trim();
+            
+            if (!qrCode) {
+                log('กรุณาใส่ QR Code', 'error');
+                return;
+            }
+
+            try {
+                log(`กำลังทดสอบ QR Code: ${qrCode}`, 'info');
+                
+                // Check if QRAPI exists
+                if (!window.QRAPI) {
+                    throw new Error('QRAPI ไม่พบ - ตรวจสอบการโหลด api.js');
+                }
+                
+                // Validate QR Code format
+                if (!window.Utils || !window.Utils.validateQRCode(qrCode)) {
+                    throw new Error('รูปแบบ QR Code ไม่ถูกต้อง');
+                }
+                
+                const result = await window.QRAPI.searchByQRCode(qrCode);
+                
+                if (result.success) {
+                    log('✅ QR Code ค้นหาสำเร็จ', 'success');
+                    log(`Data: ${JSON.stringify(result.data)}`, 'info');
+                    
+                    document.getElementById('qrTestResult').innerHTML = `
+                        <div class="alert alert-success">
+                            <strong>✅ QR Code ใช้งานได้!</strong><br>
+                            QR Code: ${result.data.qrCode}<br>
+                            Group: ${result.data.groupName}<br>
+                            Farmer: ${result.data.farmerName}
+                        </div>
+                    `;
+                    
+                    document.getElementById('qrStatus').innerHTML = '✅ Working';
+                    document.getElementById('qrStatus').className = 'status-value text-success';
+                } else {
+                    throw new Error(result.message || 'ไม่พบข้อมูล QR Code');
+                }
+                
+            } catch (error) {
+                log(`❌ QR Code ทดสอบล้มเหลว: ${error.message}`, 'error');
+                
+                document.getElementById('qrTestResult').innerHTML = `
+                    <div class="alert alert-warning">
+                        <strong>⚠️ QR Code ทดสอบล้มเหลว!</strong><br>
+                        Error: ${error.message}<br>
+                        อาจเป็นเพราะยังไม่มีข้อมูลในระบบ
+                    </div>
+                `;
+                
+                document.getElementById('qrStatus').innerHTML = '⚠️ No Data';
+                document.getElementById('qrStatus').className = 'status-value text-warning';
+            }
+        }
+
+        // Auto-run basic tests on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            log('🚀 Debug Helper เริ่มทำงาน', 'info');
+            
+            // Auto-detect API URL from CONFIG
+            if (window.CONFIG && window.CONFIG.API_BASE_URL) {
+                document.getElementById('apiUrl').value = window.CONFIG.API_BASE_URL;
+                log(`📋 พบ API URL ใน CONFIG: ${window.CONFIG.API_BASE_URL}`, 'info');
+            }
+            
+            // Auto-test JS dependencies
+            setTimeout(() => {
+                testJSDependencies();
+            }, 1000);
+        });
+
+        // Check camera support
+        function checkCameraSupport() {
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                log('✅ Camera API รองรับ', 'success');
+                return true;
+            } else {
+                log('❌ Camera API ไม่รองรับ', 'error');
+                return false;
+            }
+        }
+
+        // Global error handler
+        window.addEventListener('error', function(event) {
+            log(`❌ JavaScript Error: ${event.error.message} in ${event.filename}:${event.lineno}`, 'error');
+        });
+
+        // Unhandled promise rejection handler
+        window.addEventListener('unhandledrejection', function(event) {
+            log(`❌ Unhandled Promise Rejection: ${event.reason}`, 'error');
+        });
+
+        // Console override to capture logs
+        const originalConsole = {
+            log: console.log,
+            error: console.error,
+            warn: console.warn
+        };
+
+        console.log = function(...args) {
+            log(args.join(' '), 'info');
+            originalConsole.log.apply(console, args);
+        };
+
+        console.error = function(...args) {
+            log(args.join(' '), 'error');
+            originalConsole.error.apply(console, args);
+        };
+
+        console.warn = function(...args) {
+            log(args.join(' '), 'warning');
+            originalConsole.warn.apply(console, args);
+        };
+    </script>
+</body>
+</html>
