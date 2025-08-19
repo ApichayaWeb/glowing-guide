@@ -619,8 +619,8 @@ if (!window.location.hostname.includes('script.google.com')) {
     API.makeRequest = async function(endpoint, data) {
         console.log('Mock API called:', endpoint, data);
         
-        // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Simulate network delay (reduced for better UX)
+        await new Promise(resolve => setTimeout(resolve, 300));
         
         switch (endpoint) {
             case 'createGroup':
