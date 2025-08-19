@@ -140,10 +140,10 @@
                                                         </h6>
                                                         <p class="small mb-2">
                                                             <strong>Username:</strong> admin<br>
-                                                            <strong>Password:</strong> admin_password
+                                                            <strong>Password:</strong> admin123
                                                         </p>
                                                         <button class="btn btn-outline-danger btn-sm" 
-                                                                onclick="fillLogin('admin', 'admin_password')">
+                                                                onclick="fillLogin('admin', 'admin123')">
                                                             ใช้บัญชีนี้
                                                         </button>
                                                     </div>
@@ -569,7 +569,7 @@
             // Mock user database for testing
             const testUsers = {
                 'admin': {
-                    password: 'admin_password',
+                    password: 'admin123',
                     role: 'admin',
                     fullName: 'System Administrator',
                     groupId: null
@@ -601,35 +601,49 @@
             return null;
         }
         
-        // Mock API response for testing (replace with real API endpoint)
-        const originalMakeRequest = API.makeRequest;
-        API.makeRequest = async function(endpoint, data) {
-            if (endpoint === 'login') {
-                console.log('Mock API login called with:', data.username);
-                
-                // Simulate network delay
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                
-                // Validate credentials using mock user database
-                const user = validateAndMapCredentials(data.username, data.password);
-                
-                if (!user) {
-                    return {
-                        success: false,
-                        message: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง'
-                    };
-                }
-                
-                return {
-                    success: true,
-                    user: user,
-                    token: 'token_' + Date.now()
-                };
-            }
+        // Setup Mock API IMMEDIATELY when script loads
+        (function setupMockAPI() {
+            console.log('Setting up Mock API for testing...');
             
-            // For other endpoints, use original function (or implement as needed)
-            return originalMakeRequest.call(this, endpoint, data);
-        };
+            if (typeof API !== 'undefined' && API.makeRequest) {
+                const originalMakeRequest = API.makeRequest;
+                
+                API.makeRequest = async function(endpoint, data) {
+                    if (endpoint === 'login') {
+                        console.log('Mock API login called with:', data.username);
+                        
+                        // Simulate network delay
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                        
+                        // Validate credentials using mock user database
+                        const user = validateAndMapCredentials(data.username, data.password);
+                        
+                        if (!user) {
+                            console.log('Mock API: User not found or invalid password');
+                            return {
+                                success: false,
+                                message: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง'
+                            };
+                        }
+                        
+                        console.log('Mock API: Login successful for user:', user);
+                        return {
+                            success: true,
+                            user: user,
+                            token: 'token_' + Date.now()
+                        };
+                    }
+                    
+                    // For other endpoints, use original function (or implement as needed)
+                    return originalMakeRequest.call(this, endpoint, data);
+                };
+                
+                console.log('Mock API setup completed');
+            } else {
+                console.warn('API object not found, retrying Mock API setup...');
+                setTimeout(setupMockAPI, 100);
+            }
+        })();
     </script>
 </body>
 </html>
