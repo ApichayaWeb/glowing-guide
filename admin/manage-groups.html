@@ -85,7 +85,7 @@
 
             <!-- Statistics Row -->
             <div class="row mb-4">
-                <div class="col-lg-3 col-md-6 mb-3">
+                <div class="col-lg-4 col-md-6 mb-3">
                     <div class="card border-left-success">
                         <div class="card-body">
                             <div class="row align-items-center">
@@ -102,7 +102,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-3 col-md-6 mb-3">
+                <div class="col-lg-4 col-md-6 mb-3">
                     <div class="card border-left-info">
                         <div class="card-body">
                             <div class="row align-items-center">
@@ -119,7 +119,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-3 col-md-6 mb-3">
+                <div class="col-lg-4 col-md-6 mb-3">
                     <div class="card border-left-warning">
                         <div class="card-body">
                             <div class="row align-items-center">
@@ -131,23 +131,6 @@
                                 </div>
                                 <div class="col-auto">
                                     <i class="fas fa-qrcode fa-2x text-warning"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6 mb-3">
-                    <div class="card border-left-danger">
-                        <div class="card-body">
-                            <div class="row align-items-center">
-                                <div class="col">
-                                    <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
-                                        รหัสค้นหา
-                                    </div>
-                                    <div class="h5 mb-0 font-weight-bold text-gray-800" id="totalSearchCodes">-</div>
-                                </div>
-                                <div class="col-auto">
-                                    <i class="fas fa-search fa-2x text-danger"></i>
                                 </div>
                             </div>
                         </div>
@@ -211,22 +194,25 @@
                 </div>
                 <form id="addGroupForm">
                     <div class="modal-body">
+                        <div class="alert alert-info mb-4">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>หมายเหตุ:</strong> รหัสกลุ่มจะถูกสร้างอัตโนมัติ (01, 02, 03...) ผู้จัดการสามารถเปลี่ยนรหัสผ่านได้ภายหลัง
+                        </div>
                         <div class="row">
-                            <div class="col-md-6 mb-3">
+                            <div class="col-12 mb-3">
                                 <label for="groupName" class="form-label">ชื่อกลุ่มเกษตรกร *</label>
-                                <input type="text" class="form-control" id="groupName" required>
+                                <input type="text" class="form-control" id="groupName" required 
+                                       placeholder="เช่น กลุ่มเกษตรกรผักปลอดสารอุดรธานี">
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="managerName" class="form-label">ชื่อผู้จัดการ *</label>
-                                <input type="text" class="form-control" id="managerName" required>
+                                <label for="managerUsername" class="form-label">Username ผู้จัดการ *</label>
+                                <input type="text" class="form-control" id="managerUsername" required 
+                                       placeholder="group01_manager">
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="managerPhone" class="form-label">เบอร์โทรศัพท์ *</label>
-                                <input type="tel" class="form-control" id="managerPhone" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="managerEmail" class="form-label">อีเมล (ถ้ามี)</label>
-                                <input type="email" class="form-control" id="managerEmail">
+                                <label for="managerPassword" class="form-label">รหัสผ่านเบื้องต้น *</label>
+                                <input type="password" class="form-control" id="managerPassword" required 
+                                       placeholder="กรอกรหัสผ่าน" minlength="6">
                             </div>
                         </div>
                     </div>
@@ -348,6 +334,8 @@
         .main-content {
             padding-top: 100px;
             padding-bottom: 2rem;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
         }
 
         .page-header {
@@ -519,17 +507,14 @@
             // Calculate total farmers and QR codes
             let totalFarmers = 0;
             let totalQRCodes = 0;
-            let totalSearchCodes = 0;
             
             result.groups.forEach(group => {
                 totalFarmers += group.statistics.totalFarmers;
                 totalQRCodes += group.statistics.totalQRCodes;
-                totalSearchCodes += group.statistics.totalSearchCodes;
             });
             
             document.getElementById('totalFarmers').textContent = totalFarmers;
             document.getElementById('totalQRCodes').textContent = totalQRCodes;
-            document.getElementById('totalSearchCodes').textContent = totalSearchCodes;
         }
 
         // Show add group modal
@@ -544,12 +529,17 @@
             
             const formData = {
                 groupName: document.getElementById('groupName').value.trim(),
-                managerName: document.getElementById('managerName').value.trim(),
-                managerPhone: document.getElementById('managerPhone').value.trim()
+                managerUsername: document.getElementById('managerUsername').value.trim(),
+                managerPassword: document.getElementById('managerPassword').value.trim()
             };
             
-            if (!formData.groupName || !formData.managerName || !formData.managerPhone) {
+            if (!formData.groupName || !formData.managerUsername || !formData.managerPassword) {
                 Utils.showWarning('ข้อมูลไม่ครบ', 'กรุณากรอกข้อมูลให้ครบถ้วน');
+                return;
+            }
+            
+            if (formData.managerPassword.length < 6) {
+                Utils.showWarning('รหัสผ่านสั้นเกินไป', 'รหัสผ่านต้องมีความยาวอย่างน้อย 6 ตัวอักษร');
                 return;
             }
 
@@ -661,19 +651,11 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-6">
-                                <div class="card border-warning">
-                                    <div class="card-body text-center">
-                                        <h4 class="text-warning">${group.statistics.totalSearchCodes}</h4>
-                                        <small class="text-muted">รหัสค้นหา</small>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-6">
+                            <div class="col-12">
                                 <div class="card border-secondary">
                                     <div class="card-body text-center">
                                         <h4 class="text-secondary">100%</h4>
-                                        <small class="text-muted">ความสมบูรณ์</small>
+                                        <small class="text-muted">ความสมบูรณ์ข้อมูล</small>
                                     </div>
                                 </div>
                             </div>
