@@ -9,8 +9,6 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Chart.js -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.min.css">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="../assets/css/main.css">
 </head>
@@ -85,87 +83,55 @@
                 <!-- Stats will be loaded here -->
             </div>
 
-            <!-- Charts Row -->
+
+            <!-- Quick Actions -->
             <div class="row mb-4">
-                <!-- Groups Chart -->
-                <div class="col-lg-6 mb-4">
-                    <div class="card h-100">
-                        <div class="card-header bg-light">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header bg-gradient text-white">
                             <h5 class="mb-0">
-                                <i class="fas fa-users me-2 text-success"></i>
-                                สถิติกลุ่มเกษตรกร
+                                <i class="fas fa-bolt me-2"></i>
+                                เมนูการจัดการระบบ
                             </h5>
                         </div>
                         <div class="card-body">
-                            <canvas id="groupsChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Activity Chart -->
-                <div class="col-lg-6 mb-4">
-                    <div class="card h-100">
-                        <div class="card-header bg-light">
-                            <h5 class="mb-0">
-                                <i class="fas fa-chart-line me-2 text-success"></i>
-                                กิจกรรมรายเดือน
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <canvas id="activityChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Recent Activity and Quick Actions -->
-            <div class="row">
-                <!-- Recent Activity -->
-                <div class="col-lg-8 mb-4">
-                    <div class="card h-100">
-                        <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0">
-                                <i class="fas fa-history me-2 text-success"></i>
-                                กิจกรรมล่าสุด
-                            </h5>
-                            <button class="btn btn-sm btn-outline-success" onclick="refreshActivity()">
-                                <i class="fas fa-sync-alt me-1"></i>รีเฟรช
-                            </button>
-                        </div>
-                        <div class="card-body">
-                            <div class="activity-list" id="activityList">
-                                <!-- Activity items will be loaded here -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Quick Actions -->
-                <div class="col-lg-4 mb-4">
-                    <div class="card h-100">
-                        <div class="card-header bg-light">
-                            <h5 class="mb-0">
-                                <i class="fas fa-bolt me-2 text-success"></i>
-                                เมนูด่วน
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="d-grid gap-3">
-                                <a href="#" class="btn btn-success" onclick="showAddGroupModal()">
-                                    <i class="fas fa-plus me-2"></i>เพิ่มกลุ่มเกษตรกร
-                                </a>
-                                <a href="manage-groups.html" class="btn btn-outline-primary">
-                                    <i class="fas fa-users me-2"></i>จัดการกลุ่ม
-                                </a>
-                                <a href="reports.html" class="btn btn-outline-info">
-                                    <i class="fas fa-chart-bar me-2"></i>ดูรายงาน
-                                </a>
-                                <a href="#" class="btn btn-outline-warning" onclick="exportData()">
-                                    <i class="fas fa-download me-2"></i>ส่งออกข้อมูล
-                                </a>
-                                <a href="#" class="btn btn-outline-secondary" onclick="systemSettings()">
-                                    <i class="fas fa-cog me-2"></i>ตั้งค่าระบบ
-                                </a>
+                            <div class="row g-3">
+                                <div class="col-lg-3 col-md-6">
+                                    <div class="action-card" onclick="showAddGroupModal()">
+                                        <div class="action-icon bg-success">
+                                            <i class="fas fa-plus"></i>
+                                        </div>
+                                        <h6 class="action-title">เพิ่มกลุ่มเกษตรกร</h6>
+                                        <p class="action-desc">สร้างกลุ่มใหม่และเพิ่มผู้จัดการ</p>
+                                    </div>
+                                </div>
+                                <div class="col-lg-3 col-md-6">
+                                    <div class="action-card" onclick="window.location.href='manage-groups.html'">
+                                        <div class="action-icon bg-primary">
+                                            <i class="fas fa-users"></i>
+                                        </div>
+                                        <h6 class="action-title">จัดการกลุ่ม</h6>
+                                        <p class="action-desc">แก้ไขและจัดการข้อมูลกลุ่ม</p>
+                                    </div>
+                                </div>
+                                <div class="col-lg-3 col-md-6">
+                                    <div class="action-card" onclick="window.location.href='reports.html'">
+                                        <div class="action-icon bg-info">
+                                            <i class="fas fa-chart-bar"></i>
+                                        </div>
+                                        <h6 class="action-title">รายงานระบบ</h6>
+                                        <p class="action-desc">ดูรายงานและสถิติการใช้งาน</p>
+                                    </div>
+                                </div>
+                                <div class="col-lg-3 col-md-6">
+                                    <div class="action-card" onclick="exportData()">
+                                        <div class="action-icon bg-warning">
+                                            <i class="fas fa-download"></i>
+                                        </div>
+                                        <h6 class="action-title">ส่งออกข้อมูล</h6>
+                                        <p class="action-desc">ดาวน์โหลดข้อมูลในระบบ</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -314,8 +280,6 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.min.js"></script>
     <!-- Axios for API calls -->
     <script src="https://cdn.jsdelivr.net/npm/axios@1.4.0/dist/axios.min.js"></script>
     <!-- SweetAlert2 -->
@@ -330,63 +294,149 @@
         .main-content {
             padding-top: 100px;
             padding-bottom: 2rem;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
         }
 
         .page-header {
-            border-bottom: 2px solid #e9ecef;
-            padding-bottom: 1rem;
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
         }
 
         .stats-card {
             transition: all 0.3s ease;
             cursor: pointer;
+            border: none;
+            border-radius: 15px;
+            overflow: hidden;
+            background: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
 
         .stats-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            transform: translateY(-8px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
         }
 
         .stats-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            color: white;
+            margin-bottom: 1rem;
+        }
+
+        .bg-purple {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .bg-gradient {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        }
+
+        .action-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            height: 100%;
+            border: 2px solid transparent;
+        }
+
+        .action-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+            border-color: #28a745;
+        }
+
+        .action-icon {
             width: 60px;
             height: 60px;
-            border-radius: 50%;
+            border-radius: 15px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 1.5rem;
             color: white;
+            margin: 0 auto 1rem;
         }
 
-        .activity-item {
-            display: flex;
-            align-items: center;
-            padding: 0.75rem 0;
+        .action-title {
+            color: #2d3748;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .action-desc {
+            color: #718096;
+            font-size: 0.9rem;
+            margin-bottom: 0;
+        }
+
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .card-header {
+            border: none;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 1.5rem;
+        }
+
+        .table-responsive {
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .table th {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border: none;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .table td {
+            border: none;
+            vertical-align: middle;
+            padding: 1rem 0.75rem;
+        }
+
+        .table tbody tr {
             border-bottom: 1px solid #f8f9fa;
         }
 
-        .activity-item:last-child {
-            border-bottom: none;
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
         }
 
-        .activity-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 1rem;
-            font-size: 0.875rem;
+        .btn {
+            border-radius: 10px;
+            font-weight: 500;
+            transition: all 0.3s ease;
         }
 
-        .activity-content {
-            flex: 1;
+        .btn:hover {
+            transform: translateY(-2px);
         }
 
-        .activity-time {
-            font-size: 0.75rem;
-            color: #6c757d;
+        .badge {
+            border-radius: 8px;
+            font-size: 0.8rem;
+            padding: 0.5rem 0.8rem;
         }
 
         @media (max-width: 768px) {
@@ -397,13 +447,19 @@
             .stats-card {
                 margin-bottom: 1rem;
             }
+
+            .action-card {
+                margin-bottom: 1rem;
+            }
+
+            .page-header {
+                padding: 1.5rem;
+            }
         }
     </style>
 
     <script>
         // Global variables
-        let groupsChart = null;
-        let activityChart = null;
         let systemStats = null;
 
         // Initialize dashboard
@@ -549,8 +605,6 @@
                 if (statsResult.success) {
                     systemStats = statsResult.statistics;
                     displayStatistics(systemStats);
-                    createCharts(systemStats);
-                    displayRecentActivity(systemStats.recentActivity);
                 }
                 
                 // Load recent groups
@@ -597,11 +651,11 @@
                     link: '#'
                 },
                 {
-                    title: 'รหัสค้นหาเชิงลึก',
-                    value: stats.totalSearchCodes,
-                    subtitle: 'สำหรับตรวจสอบ',
-                    icon: 'fas fa-search',
-                    color: 'bg-danger',
+                    title: 'ข้อมูลผลิตภัณฑ์',
+                    value: stats.totalProducts || 0,
+                    subtitle: 'ผลิตภัณฑ์ในระบบ',
+                    icon: 'fas fa-box',
+                    color: 'bg-purple',
                     link: '#'
                 }
             ];
@@ -635,141 +689,7 @@
             statsContainer.innerHTML = html;
         }
 
-        // Create charts
-        function createCharts(stats) {
-            createGroupsChart();
-            createActivityChart();
-        }
 
-        // Create groups chart
-        function createGroupsChart() {
-            const ctx = document.getElementById('groupsChart').getContext('2d');
-            
-            groupsChart = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['กลุ่มที่เปิดใช้งาน', 'กลุ่มที่ปิดใช้งาน'],
-                    datasets: [{
-                        data: [systemStats.activeGroups, systemStats.totalGroups - systemStats.activeGroups],
-                        backgroundColor: ['#198754', '#6c757d'],
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
-                        }
-                    }
-                }
-            });
-        }
-
-        // Create activity chart
-        function createActivityChart() {
-            const ctx = document.getElementById('activityChart').getContext('2d');
-            
-            // Mock data for demonstration
-            const monthlyData = {
-                labels: ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.'],
-                datasets: [{
-                    label: 'QR Code ใหม่',
-                    data: [12, 19, 15, 25, 22, 30],
-                    borderColor: '#198754',
-                    backgroundColor: 'rgba(25, 135, 84, 0.1)',
-                    tension: 0.4
-                }, {
-                    label: 'เกษตรกรใหม่',
-                    data: [8, 12, 10, 15, 18, 20],
-                    borderColor: '#0dcaf0',
-                    backgroundColor: 'rgba(13, 202, 240, 0.1)',
-                    tension: 0.4
-                }]
-            };
-            
-            activityChart = new Chart(ctx, {
-                type: 'line',
-                data: monthlyData,
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
-                }
-            });
-        }
-
-        // Display recent activity
-        function displayRecentActivity(activities) {
-            const activityContainer = document.getElementById('activityList');
-            
-            if (!activities || activities.length === 0) {
-                activityContainer.innerHTML = `
-                    <div class="text-center text-muted py-4">
-                        <i class="fas fa-history mb-2"></i>
-                        <p>ไม่มีกิจกรรมล่าสุด</p>
-                    </div>
-                `;
-                return;
-            }
-
-            let html = '';
-            activities.forEach(activity => {
-                const iconClass = getActivityIcon(activity.type);
-                const timeAgo = getTimeAgo(activity.timestamp);
-                
-                html += `
-                    <div class="activity-item">
-                        <div class="activity-icon bg-success text-white">
-                            <i class="${iconClass}"></i>
-                        </div>
-                        <div class="activity-content">
-                            <div class="fw-medium">${activity.description}</div>
-                            <div class="activity-time">${timeAgo}</div>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            activityContainer.innerHTML = html;
-        }
-
-        // Get activity icon
-        function getActivityIcon(type) {
-            const icons = {
-                'login': 'fas fa-sign-in-alt',
-                'qr_code': 'fas fa-qrcode',
-                'farmer_add': 'fas fa-user-plus',
-                'group_add': 'fas fa-users'
-            };
-            return icons[type] || 'fas fa-circle';
-        }
-
-        // Get time ago
-        function getTimeAgo(timestamp) {
-            const now = new Date();
-            const time = new Date(timestamp);
-            const diff = now - time;
-            
-            const minutes = Math.floor(diff / 60000);
-            const hours = Math.floor(diff / 3600000);
-            const days = Math.floor(diff / 86400000);
-            
-            if (days > 0) return `${days} วันที่แล้ว`;
-            if (hours > 0) return `${hours} ชั่วโมงที่แล้ว`;
-            if (minutes > 0) return `${minutes} นาทีที่แล้ว`;
-            return 'เมื่อสักครู่';
-        }
 
         // Display recent groups
         function displayRecentGroups(groups) {
@@ -916,20 +836,12 @@
             window.location.href = `manage-groups.html?group=${groupId}`;
         }
 
-        // Refresh activity
-        function refreshActivity() {
-            loadDashboardData();
-        }
 
         // Export data
         function exportData() {
             Utils.showSuccess('ส่งออกข้อมูล', 'ฟีเจอร์นี้จะเปิดใช้งานในเร็วๆ นี้');
         }
 
-        // System settings
-        function systemSettings() {
-            Utils.showSuccess('ตั้งค่าระบบ', 'ฟีเจอร์นี้จะเปิดใช้งานในเร็วๆ นี้');
-        }
     </script>
 </body>
 </html>
