@@ -346,8 +346,8 @@ const AdminAPI = {
     async createGroup(groupData) {
         return await API.makeRequest('createGroup', {
             groupName: Utils.sanitizeInput(groupData.groupName),
-            managerName: Utils.sanitizeInput(groupData.managerName),
-            managerPhone: Utils.sanitizeInput(groupData.managerPhone)
+            managerUsername: Utils.sanitizeInput(groupData.managerUsername),
+            managerPassword: groupData.managerPassword // Don't sanitize password as it might alter it
         });
     },
 
@@ -609,3 +609,85 @@ window.FarmerAPI = FarmerAPI;
 window.ReportAPI = ReportAPI;
 window.handleAPIError = handleAPIError;
 window.apiCall = apiCall;
+
+// Mock API for development/testing (remove when real API is ready)
+if (!window.location.hostname.includes('script.google.com')) {
+    console.log('Setting up Mock API for testing...');
+    
+    // Override API.makeRequest for testing
+    const originalMakeRequest = API.makeRequest;
+    API.makeRequest = async function(endpoint, data) {
+        console.log('Mock API called:', endpoint, data);
+        
+        // Simulate network delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        switch (endpoint) {
+            case 'createGroup':
+                // Generate auto group code
+                const existingGroups = JSON.parse(localStorage.getItem('mockGroups') || '[]');
+                const nextGroupNumber = (existingGroups.length + 1).toString().padStart(2, '0');
+                const groupCode = nextGroupNumber;
+                
+                const newGroup = {
+                    groupId: 'group_' + Date.now(),
+                    groupCode: groupCode,
+                    groupName: data.groupName,
+                    managerUsername: data.managerUsername,
+                    status: 'active',
+                    created: new Date().toISOString(),
+                    statistics: {
+                        totalFarmers: 0,
+                        totalQRCodes: 0
+                    }
+                };
+                
+                existingGroups.push(newGroup);
+                localStorage.setItem('mockGroups', JSON.stringify(existingGroups));
+                
+                console.log('Mock API: Group created successfully', newGroup);
+                return {
+                    success: true,
+                    message: 'สร้างกลุ่มเรียบร้อยแล้ว',
+                    group: newGroup
+                };
+                
+            case 'getAllGroups':
+                const groups = JSON.parse(localStorage.getItem('mockGroups') || '[]');
+                return {
+                    success: true,
+                    groups: groups,
+                    totalGroups: groups.length,
+                    activeGroups: groups.filter(g => g.status === 'active').length
+                };
+                
+            case 'getSystemStats':
+                const allGroups = JSON.parse(localStorage.getItem('mockGroups') || '[]');
+                let totalFarmers = 0;
+                let totalQRCodes = 0;
+                
+                allGroups.forEach(group => {
+                    totalFarmers += group.statistics.totalFarmers;
+                    totalQRCodes += group.statistics.totalQRCodes;
+                });
+                
+                return {
+                    success: true,
+                    statistics: {
+                        totalGroups: allGroups.length,
+                        activeGroups: allGroups.filter(g => g.status === 'active').length,
+                        totalFarmers: totalFarmers,
+                        activeFarmers: totalFarmers,
+                        totalQRCodes: totalQRCodes
+                    },
+                    recentActivity: []
+                };
+                
+            default:
+                console.log('Mock API: Calling original API for endpoint:', endpoint);
+                return originalMakeRequest.call(this, endpoint, data);
+        }
+    };
+    
+    console.log('Mock API setup completed');
+}
