@@ -564,9 +564,12 @@
 
         // Validate test credentials and provide proper mapping
         function validateAndMapCredentials(username, password) {
-            console.log('Validating credentials for:', username);
+            console.log('=== CREDENTIAL VALIDATION ===');
+            console.log('Validating credentials for username:', username);
+            console.log('Password provided:', password ? '[PROVIDED]' : '[MISSING]');
+            console.log('Password length:', password ? password.length : 0);
             
-            // Mock user database for testing
+            // Mock user database for testing - EXACT MATCH REQUIRED
             const testUsers = {
                 'admin': {
                     password: 'admin123',
@@ -588,59 +591,106 @@
                 }
             };
             
+            console.log('Available test users:', Object.keys(testUsers));
+            console.log('Looking for user:', username);
+            
             const user = testUsers[username];
-            if (user && user.password === password) {
-                return {
-                    username: username,
-                    role: user.role,
-                    fullName: user.fullName,
-                    groupId: user.groupId
-                };
+            console.log('Found user object:', user);
+            
+            if (user) {
+                console.log('Expected password:', user.password);
+                console.log('Provided password:', password);
+                console.log('Password match:', user.password === password);
+                
+                if (user.password === password) {
+                    const result = {
+                        username: username,
+                        role: user.role,
+                        fullName: user.fullName,
+                        groupId: user.groupId
+                    };
+                    console.log('=== VALIDATION SUCCESS ===');
+                    console.log('Returning user data:', result);
+                    return result;
+                }
             }
             
+            console.log('=== VALIDATION FAILED ===');
+            console.log('No matching user found or password mismatch');
             return null;
         }
         
         // Setup Mock API IMMEDIATELY when script loads
         (function setupMockAPI() {
-            console.log('Setting up Mock API for testing...');
+            console.log('=== Setting up Mock API for testing ===');
             
             if (typeof API !== 'undefined' && API.makeRequest) {
-                const originalMakeRequest = API.makeRequest;
+                console.log('API object found, setting up mock...');
+                console.log('Original API.makeRequest:', typeof API.makeRequest);
+                
+                const originalMakeRequest = API.makeRequest.bind(API);
                 
                 API.makeRequest = async function(endpoint, data) {
+                    console.log('=== API.makeRequest called ===');
+                    console.log('Endpoint:', endpoint);
+                    console.log('Data:', data);
+                    
                     if (endpoint === 'login') {
-                        console.log('Mock API login called with:', data.username);
+                        console.log('=== MOCK LOGIN INTERCEPT ===');
+                        console.log('Mock API login called with username:', data.username);
+                        console.log('Mock API login called with password:', data.password ? '[PROVIDED]' : '[MISSING]');
                         
                         // Simulate network delay
                         await new Promise(resolve => setTimeout(resolve, 1000));
                         
                         // Validate credentials using mock user database
                         const user = validateAndMapCredentials(data.username, data.password);
+                        console.log('validateAndMapCredentials result:', user);
                         
                         if (!user) {
-                            console.log('Mock API: User not found or invalid password');
-                            return {
+                            console.log('=== MOCK LOGIN FAILED ===');
+                            const errorResponse = {
                                 success: false,
                                 message: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง'
                             };
+                            console.log('Returning error response:', errorResponse);
+                            return errorResponse;
                         }
                         
-                        console.log('Mock API: Login successful for user:', user);
-                        return {
+                        console.log('=== MOCK LOGIN SUCCESS ===');
+                        const successResponse = {
                             success: true,
                             user: user,
                             token: 'token_' + Date.now()
                         };
+                        console.log('Returning success response:', successResponse);
+                        return successResponse;
                     }
                     
-                    // For other endpoints, use original function (or implement as needed)
+                    // For other endpoints, use original function
+                    console.log('Non-login endpoint, calling original API');
                     return originalMakeRequest.call(this, endpoint, data);
                 };
                 
-                console.log('Mock API setup completed');
+                console.log('=== Mock API setup completed successfully ===');
+                console.log('API.makeRequest is now:', typeof API.makeRequest);
+                
+                // Test the mock setup
+                console.log('Testing mock setup...');
+                API.makeRequest('login', { username: 'admin', password: 'admin123' })
+                    .then(result => {
+                        console.log('Mock test result:', result);
+                    })
+                    .catch(error => {
+                        console.error('Mock test error:', error);
+                    });
+                
             } else {
-                console.warn('API object not found, retrying Mock API setup...');
+                console.warn('API object not found yet, retrying in 100ms...');
+                console.log('typeof API:', typeof API);
+                if (typeof API !== 'undefined') {
+                    console.log('API.makeRequest:', typeof API.makeRequest);
+                }
                 setTimeout(setupMockAPI, 100);
             }
         })();
