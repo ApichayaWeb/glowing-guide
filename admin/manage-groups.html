@@ -15,44 +15,93 @@
     <link rel="stylesheet" href="../assets/css/main.css">
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-success fixed-top">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="../index.html">
-                <i class="fas fa-leaf me-2"></i>
-                ระบบสอบย้อนกลับผักอุดร
+    <!-- Enhanced Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top custom-navbar">
+        <div class="container-fluid px-4">
+            <!-- Brand -->
+            <a class="navbar-brand d-flex align-items-center" href="../index.html">
+                <div class="brand-icon me-3">
+                    <i class="fas fa-leaf"></i>
+                </div>
+                <div class="brand-text">
+                    <div class="brand-title">ระบบสอบย้อนกลับผักอุดร</div>
+                    <div class="brand-subtitle">Admin Dashboard</div>
+                </div>
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+
+            <!-- Mobile Toggle -->
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
+
+            <!-- Navigation Items -->
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="dashboard.html">
-                            <i class="fas fa-tachometer-alt me-1"></i>แผงควบคุม
+                <!-- Main Navigation -->
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item mx-1">
+                        <a class="nav-link nav-link-custom" href="dashboard.html">
+                            <i class="fas fa-tachometer-alt nav-icon"></i>
+                            <span class="nav-text">แผงควบคุม</span>
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="manage-groups.html">
-                            <i class="fas fa-users me-1"></i>จัดการกลุ่ม
+                    <li class="nav-item mx-1">
+                        <a class="nav-link nav-link-custom active" href="manage-groups.html">
+                            <i class="fas fa-users nav-icon"></i>
+                            <span class="nav-text">จัดการกลุ่ม</span>
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="reports.html">
-                            <i class="fas fa-chart-bar me-1"></i>รายงาน
+                    <li class="nav-item mx-1">
+                        <a class="nav-link nav-link-custom" href="reports.html">
+                            <i class="fas fa-chart-bar nav-icon"></i>
+                            <span class="nav-text">รายงาน</span>
                         </a>
                     </li>
                 </ul>
+
+                <!-- User Menu -->
                 <ul class="navbar-nav">
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-user-circle me-1"></i>
-                            <span class="user-display">Admin</span>
+                        <a class="nav-link dropdown-toggle user-menu" href="#" role="button" data-bs-toggle="dropdown">
+                            <div class="user-info d-flex align-items-center">
+                                <div class="user-avatar me-2">
+                                    <i class="fas fa-user-circle"></i>
+                                </div>
+                                <div class="user-details d-none d-md-block">
+                                    <div class="user-name user-display">Admin</div>
+                                    <div class="user-role">ผู้ดูแลระบบ</div>
+                                </div>
+                            </div>
                         </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item logout-btn" href="#">
-                                <i class="fas fa-sign-out-alt me-2"></i>ออกจากระบบ
-                            </a></li>
+                        <ul class="dropdown-menu dropdown-menu-end user-dropdown">
+                            <li class="dropdown-header">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-user-circle me-2 text-success"></i>
+                                    <div>
+                                        <div class="fw-bold user-display">Admin</div>
+                                        <small class="text-muted">ผู้ดูแลระบบ</small>
+                                    </div>
+                                </div>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item dropdown-item-custom" href="#" onclick="changePassword()">
+                                    <i class="fas fa-key me-3 text-primary"></i>
+                                    <span>เปลี่ยนรหัสผ่าน</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item dropdown-item-custom" href="#">
+                                    <i class="fas fa-cog me-3 text-secondary"></i>
+                                    <span>ตั้งค่าบัญชี</span>
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item dropdown-item-custom logout-btn" href="#">
+                                    <i class="fas fa-sign-out-alt me-3 text-danger"></i>
+                                    <span>ออกจากระบบ</span>
+                                </a>
+                            </li>
                         </ul>
                     </li>
                 </ul>
@@ -336,6 +385,157 @@
             padding-bottom: 2rem;
             background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             min-height: 100vh;
+        }
+
+        /* Enhanced Navbar Styles */
+        .custom-navbar {
+            background: linear-gradient(135deg, #2c5530 0%, #28a745 50%, #20c997 100%);
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            padding: 0.5rem 0;
+        }
+
+        .brand-icon {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #28a745;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .brand-text {
+            line-height: 1.2;
+        }
+
+        .brand-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: white;
+        }
+
+        .brand-subtitle {
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.8);
+            font-weight: 400;
+        }
+
+        .nav-link-custom {
+            padding: 0.75rem 1rem !important;
+            margin: 0 0.25rem;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            color: rgba(255,255,255,0.9) !important;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-link-custom::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            border-radius: 10px;
+        }
+
+        .nav-link-custom:hover::before,
+        .nav-link-custom.active::before {
+            opacity: 1;
+        }
+
+        .nav-link-custom:hover,
+        .nav-link-custom.active {
+            color: white !important;
+            background: rgba(255,255,255,0.15);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .nav-icon {
+            width: 18px;
+            text-align: center;
+            margin-right: 0.5rem;
+        }
+
+        .nav-text {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .user-menu {
+            padding: 0.5rem 1rem !important;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            color: rgba(255,255,255,0.9) !important;
+        }
+
+        .user-menu:hover {
+            background: rgba(255,255,255,0.1);
+            color: white !important;
+        }
+
+        .user-avatar i {
+            font-size: 2rem;
+            color: #fff;
+        }
+
+        .user-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: white;
+            line-height: 1.2;
+        }
+
+        .user-role {
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.8);
+            line-height: 1.2;
+        }
+
+        .user-dropdown {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            padding: 0.5rem 0;
+            margin-top: 0.5rem;
+            min-width: 280px;
+        }
+
+        .dropdown-header {
+            padding: 1rem 1.25rem;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 10px 10px 0 0;
+            margin-bottom: 0.5rem;
+        }
+
+        .dropdown-item-custom {
+            padding: 0.75rem 1.25rem;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            margin: 0.25rem 0.5rem;
+        }
+
+        .dropdown-item-custom:hover {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            transform: translateX(5px);
+        }
+
+        .navbar-toggler {
+            padding: 0.5rem;
+            border-radius: 8px;
+        }
+
+        .navbar-toggler:focus {
+            box-shadow: 0 0 0 0.2rem rgba(255,255,255,0.25);
         }
 
         .page-header {
@@ -810,6 +1010,11 @@
         // Refresh data
         function refreshData() {
             loadGroupsData();
+        }
+
+        // Change password function (placeholder)
+        function changePassword() {
+            Utils.showSuccess('ฟีเจอร์เปลี่ยนรหัสผ่าน', 'ฟีเจอร์นี้จะเปิดใช้งานในเร็วๆ นี้');
         }
 
         // Export groups

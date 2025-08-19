@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ทดสอบเพิ่มกลุ่มเกษตรกร</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>ทดสอบระบบเพิ่มกลุ่มเกษตรกร</h2>
+        
+        <div class="card mt-4">
+            <div class="card-body">
+                <form id="testForm">
+                    <div class="mb-3">
+                        <label for="groupName" class="form-label">ชื่อกลุ่มเกษตรกร</label>
+                        <input type="text" class="form-control" id="groupName" value="กลุ่มเกษตรกรผักปลอดสารทดสอบ" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="managerUsername" class="form-label">Username ผู้จัดการ</label>
+                        <input type="text" class="form-control" id="managerUsername" value="test_manager" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="managerPassword" class="form-label">รหัสผ่านเบื้องต้น</label>
+                        <input type="password" class="form-control" id="managerPassword" value="123456" required>
+                    </div>
+                    <button type="submit" class="btn btn-success">ทดสอบเพิ่มกลุ่ม</button>
+                </form>
+                
+                <div id="results" class="mt-4"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/utils.js"></script>
+    <script src="assets/js/api.js"></script>
+    
+    <script>
+        document.getElementById('testForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                groupName: document.getElementById('groupName').value,
+                managerUsername: document.getElementById('managerUsername').value,
+                managerPassword: document.getElementById('managerPassword').value
+            };
+            
+            console.log('Testing with data:', formData);
+            
+            try {
+                const result = await AdminAPI.createGroup(formData);
+                console.log('Result:', result);
+                
+                document.getElementById('results').innerHTML = `
+                    <div class="alert alert-success">
+                        <h5>สำเร็จ!</h5>
+                        <p><strong>ข้อความ:</strong> ${result.message}</p>
+                        <p><strong>รหัสกลุ่ม:</strong> ${result.group.groupCode}</p>
+                        <p><strong>ชื่อกลุ่ม:</strong> ${result.group.groupName}</p>
+                        <p><strong>ผู้จัดการ:</strong> ${result.group.managerUsername}</p>
+                    </div>
+                `;
+                
+                Swal.fire({
+                    icon: 'success',
+                    title: 'สร้างกลุ่มสำเร็จ',
+                    text: result.message
+                });
+                
+            } catch (error) {
+                console.error('Error:', error);
+                
+                document.getElementById('results').innerHTML = `
+                    <div class="alert alert-danger">
+                        <h5>เกิดข้อผิดพลาด</h5>
+                        <p><strong>ข้อผิดพลาด:</strong> ${error.message}</p>
+                    </div>
+                `;
+                
+                Swal.fire({
+                    icon: 'error',
+                    title: 'เกิดข้อผิดพลาด',
+                    text: error.message
+                });
+            }
+        });
+    </script>
+</body>
+</html>
