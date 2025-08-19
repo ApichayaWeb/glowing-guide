@@ -403,48 +403,71 @@
                     console.log('Remember me enabled');
                 }
                 
-                // Verify user data is stored
-                const storedUser = AuthAPI.getCurrentUser();
-                console.log('Stored user data verification:', storedUser);
+                // Ensure complete session data is stored
+                const loginTime = new Date().toISOString();
+                const sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                const authToken = 'token_' + Date.now();
                 
-                if (!storedUser || !storedUser.role) {
-                    console.error('User data not properly stored, attempting to store again');
-                    
-                    // Try to store user data again
-                    const userData = {
-                        username: user.username || username,
-                        role: user.role,
-                        fullName: user.fullName || user.username,
-                        loginTime: new Date().toISOString(),
-                        sessionId: 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)
-                    };
-                    
-                    // Store with multiple methods to ensure persistence
-                    Storage.set(CONFIG.STORAGE_KEYS.USER_DATA, userData);
-                    Storage.set('auth_token', 'token_' + Date.now());
-                    Storage.set('session_id', userData.sessionId);
-                    Storage.set(CONFIG.STORAGE_KEYS.LAST_LOGIN, userData.loginTime);
-                    
-                    // Verify storage again
-                    const reStoredUser = AuthAPI.getCurrentUser();
-                    console.log('Re-stored user data verification:', reStoredUser);
-                    
-                    if (!reStoredUser || !reStoredUser.role) {
-                        throw new Error('Critical: Unable to store user data in localStorage');
-                    }
+                // Create enhanced user data with all required fields
+                const enhancedUserData = {
+                    username: user.username || username,
+                    role: user.role,
+                    fullName: user.fullName || user.username,
+                    loginTime: loginTime,
+                    sessionId: sessionId,
+                    lastActivity: Date.now()
+                };
+                
+                // Store ALL required authentication data
+                Storage.set(CONFIG.STORAGE_KEYS.USER_DATA, enhancedUserData);
+                Storage.set(CONFIG.STORAGE_KEYS.LAST_LOGIN, loginTime);
+                Storage.set('auth_token', authToken);
+                Storage.set('session_id', sessionId);
+                
+                console.log('Complete authentication data stored:', {
+                    userData: enhancedUserData,
+                    authToken,
+                    sessionId,
+                    lastLogin: loginTime
+                });
+                
+                // Verify ALL required data is stored correctly
+                const authVerification = {
+                    userData: AuthAPI.getCurrentUser(),
+                    lastLogin: Storage.get(CONFIG.STORAGE_KEYS.LAST_LOGIN),
+                    authToken: Storage.get('auth_token'),
+                    sessionId: Storage.get('session_id')
+                };
+                
+                console.log('Authentication verification:', authVerification);
+                
+                // Check if ALL required authentication data is present
+                if (!authVerification.userData || !authVerification.userData.role || 
+                    !authVerification.lastLogin || !authVerification.authToken || !authVerification.sessionId) {
+                    console.error('Missing authentication data:', authVerification);
+                    throw new Error('Critical: Required authentication data not stored properly');
+                }
+                
+                // Additional verification using AuthAPI.isLoggedIn()
+                const isLoggedInCheck = AuthAPI.isLoggedIn();
+                console.log('AuthAPI.isLoggedIn() verification:', isLoggedInCheck);
+                
+                if (!isLoggedInCheck) {
+                    console.error('AuthAPI.isLoggedIn() returned false after storing data');
+                    throw new Error('Authentication verification failed');
                 }
                 
                 // Show success message
                 Swal.fire({
                     icon: 'success',
                     title: 'เข้าสู่ระบบสำเร็จ',
-                    text: `ยินดีต้อนรับ ${user.username || user.fullName}`,
+                    text: `ยินดีต้อนรับ ${enhancedUserData.fullName}`,
                     timer: 1500,
                     showConfirmButton: false
                 }).then(() => {
-                    // Redirect based on user role
-                    console.log('Redirecting user with role:', storedUser.role);
-                    redirectBasedOnRole(storedUser.role);
+                    // Redirect based on user role with enhanced data
+                    console.log('Redirecting user with role:', enhancedUserData.role);
+                    redirectBasedOnRole(enhancedUserData.role);
                 });
                 
             } catch (error) {
