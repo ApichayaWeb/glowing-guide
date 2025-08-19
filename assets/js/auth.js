@@ -72,7 +72,7 @@ const AuthAPI = {
         try {
             // Check for too many failed attempts
             if (this.state.failedAttempts >= this.CONFIG.MAX_FAILED_ATTEMPTS) {
-                const lockoutTime = localStorage.getItem('lockout_time');
+                const lockoutTime = Storage.get('lockout_time');
                 if (lockoutTime && Date.now() - parseInt(lockoutTime) < 15 * 60 * 1000) {
                     throw new Error('บัญชีถูกล็อกเนื่องจากพยายามเข้าสู่ระบบผิดหลายครั้ง กรุณารอ 15 นาที');
                 }
@@ -88,7 +88,7 @@ const AuthAPI = {
             if (result.success) {
                 // Reset failed attempts
                 this.state.failedAttempts = 0;
-                localStorage.removeItem('lockout_time');
+                Storage.remove('lockout_time');
                 
                 // Store enhanced user data
                 const loginData = {
@@ -117,7 +117,7 @@ const AuthAPI = {
                 // Track failed attempt
                 this.state.failedAttempts++;
                 if (this.state.failedAttempts >= this.CONFIG.MAX_FAILED_ATTEMPTS) {
-                    localStorage.setItem('lockout_time', Date.now().toString());
+                    Storage.set('lockout_time', Date.now().toString());
                 }
                 throw new Error(result.message || 'ข้อมูลการเข้าสู่ระบบไม่ถูกต้อง');
             }

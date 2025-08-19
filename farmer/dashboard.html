@@ -239,17 +239,12 @@
 
         async function initializePage() {
             try {
-                // Check authentication
-                if (!AuthAPI.isLoggedIn()) {
-                    window.location.href = '../login.html';
+                // Use PageProtection for proper authentication
+                if (!PageProtection.protectFarmerPage()) {
                     return;
                 }
 
                 const user = AuthAPI.getCurrentUser();
-                if (user.role !== 'farmer') {
-                    AuthAPI.logout();
-                    return;
-                }
 
                 // Update UI with user data
                 updateUserInfo(user);

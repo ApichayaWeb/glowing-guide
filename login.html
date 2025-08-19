@@ -578,39 +578,34 @@
             return null;
         }
         
-        // Override AuthAPI.login for testing purposes
-        const originalLogin = AuthAPI.login;
-        AuthAPI.login = async function(username, password) {
-            console.log('Mock login called with:', username);
-            
-            // Simulate network delay
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            
-            // Validate credentials
-            const user = validateAndMapCredentials(username, password);
-            
-            if (!user) {
-                throw new Error('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
+        // Mock API response for testing (replace with real API endpoint)
+        const originalMakeRequest = API.makeRequest;
+        API.makeRequest = async function(endpoint, data) {
+            if (endpoint === 'login') {
+                console.log('Mock API login called with:', data.username);
+                
+                // Simulate network delay
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // Validate credentials using mock user database
+                const user = validateAndMapCredentials(data.username, data.password);
+                
+                if (!user) {
+                    return {
+                        success: false,
+                        message: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง'
+                    };
+                }
+                
+                return {
+                    success: true,
+                    user: user,
+                    token: 'token_' + Date.now()
+                };
             }
             
-            // Create full user data
-            const userData = {
-                ...user,
-                loginTime: new Date().toISOString(),
-                sessionId: 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
-                lastActivity: Date.now(),
-                sessionCount: 1
-            };
-            
-            console.log('Storing user data:', userData);
-            
-            // Store user data
-            Storage.set(CONFIG.STORAGE_KEYS.USER_DATA, userData);
-            Storage.set(CONFIG.STORAGE_KEYS.LAST_LOGIN, userData.loginTime);
-            Storage.set('auth_token', 'token_' + Date.now());
-            Storage.set('session_id', userData.sessionId);
-            
-            return userData;
+            // For other endpoints, use original function (or implement as needed)
+            return originalMakeRequest.call(this, endpoint, data);
         };
     </script>
 </body>

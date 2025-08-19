@@ -262,74 +262,7 @@ class APIHandler {
 // Create global API instance
 const API = new APIHandler();
 
-/**
- * Authentication API Functions
- */
-const AuthAPI = {
-    
-    /**
-     * Login user
-     */
-    async login(username, password) {
-        try {
-            const result = await API.makeRequest('login', {
-                username: Utils.sanitizeInput(username),
-                password: password
-            });
-
-            if (result.success) {
-                // Store user data
-                Storage.set(CONFIG.STORAGE_KEYS.USER_DATA, result.user);
-                Storage.set(CONFIG.STORAGE_KEYS.LAST_LOGIN, new Date().toISOString());
-                
-                return result.user;
-            } else {
-                throw new Error(result.message || 'ข้อมูลการเข้าสู่ระบบไม่ถูกต้อง');
-            }
-        } catch (error) {
-            console.error('Login error:', error);
-            throw error;
-        }
-    },
-
-    /**
-     * Logout user
-     */
-    logout() {
-        Storage.remove(CONFIG.STORAGE_KEYS.USER_DATA);
-        Storage.remove(CONFIG.STORAGE_KEYS.LAST_LOGIN);
-        window.location.href = 'login.html';
-    },
-
-    /**
-     * Get current user
-     */
-    getCurrentUser() {
-        return Storage.get(CONFIG.STORAGE_KEYS.USER_DATA);
-    },
-
-    /**
-     * Check if user is logged in
-     */
-    isLoggedIn() {
-        const user = this.getCurrentUser();
-        return user && user.username;
-    },
-
-    /**
-     * Change password
-     */
-    async changePassword(oldPassword, newPassword) {
-        const user = this.getCurrentUser();
-        if (!user) throw new Error('ไม่พบข้อมูลผู้ใช้');
-
-        return await API.makeRequest('changePassword', {
-            username: user.username,
-            oldPassword: oldPassword,
-            newPassword: newPassword
-        });
-    }
-};
+// Note: AuthAPI has been moved to auth.js to avoid conflicts
 
 /**
  * QR Code API Functions
@@ -667,9 +600,8 @@ async function apiCall(apiFunction, loadingMessage = 'กำลังโหล�
     }
 }
 
-// Export API modules
+// Export API modules (AuthAPI is exported from auth.js)
 window.API = API;
-window.AuthAPI = AuthAPI;
 window.QRAPI = QRAPI;
 window.AdminAPI = AdminAPI;
 window.GroupAPI = GroupAPI;
