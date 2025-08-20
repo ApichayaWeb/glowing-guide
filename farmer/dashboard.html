@@ -243,6 +243,17 @@
                 if (!PageProtection.protectFarmerPage()) {
                     return;
                 }
+                
+                // Additional explicit validation
+                const currentUser = AuthAPI.getCurrentUser();
+                console.log('Farmer dashboard - Current user:', currentUser);
+                
+                if (!currentUser || !currentUser.role || currentUser.role.toString().trim().toLowerCase() !== 'farmer') {
+                    console.error('Permission denied: Farmer role required for dashboard');
+                    Utils.showError('ไม่มีสิทธิ์', 'คุณต้องมีสิทธิ์เกษตรกรเท่านั้น');
+                    setTimeout(() => window.location.href = '../login.html', 2000);
+                    return;
+                }
 
                 const user = AuthAPI.getCurrentUser();
 

@@ -802,8 +802,14 @@
         async function loadDashboardData() {
             // Check admin permission before loading data
             const currentUser = AuthAPI.getCurrentUser();
-            if (!currentUser || currentUser.role !== 'admin') {
+            console.log('loadDashboardData - Current user:', currentUser);
+            console.log('loadDashboardData - User role:', currentUser ? currentUser.role : 'null');
+            console.log('loadDashboardData - Role type:', currentUser ? typeof currentUser.role : 'null');
+            console.log('loadDashboardData - Role JSON:', currentUser ? JSON.stringify(currentUser.role) : 'null');
+            
+            if (!currentUser || !currentUser.role || currentUser.role.toString().trim().toLowerCase() !== 'admin') {
                 console.error('Permission denied: Admin role required');
+                console.error('Expected: admin, Got:', currentUser ? currentUser.role : 'null');
                 Utils.showError('ไม่มีสิทธิ์', 'คุณต้องมีสิทธิ์ผู้ดูแลระบบเท่านั้น');
                 setTimeout(() => window.location.href = '../login.html', 2000);
                 return;
@@ -951,7 +957,8 @@
             
             // Check admin permission
             const currentUser = AuthAPI.getCurrentUser();
-            if (!currentUser || currentUser.role !== 'admin') {
+            if (!currentUser || !currentUser.role || currentUser.role.toString().trim().toLowerCase() !== 'admin') {
+                console.error('Permission denied:', currentUser ? currentUser.role : 'null');
                 Utils.showError('ไม่มีสิทธิ์', 'คุณต้องมีสิทธิ์ผู้ดูแลระบบเท่านั้น');
                 return;
             }
@@ -976,11 +983,16 @@
                 Utils.showLoading('กำลังเพิ่มกลุ่ม...');
                 
                 const result = await AdminAPI.createGroup(formData);
+				
+				// รองรับทั้งรูปแบบ {group:{...}} และ {data:{...}}
+				const group = result?.group ?? result?.data;
                 
                 Utils.hideLoading();
                 
                 if (result.success) {
-                    Utils.showSuccess('เพิ่มกลุ่มสำเร็จ', `สร้างกลุ่ม ${result.group.groupName} เรียบร้อยแล้ว`);
+                    group.statistics ||= { totalFarmers: 0, totalQRCodes: 0 };
+					
+					Utils.showSuccess('เพิ่มกลุ่มสำเร็จ', `สร้างกลุ่ม ${group.groupName} เรียบร้อยแล้ว`);
                     
                     // Close modal and refresh data
                     const modal = bootstrap.Modal.getInstance(document.getElementById('addGroupModal'));
@@ -992,7 +1004,8 @@
                         loadDashboardData();
                     }, 500);
                 } else {
-                    Utils.showError('เกิดข้อผิดพลาด', result.message);
+                   Utils.showError('เกิดข้อผิดพลาด', result?.message || 'รูปแบบผลลัพธ์ไม่ถูกต้อง');
+					console.warn('Unexpected result shape:', result);
                 }
                 
             } catch (error) {
@@ -1013,7 +1026,8 @@
             
             // Check admin permission
             const currentUser = AuthAPI.getCurrentUser();
-            if (!currentUser || currentUser.role !== 'admin') {
+            if (!currentUser || !currentUser.role || currentUser.role.toString().trim().toLowerCase() !== 'admin') {
+                console.error('Permission denied:', currentUser ? currentUser.role : 'null');
                 Utils.showError('ไม่มีสิทธิ์', 'คุณต้องมีสิทธิ์ผู้ดูแลระบบเท่านั้น');
                 return;
             }

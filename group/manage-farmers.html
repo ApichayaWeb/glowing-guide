@@ -567,7 +567,7 @@
                 }
 
                 const user = AuthAPI.getCurrentUser();
-                if (!user || user.role !== 'group') {
+                if (!user || !user.role || user.role.toString().trim().toLowerCase() !== 'group') {
                     Utils.showError('ไม่มีสิทธิ์', 'คุณต้องมีสิทธิ์ผู้จัดการกลุ่มเท่านั้น');
                     setTimeout(() => window.location.href = '../login.html', 2000);
                     return;

@@ -567,7 +567,7 @@
         async function loadDashboardData() {
             // Check group permission before loading data
             const currentUser = AuthAPI.getCurrentUser();
-            if (!currentUser || currentUser.role !== 'group') {
+            if (!currentUser || !currentUser.role || currentUser.role.toString().trim().toLowerCase() !== 'group') {
                 console.error('Permission denied: Group manager role required');
                 Utils.showError('ไม่มีสิทธิ์', 'คุณต้องมีสิทธิ์ผู้จัดการกลุ่มเท่านั้น');
                 setTimeout(() => window.location.href = '../login.html', 2000);
@@ -892,7 +892,7 @@
         function editGroupProfile() {
             // Check group permission
             const currentUser = AuthAPI.getCurrentUser();
-            if (!currentUser || currentUser.role !== 'group') {
+            if (!currentUser || !currentUser.role || currentUser.role.toString().trim().toLowerCase() !== 'group') {
                 Utils.showError('ไม่มีสิทธิ์', 'คุณต้องมีสิทธิ์ผู้จัดการกลุ่มเท่านั้น');
                 return;
             }
@@ -917,7 +917,7 @@
             
             // Check group permission
             const currentUser = AuthAPI.getCurrentUser();
-            if (!currentUser || currentUser.role !== 'group') {
+            if (!currentUser || !currentUser.role || currentUser.role.toString().trim().toLowerCase() !== 'group') {
                 Utils.showError('ไม่มีสิทธิ์', 'คุณต้องมีสิทธิ์ผู้จัดการกลุ่มเท่านั้น');
                 return;
             }
@@ -970,7 +970,7 @@
             
             // Check group permission
             const currentUser = AuthAPI.getCurrentUser();
-            if (!currentUser || currentUser.role !== 'group') {
+            if (!currentUser || !currentUser.role || currentUser.role.toString().trim().toLowerCase() !== 'group') {
                 Utils.showError('ไม่มีสิทธิ์', 'คุณต้องมีสิทธิ์ผู้จัดการกลุ่มเท่านั้น');
                 return;
             }

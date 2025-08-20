@@ -595,6 +595,17 @@
     <script>
         // Initialize page on load
         document.addEventListener('DOMContentLoaded', function() {
+            // Check admin permission first
+            const currentUser = AuthAPI.getCurrentUser();
+            console.log('Admin reports - Current user:', currentUser);
+            
+            if (!currentUser || !currentUser.role || currentUser.role.toString().trim().toLowerCase() !== 'admin') {
+                console.error('Permission denied: Admin role required for reports');
+                Utils.showError('ไม่มีสิทธิ์', 'คุณต้องมีสิทธิ์ผู้ดูแลระบบเท่านั้น');
+                setTimeout(() => window.location.href = '../login.html', 2000);
+                return;
+            }
+            
             // Initialize date range picker
             initializeDateRangePicker();
             

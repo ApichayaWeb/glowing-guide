@@ -606,6 +606,17 @@
 
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
+            // Check admin permission first
+            const currentUser = AuthAPI.getCurrentUser();
+            console.log('Admin manage-groups - Current user:', currentUser);
+            
+            if (!currentUser || !currentUser.role || currentUser.role.toString().trim().toLowerCase() !== 'admin') {
+                console.error('Permission denied: Admin role required for manage-groups');
+                Utils.showError('ไม่มีสิทธิ์', 'คุณต้องมีสิทธิ์ผู้ดูแลระบบเท่านั้น');
+                setTimeout(() => window.location.href = '../login.html', 2000);
+                return;
+            }
+            
             initializePage();
             loadGroupsData();
             setupEventListeners();
@@ -747,10 +758,15 @@
                 Utils.showLoading('กำลังเพิ่มกลุ่มเกษตรกร...');
                 
                 const result = await AdminAPI.createGroup(formData);
+				
+				// รองรับทั้งรูปแบบ {group:{...}} และ {data:{...}}
+				const group = result?.group ?? result?.data;
                 
                 Utils.hideLoading();
                 
-                if (result.success) {
+                if (result?.success && group) {
+					group.statistics ||= { totalFarmers: 0, totalQRCodes: 0 };
+					
                     Utils.showSuccess('เพิ่มกลุ่มสำเร็จ', `สร้างกลุ่ม ${result.group.groupName} เรียบร้อยแล้ว`);
                     
                     // Close modal and refresh data
@@ -761,9 +777,10 @@
                     // Reload data
                     setTimeout(() => {
                         loadGroupsData();
-                    }, 1000);
+                    }, 500);
                 } else {
-                    Utils.showError('เกิดข้อผิดพลาด', result.message);
+                    Utils.showError('เกิดข้อผิดพลาด', result?.message || 'รูปแบบผลลัพธ์ไม่ถูกต้อง');
+					console.warn('Unexpected result shape:', result);
                 }
                 
             } catch (error) {

@@ -605,7 +605,7 @@
                 }
 
                 const user = AuthAPI.getCurrentUser();
-                if (user.role !== 'farmer') {
+                if (!user.role || user.role.toString().trim().toLowerCase() !== 'farmer') {
                     AuthAPI.logout();
                     return;
                 }
