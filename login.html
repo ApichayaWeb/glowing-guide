@@ -417,6 +417,9 @@
         // Redirect user based on their role
         function redirectBasedOnRole(role = null) {
             console.log('redirectBasedOnRole called with role:', role);
+            console.log('Role type:', typeof role);
+            console.log('Role length:', role ? role.length : 'null');
+            console.log('Role JSON:', JSON.stringify(role));
             
             if (!role) {
                 const user = AuthAPI.getCurrentUser();
@@ -430,27 +433,35 @@
                 return;
             }
 
+            // Clean up the role string (remove whitespace, convert to lowercase for comparison)
+            const cleanRole = role.toString().trim().toLowerCase();
+            console.log('Clean role:', cleanRole);
+
             let targetUrl = '';
             
-            switch (role) {
+            switch (cleanRole) {
                 case 'admin':
                     targetUrl = './admin/dashboard.html';
+                    console.log('Admin role matched, redirecting to admin dashboard');
                     break;
                 case 'group':
                     targetUrl = './group/dashboard.html';
+                    console.log('Group role matched, redirecting to group dashboard');
                     break;
                 case 'farmer':
                     targetUrl = './farmer/dashboard.html';
+                    console.log('Farmer role matched, redirecting to farmer dashboard');
                     break;
                 default:
-                    console.warn('Unknown role:', role, 'redirecting to home');
+                    console.warn('Unknown role:', role, 'cleaned:', cleanRole, 'redirecting to home');
                     targetUrl = './index.html';
             }
             
-            console.log('Redirecting to:', targetUrl);
+            console.log('Final target URL:', targetUrl);
             
             // Add delay to ensure data is properly saved
             setTimeout(() => {
+                console.log('Actually redirecting to:', targetUrl);
                 window.location.href = targetUrl;
             }, 100);
         }
