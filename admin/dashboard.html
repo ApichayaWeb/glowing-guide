@@ -125,7 +125,31 @@
 
             <!-- Statistics Cards -->
             <div class="row mb-4" id="statsCards">
-                <!-- Stats will be loaded here -->
+                <!-- Skeleton loading for stats -->
+                <div class="col-lg-4 col-md-6 mb-4 skeleton-loader">
+                    <div class="card h-100" style="background: #f8f9fa;">
+                        <div class="card-body">
+                            <div style="background: #e9ecef; height: 20px; border-radius: 4px; margin-bottom: 10px;"></div>
+                            <div style="background: #e9ecef; height: 40px; border-radius: 4px; width: 60%;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6 mb-4 skeleton-loader">
+                    <div class="card h-100" style="background: #f8f9fa;">
+                        <div class="card-body">
+                            <div style="background: #e9ecef; height: 20px; border-radius: 4px; margin-bottom: 10px;"></div>
+                            <div style="background: #e9ecef; height: 40px; border-radius: 4px; width: 60%;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6 mb-4 skeleton-loader">
+                    <div class="card h-100" style="background: #f8f9fa;">
+                        <div class="card-body">
+                            <div style="background: #e9ecef; height: 20px; border-radius: 4px; margin-bottom: 10px;"></div>
+                            <div style="background: #e9ecef; height: 40px; border-radius: 4px; width: 60%;"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
 
@@ -327,8 +351,8 @@
 
     <style>
         .main-content {
-            padding-top: 100px;
-            padding-bottom: 2rem;
+            padding-top: 80px;
+            padding-bottom: 1rem;
             background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             min-height: 100vh;
         }
@@ -336,9 +360,9 @@
         .page-header {
             background: white;
             border-radius: 15px;
-            padding: 2rem;
+            padding: 1.5rem;
             box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
         }
 
         .stats-card {
@@ -379,7 +403,7 @@
         .action-card {
             background: white;
             border-radius: 15px;
-            padding: 2rem;
+            padding: 1.5rem;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -429,7 +453,7 @@
             border: none;
             background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
             color: white;
-            padding: 1.5rem;
+            padding: 1rem;
         }
 
         .table-responsive {
@@ -447,7 +471,7 @@
         .table td {
             border: none;
             vertical-align: middle;
-            padding: 1rem 0.75rem;
+            padding: 0.75rem 0.75rem;
         }
 
         .table tbody tr {
@@ -668,12 +692,34 @@
                 padding-top: 80px;
             }
         }
+        
+        /* Skeleton Loading Animation */
+        .skeleton-loader {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: .5;
+            }
+        }
     </style>
 
     <script>
+        // ====================================================================
+        // ADMIN DASHBOARD - MAIN SCRIPT
+        // ====================================================================
+        
         // Global variables
         let systemStats = null;
 
+        // ====================================================================
+        // INITIALIZATION
+        // ====================================================================
+        
         // Initialize dashboard
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Admin dashboard DOM loaded');
@@ -686,8 +732,8 @@
             
             console.log('Admin access granted');
             
-            // Setup page with user info and navigation
-            if (AuthAPI.setupPage({ setupNavigation: true })) {
+            // Setup page with user info only (ไม่สร้าง navigation เพิ่ม)
+            if (AuthAPI.setupPage({ setupNavigation: false })) {
                 console.log('Page setup completed successfully');
                 
                 // Update user display in navigation
@@ -753,50 +799,22 @@
             // Change password form
             document.getElementById('changePasswordForm').addEventListener('submit', handleChangePassword);
             
-            // Logout button
+            // Logout button - ใช้ AuthAPI.confirmLogout แทน
             const logoutBtn = document.querySelector('.logout-btn');
             if (logoutBtn) {
-                logoutBtn.addEventListener('click', handleLogout);
+                logoutBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    AuthAPI.confirmLogout();
+                });
                 console.log('Logout button event listener added');
             } else {
                 console.warn('Logout button not found');
             }
         }
         
-        // Handle logout
-        function handleLogout(event) {
-            event.preventDefault();
-            console.log('Logout button clicked');
-            
-            // Show confirmation dialog
-            Swal.fire({
-                title: 'ออกจากระบบ',
-                text: 'คุณต้องการออกจากระบบใช่หรือไม่?',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#dc3545',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'ออกจากระบบ',
-                cancelButtonText: 'ยกเลิก'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Perform logout
-                    AuthAPI.logout();
-                    
-                    // Show success message and redirect
-                    Swal.fire({
-                        title: 'ออกจากระบบสำเร็จ',
-                        text: 'กำลังนำคุณไปยังหน้าเข้าสู่ระบบ...',
-                        icon: 'success',
-                        timer: 1500,
-                        showConfirmButton: false
-                    }).then(() => {
-                        // Redirect to login page
-                        window.location.href = '../login.html';
-                    });
-                }
-            });
-        }
+        // ====================================================================
+        // DATA MANAGEMENT
+        // ====================================================================
 
         // Load dashboard data
         async function loadDashboardData() {
@@ -816,8 +834,8 @@
             }
             
             try {
-                // Show loading with shorter message
-            Utils.showLoading('กำลังโหลด...');
+                // ไม่แสดง loading modal สำหรับข้อมูลเบื้องต้น เพื่อความเร็ว
+                // Utils.showLoading('กำลังโหลดข้อมูล...');
                 
                 // Load data concurrently for better performance
                 const [statsResult, groupsResult] = await Promise.all([
@@ -845,6 +863,9 @@
         // Display statistics cards
         function displayStatistics(stats) {
             const statsContainer = document.getElementById('statsCards');
+            
+            // ลบ skeleton loading ออกก่อน
+            statsContainer.innerHTML = '';
             
             const statsCards = [
                 {
@@ -943,6 +964,10 @@
             
             tableBody.innerHTML = html;
         }
+
+        // ====================================================================
+        // GROUP MANAGEMENT FUNCTIONS
+        // ====================================================================
 
         // Show add group modal
         function showAddGroupModal() {
@@ -1069,6 +1094,10 @@
             }
         }
 
+        // ====================================================================
+        // USER MANAGEMENT FUNCTIONS  
+        // ====================================================================
+
         // Change password
         function changePassword() {
             const modal = new bootstrap.Modal(document.getElementById('changePasswordModal'));
@@ -1111,6 +1140,10 @@
                 handleAPIError(error, 'เกิดข้อผิดพลาดในการเปลี่ยนรหัสผ่าน');
             }
         }
+
+        // ====================================================================
+        // UTILITY FUNCTIONS
+        // ====================================================================
 
         // View group details
         function viewGroup(groupId) {
