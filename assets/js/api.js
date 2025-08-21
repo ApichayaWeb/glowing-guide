@@ -345,9 +345,9 @@ const AdminAPI = {
      */
     async createGroup(groupData) {
         return await API.makeRequest('createGroup', {
-            groupName: Utils.sanitizeInput(groupData.groupName),
             managerUsername: Utils.sanitizeInput(groupData.managerUsername),
             managerPassword: groupData.managerPassword // Don't sanitize password as it might alter it
+            // ลบ groupName ออก ให้ backend สร้างรหัสกลุ่มอัตโนมัติ
         });
     },
 
