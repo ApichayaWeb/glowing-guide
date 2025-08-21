@@ -202,7 +202,6 @@
                                     <thead class="table-success">
                                         <tr>
                                             <th>รหัสกลุ่ม</th>
-                                            <th>ชื่อกลุ่ม</th>
                                             <th>ผู้จัดการ</th>
                                             <th>สมาชิก</th>
                                             <th>สถานะ</th>
@@ -232,18 +231,24 @@
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <form id="addGroupForm">
+                <form id="addGroupForm" novalidate>
                     <div class="modal-body">
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="managerUsername" class="form-label">Username ผู้จัดการ *</label>
                                 <input type="text" class="form-control" id="managerUsername" required 
-                                       placeholder="เช่น group_manager01">
+                                       placeholder="เช่น group_manager01" autocomplete="off">
+                                <div class="invalid-feedback">
+                                    กรุณากรอก Username ผู้จัดการ
+                                </div>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="managerPassword" class="form-label">รหัสผ่านเบื้องต้น *</label>
                                 <input type="password" class="form-control" id="managerPassword" required 
-                                       placeholder="กรอกรหัสผ่าน" minlength="6">
+                                       placeholder="กรอกรหัสผ่าน" minlength="6" autocomplete="new-password">
+                                <div class="invalid-feedback">
+                                    กรุณากรอกรหัสผ่านเบื้องต้น (อย่างน้อย 6 ตัวอักษร)
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -923,7 +928,6 @@
                 html += `
                     <tr>
                         <td><span class="badge bg-outline-primary">${group.groupCode}</span></td>
-                        <td>${group.groupName}</td>
                         <td>${group.managerUsername}</td>
                         <td>${group.statistics.totalFarmers} ราย</td>
                         <td>${statusBadge}</td>
@@ -943,6 +947,23 @@
         // Show add group modal
         function showAddGroupModal() {
             const modal = new bootstrap.Modal(document.getElementById('addGroupModal'));
+            
+            // Reset form and clear any validation states
+            const form = document.getElementById('addGroupForm');
+            const usernameInput = document.getElementById('managerUsername');
+            const passwordInput = document.getElementById('managerPassword');
+            
+            if (form) form.reset();
+            if (usernameInput) {
+                usernameInput.classList.remove('is-invalid', 'is-valid');
+                usernameInput.value = '';
+            }
+            if (passwordInput) {
+                passwordInput.classList.remove('is-invalid', 'is-valid');
+                passwordInput.value = '';
+            }
+            
+            console.log('Modal opened - form reset completed');
             modal.show();
         }
 
@@ -950,19 +971,56 @@
         async function handleAddGroup(event) {
             event.preventDefault();
             
-            // Check admin permission
+            console.log('Form submitted - handleAddGroup called');
+            
+            // Get form elements
+            const usernameInput = document.getElementById('managerUsername');
+            const passwordInput = document.getElementById('managerPassword');
+            
+            if (!usernameInput || !passwordInput) {
+                console.error('Form elements not found');
+                Utils.showError('ข้อผิดพลาด', 'ไม่สามารถเข้าถึงฟอร์มได้');
+                return;
+            }
+            
+            const managerUsername = usernameInput.value.trim();
+            const managerPassword = passwordInput.value.trim();
+            
+            // Debug log values
+            console.log('Form element values:');
+            console.log('- Username input found:', !!usernameInput);
+            console.log('- Password input found:', !!passwordInput);
+            console.log('- Username raw value:', usernameInput.value);
+            console.log('- Password raw value:', passwordInput.value);
+            console.log('- Username trimmed:', managerUsername, 'Length:', managerUsername.length);
+            console.log('- Password trimmed:', managerPassword, 'Length:', managerPassword.length);
+            
+            // Clear any previous validation states
+            usernameInput.classList.remove('is-invalid');
+            passwordInput.classList.remove('is-invalid');
+            
+            // Enhanced validation
+            if (!managerUsername) {
+                console.log('Validation failed: empty username');
+                usernameInput.classList.add('is-invalid');
+                Utils.showWarning('ข้อมูลไม่ครบ', 'กรุณากรอก Username ผู้จัดการ');
+                usernameInput.focus();
+                return;
+            }
+            
+            if (!managerPassword) {
+                console.log('Validation failed: empty password');
+                passwordInput.classList.add('is-invalid');
+                Utils.showWarning('ข้อมูลไม่ครบ', 'กรุณากรอกรหัสผ่านเบื้องต้น');
+                passwordInput.focus();
+                return;
+            }
+            
+            // Check admin permission after basic validation
             const currentUser = AuthAPI.getCurrentUser();
             if (!currentUser || !currentUser.role || currentUser.role.toString().trim().toLowerCase() !== 'admin') {
                 console.error('Permission denied:', currentUser ? currentUser.role : 'null');
                 Utils.showError('ไม่มีสิทธิ์', 'คุณต้องมีสิทธิ์ผู้ดูแลระบบเท่านั้น');
-                return;
-            }
-            
-            const managerUsername = document.getElementById('managerUsername').value.trim();
-            const managerPassword = document.getElementById('managerPassword').value.trim();
-            
-            if (!managerUsername || !managerPassword) {
-                Utils.showWarning('ข้อมูลไม่ครบ', 'กรุณากรอกข้อมูลให้ครบถ้วน');
                 return;
             }
             
@@ -989,7 +1047,7 @@
                 if (result.success) {
                     group.statistics ||= { totalFarmers: 0, totalQRCodes: 0 };
 					
-					Utils.showSuccess('เพิ่มกลุ่มสำเร็จ', `สร้างกลุ่ม ${group.groupName} เรียบร้อยแล้ว`);
+					Utils.showSuccess('เพิ่มกลุ่มสำเร็จ', `สร้างกลุ่ม ${result.group.groupCode} เรียบร้อยแล้ว`);
                     
                     // Close modal and refresh data
                     const modal = bootstrap.Modal.getInstance(document.getElementById('addGroupModal'));
