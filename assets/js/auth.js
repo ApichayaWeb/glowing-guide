@@ -1728,10 +1728,21 @@ Object.assign(AuthAPI, {
         const delay = method === 'emergency' ? 500 : 1500;
         
         setTimeout(() => {
-            if (method === 'manual') {
-                window.location.href = this.getRelativePath() + 'logout.html';
-            } else {
-                window.location.href = this.getRelativePath() + 'login.html';
+            console.log('Redirecting after logout, method:', method);
+            try {
+                if (method === 'manual') {
+                    const logoutUrl = this.getRelativePath() + 'logout.html';
+                    console.log('Redirecting to:', logoutUrl);
+                    window.location.href = logoutUrl;
+                } else {
+                    const loginUrl = this.getRelativePath() + 'login.html';
+                    console.log('Redirecting to:', loginUrl);
+                    window.location.href = loginUrl;
+                }
+            } catch (error) {
+                console.error('Redirect error:', error);
+                // Fallback to simple redirect
+                window.location.href = '../login.html';
             }
         }, delay);
     }
