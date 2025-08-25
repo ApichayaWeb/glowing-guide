@@ -632,11 +632,13 @@
             AuthAPI.setupPage({ setupNavigation: false });
             
             initializePage();
-            loadGroupsData();
             setupEventListeners();
             
-            // Check URL parameter for direct group view
-            checkURLForGroupView();
+            // Load data first, then check URL parameter
+            loadGroupsData().then(() => {
+                // Check URL parameter for direct group view after data is loaded
+                checkURLForGroupView();
+            });
             
             // Set up aggressive periodic cleanup of auth nav items
             setInterval(cleanupAuthNavItems, 500);
@@ -750,28 +752,27 @@
             const urlParams = new URLSearchParams(window.location.search);
             const groupId = urlParams.get('group');
             
-            if (groupId) {
-                console.log('URL parameter detected - groupId:', groupId);
+            console.log('checkURLForGroupView called, groupId from URL:', groupId);
+            console.log('allGroups available:', allGroups ? allGroups.length : 'null');
+            
+            if (groupId && allGroups && allGroups.length > 0) {
+                console.log('Showing group details for:', groupId);
                 
-                // Wait a bit for data to load, then show group details
+                // Small delay to ensure DOM is ready
                 setTimeout(async () => {
-                    // Ensure data is loaded
-                    if (!allGroups || allGroups.length === 0) {
-                        console.log('Groups not loaded yet, waiting...');
-                        await loadGroupsData();
-                    }
-                    
-                    if (allGroups && allGroups.length > 0) {
-                        console.log('Showing group details for:', groupId);
+                    try {
                         await viewGroup(groupId);
-                        
                         // Clean up URL parameter after showing
                         window.history.replaceState({}, document.title, window.location.pathname);
-                    } else {
-                        console.error('No groups data available for URL parameter');
-                        Utils.showError('ไม่พบข้อมูล', 'ไม่สามารถโหลดรายละเอียดกลุ่มได้');
+                        console.log('Group modal shown and URL cleaned');
+                    } catch (error) {
+                        console.error('Error showing group from URL:', error);
+                        Utils.showError('เกิดข้อผิดพลาด', 'ไม่สามารถแสดงรายละเอียดกลุ่มได้');
                     }
-                }, 1000); // Wait 1 second for initial data load
+                }, 500);
+            } else if (groupId) {
+                console.error('Group ID found but no groups data available');
+                Utils.showError('ไม่พบข้อมูล', 'ไม่สามารถโหลดรายละเอียดกลุ่มได้');
             }
         }
 
