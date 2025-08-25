@@ -939,6 +939,12 @@
                 // Hide loading first, then show modal after a brief delay
                 Utils.hideLoading();
                 
+                // Force close loading modal manually
+                const loadingModal = bootstrap.Modal.getInstance(document.getElementById('loadingModal'));
+                if (loadingModal) {
+                    loadingModal.hide();
+                }
+                
                 // Short delay to ensure loading modal is fully hidden
                 setTimeout(() => {
                     try {
@@ -949,7 +955,7 @@
                         console.error('Error showing modal:', modalError);
                         Utils.showError('ข้อผิดพลาด Modal', 'ไม่สามารถแสดงหน้าต่างรายละเอียดได้');
                     }
-                }, 100);
+                }, 200);
                 
             } catch (error) {
                 Utils.hideLoading();
