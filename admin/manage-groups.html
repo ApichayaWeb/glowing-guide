@@ -908,9 +908,16 @@
                         Utils.showError('ไม่พบข้อมูล', 'ไม่สามารถโหลดข้อมูลกลุ่มได้');
                         return;
                     }
+                    
+                    // Update loading message instead of showing new modal
+                    const modal = document.getElementById('loadingModal');
+                    if (modal) {
+                        const messageEl = modal.querySelector('h5');
+                        if (messageEl) messageEl.textContent = 'กำลังเตรียมรายละเอียด...';
+                    }
+                } else {
+                    Utils.showLoading('กำลังเตรียมรายละเอียด...');
                 }
-                
-                Utils.showLoading('กำลังเตรียมรายละเอียด...');
                 
                 console.log('viewGroup called with groupId:', groupId);
                 console.log('Available groups:', allGroups.length, 'groups');
@@ -936,17 +943,42 @@
                     return;
                 }
                 
-                // Hide loading first, then show modal after a brief delay
+                // Hide loading and wait for it to fully close before showing details modal
+                const loadingModalEl = document.getElementById('loadingModal');
+                
+                // First try Utils.hideLoading()
                 Utils.hideLoading();
                 
-                // Force close loading modal manually
-                const loadingModal = bootstrap.Modal.getInstance(document.getElementById('loadingModal'));
+                // Then force close the loading modal
+                const loadingModal = bootstrap.Modal.getInstance(loadingModalEl);
                 if (loadingModal) {
                     loadingModal.hide();
                 }
                 
-                // Short delay to ensure loading modal is fully hidden
-                setTimeout(() => {
+                // Wait for loading modal to be completely hidden
+                const waitForLoadingToClose = () => {
+                    return new Promise((resolve) => {
+                        // Listen for the modal hidden event
+                        const onHidden = () => {
+                            loadingModalEl.removeEventListener('hidden.bs.modal', onHidden);
+                            resolve();
+                        };
+                        
+                        // Check if modal is already hidden
+                        if (!loadingModalEl.classList.contains('show')) {
+                            resolve();
+                            return;
+                        }
+                        
+                        loadingModalEl.addEventListener('hidden.bs.modal', onHidden);
+                        
+                        // Backup timeout in case event doesn't fire
+                        setTimeout(resolve, 500);
+                    });
+                };
+                
+                // Wait for loading modal to close, then show group details modal
+                waitForLoadingToClose().then(() => {
                     try {
                         const modal = new bootstrap.Modal(document.getElementById('groupDetailsModal'));
                         modal.show();
@@ -955,7 +987,7 @@
                         console.error('Error showing modal:', modalError);
                         Utils.showError('ข้อผิดพลาด Modal', 'ไม่สามารถแสดงหน้าต่างรายละเอียดได้');
                     }
-                }, 200);
+                });
                 
             } catch (error) {
                 Utils.hideLoading();
