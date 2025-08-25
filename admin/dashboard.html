@@ -1173,7 +1173,7 @@
                 if (result.success) {
                     group.statistics ||= { totalFarmers: 0, totalQRCodes: 0 };
 					
-					Utils.showSuccess('เพิ่มกลุ่มสำเร็จ', `สร้างกลุ่ม ${result.group.groupCode} เรียบร้อยแล้ว`);
+					Utils.showSuccess('เพิ่มกลุ่มสำเร็จ', `สร้างกลุ่ม ${group.groupCode} เรียบร้อยแล้ว`);
                     
                     // Close modal and refresh data
                     const modal = bootstrap.Modal.getInstance(document.getElementById('addGroupModal'));
