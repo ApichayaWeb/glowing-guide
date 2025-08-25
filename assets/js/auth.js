@@ -71,6 +71,14 @@ const AuthAPI = {
                 Storage.set('auth_token', result.token || this.generateToken());
                 Storage.set('session_id', loginData.sessionId);
                 
+                // Check if password change is required
+                if (loginData.mustChangePassword) {
+                    // Store flag and redirect to password change page
+                    Storage.set('force_password_change', 'true');
+                    window.location.href = 'change-password.html';
+                    return loginData;
+                }
+                
                 // Initialize enhanced security features
                 this.initializeAutoLogout();
                 this.startCrossTabSync();
@@ -238,6 +246,9 @@ const AuthAPI = {
         });
 
         if (result.success) {
+            // Clear forced password change flag
+            Storage.remove('force_password_change');
+            
             Utils.showSuccess('เปลี่ยนรหัสผ่านสำเร็จ', 'กรุณาเข้าสู่ระบบใหม่');
             setTimeout(() => {
                 this.logout();
