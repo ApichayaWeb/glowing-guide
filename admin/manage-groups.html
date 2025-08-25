@@ -895,10 +895,25 @@
         // View group details
         async function viewGroup(groupId) {
             try {
-                Utils.showLoading('กำลังโหลดรายละเอียด...');
+                // Check if data is available first
+                if (!allGroups || allGroups.length === 0) {
+                    console.log('allGroups not ready, waiting...');
+                    Utils.showLoading('กำลังโหลดข้อมูลกลุ่ม...');
+                    
+                    // Wait for data to be loaded
+                    await loadGroupsData();
+                    
+                    if (!allGroups || allGroups.length === 0) {
+                        Utils.hideLoading();
+                        Utils.showError('ไม่พบข้อมูล', 'ไม่สามารถโหลดข้อมูลกลุ่มได้');
+                        return;
+                    }
+                }
+                
+                Utils.showLoading('กำลังเตรียมรายละเอียด...');
                 
                 console.log('viewGroup called with groupId:', groupId);
-                console.log('Available groups:', allGroups);
+                console.log('Available groups:', allGroups.length, 'groups');
                 
                 const group = allGroups.find(g => g.groupId === groupId);
                 if (!group) {
@@ -921,17 +936,20 @@
                     return;
                 }
                 
+                // Hide loading first, then show modal after a brief delay
                 Utils.hideLoading();
                 
-                // Show modal with error handling
-                try {
-                    const modal = new bootstrap.Modal(document.getElementById('groupDetailsModal'));
-                    modal.show();
-                    console.log('Modal shown successfully');
-                } catch (modalError) {
-                    console.error('Error showing modal:', modalError);
-                    Utils.showError('ข้อผิดพลาด Modal', 'ไม่สามารถแสดงหน้าต่างรายละเอียดได้');
-                }
+                // Short delay to ensure loading modal is fully hidden
+                setTimeout(() => {
+                    try {
+                        const modal = new bootstrap.Modal(document.getElementById('groupDetailsModal'));
+                        modal.show();
+                        console.log('Modal shown successfully');
+                    } catch (modalError) {
+                        console.error('Error showing modal:', modalError);
+                        Utils.showError('ข้อผิดพลาด Modal', 'ไม่สามารถแสดงหน้าต่างรายละเอียดได้');
+                    }
+                }, 100);
                 
             } catch (error) {
                 Utils.hideLoading();
