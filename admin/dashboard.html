@@ -721,9 +721,25 @@
         // INITIALIZATION
         // ====================================================================
         
+        // Aggressively override setupNavigation BEFORE DOM loaded
+        if (typeof AuthAPI !== 'undefined') {
+            AuthAPI.setupNavigation = function() {
+                console.log('setupNavigation blocked');
+                return;
+            };
+        }
+
         // Initialize dashboard
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Admin dashboard DOM loaded');
+            
+            // Override setupNavigation again to be sure
+            if (typeof AuthAPI !== 'undefined') {
+                AuthAPI.setupNavigation = function() {
+                    console.log('setupNavigation blocked in DOM ready');
+                    return;
+                };
+            }
             
             // Protect admin page - only admin can access
             if (!PageProtection.protectAdminPage()) {
@@ -733,16 +749,8 @@
             
             console.log('Admin access granted');
             
-            // Clear any existing auth navigation items first
-            const authNavItems = document.querySelectorAll('.auth-nav-item');
-            authNavItems.forEach(item => item.remove());
-            
-            // Override setupNavigation to prevent any additional navigation setup
-            const originalSetupNav = AuthAPI.setupNavigation;
-            AuthAPI.setupNavigation = function() {
-                console.log('setupNavigation called but blocked for dashboard page');
-                return;
-            };
+            // Clear any existing auth navigation items aggressively
+            cleanupAuthNavItems();
             
             // Setup page with user info only (ไม่สร้าง navigation เพิ่ม)
             if (AuthAPI.setupPage({ setupNavigation: false })) {
@@ -754,8 +762,16 @@
                 loadDashboardData();
                 setupEventListeners();
                 
-                // Set up periodic cleanup of auth nav items
-                setInterval(cleanupAuthNavItems, 1000);
+                // Set up aggressive periodic cleanup of auth nav items
+                setInterval(cleanupAuthNavItems, 500);
+                
+                // Also cleanup after any potential async operations
+                setTimeout(cleanupAuthNavItems, 100);
+                setTimeout(cleanupAuthNavItems, 500);
+                setTimeout(cleanupAuthNavItems, 1000);
+                
+                // Set up MutationObserver to watch for dynamically added nav items
+                setupNavbarProtection();
             } else {
                 console.error('Page setup failed');
             }
@@ -803,13 +819,77 @@
             }
         }
 
-        // Cleanup function to remove unwanted auth nav items
+        // Aggressive cleanup function to remove unwanted auth nav items
         function cleanupAuthNavItems() {
+            // Remove by class
             const authNavItems = document.querySelectorAll('.auth-nav-item');
             if (authNavItems.length > 0) {
-                console.log('Cleaning up', authNavItems.length, 'auth nav items');
+                console.log('Cleaning up', authNavItems.length, 'auth nav items by class');
                 authNavItems.forEach(item => item.remove());
             }
+            
+            // Also check for any navbar-text spans that might contain user info
+            const navbarTexts = document.querySelectorAll('.navbar-text');
+            navbarTexts.forEach(text => {
+                if (text.textContent.includes('สวัสดี,') || text.textContent.includes('admin')) {
+                    console.log('Removing navbar-text:', text.textContent);
+                    text.parentElement?.remove();
+                }
+            });
+            
+            // Remove any duplicate navigation links in the main navbar-nav
+            const mainNavbar = document.querySelector('.navbar-nav.me-auto');
+            if (mainNavbar) {
+                const existingLinks = Array.from(mainNavbar.querySelectorAll('a[href*="admin/"]'));
+                // Keep only the first 3 items (แผงควบคุม, จัดการกลุ่ม, รายงาน)
+                const validItems = Array.from(mainNavbar.children).slice(0, 3);
+                const allItems = Array.from(mainNavbar.children);
+                
+                allItems.forEach((item, index) => {
+                    if (index >= 3) {
+                        console.log('Removing extra nav item:', item);
+                        item.remove();
+                    }
+                });
+            }
+        }
+
+        // Setup navbar protection with MutationObserver
+        function setupNavbarProtection() {
+            const mainNavbar = document.querySelector('.navbar-nav.me-auto');
+            if (!mainNavbar) return;
+            
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    mutation.addedNodes.forEach(function(node) {
+                        if (node.nodeType === Node.ELEMENT_NODE) {
+                            // Check if added node is an auth-nav-item
+                            if (node.classList?.contains('auth-nav-item') || 
+                                node.querySelector?.('.auth-nav-item')) {
+                                console.log('MutationObserver: Removing dynamically added auth nav item');
+                                node.remove();
+                            }
+                            
+                            // Check for navbar-text with user info
+                            if (node.classList?.contains('navbar-text') || 
+                                node.querySelector?.('.navbar-text')) {
+                                if (node.textContent?.includes('สวัสดี,') || 
+                                    node.textContent?.includes('admin')) {
+                                    console.log('MutationObserver: Removing user info text');
+                                    node.remove();
+                                }
+                            }
+                        }
+                    });
+                });
+            });
+            
+            observer.observe(mainNavbar, {
+                childList: true,
+                subtree: true
+            });
+            
+            console.log('Navbar protection MutationObserver setup complete');
         }
 
         // Setup event listeners
