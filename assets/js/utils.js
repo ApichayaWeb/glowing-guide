@@ -119,11 +119,11 @@ const Utils = {
             const messageEl = modal.querySelector('h5');
             if (messageEl) messageEl.textContent = message;
             
-             // Check if instance already exists, if not create new one
-   let bootstrapModal = bootstrap.Modal.getInstance(modal);
-     if (!bootstrapModal) {
-       bootstrapModal = new bootstrap.Modal(modal);
-        }
+            // Check if instance already exists, if not create new one
+            let bootstrapModal = bootstrap.Modal.getInstance(modal);
+            if (!bootstrapModal) {
+                bootstrapModal = new bootstrap.Modal(modal);
+            }
             bootstrapModal.show();
         }
     },
@@ -137,23 +137,25 @@ const Utils = {
             let bootstrapModal = bootstrap.Modal.getInstance(modal);
             if (bootstrapModal) {
                 bootstrapModal.hide();
-            }
-        } else {
-      // Force hide by removing modal backdrop and classes
-        modal.classList.remove('show');
-        modal.style.display = 'none';
-       modal.setAttribute('aria-hidden', 'true');
-        modal.removeAttribute('aria-modal');
-                       // Remove backdrop
-          const backdrop = document.querySelector('.modal-backdrop');
-        if (backdrop) {
-              backdrop.remove();
-            }
-   
-          // Remove modal-open class from body
-          document.body.classList.remove('modal-open');
+            } else {
+                // Force hide by removing modal backdrop and classes
+                modal.classList.remove('show');
+                modal.style.display = 'none';
+                modal.setAttribute('aria-hidden', 'true');
+                modal.removeAttribute('aria-modal');
+                
+                // Remove backdrop
+                const backdrop = document.querySelector('.modal-backdrop');
+                if (backdrop) {
+                    backdrop.remove();
+                }
+                
+                // Remove modal-open class from body
+                document.body.classList.remove('modal-open');
                 document.body.style.removeProperty('overflow');
-                   document.body.style.removeProperty('padding-right');
+                document.body.style.removeProperty('padding-right');
+            }
+        }
     },
     
     /**
