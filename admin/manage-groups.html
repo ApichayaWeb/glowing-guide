@@ -748,12 +748,17 @@
                 Utils.showLoading('กำลังโหลดข้อมูลกลุ่ม...');
                 
                 const result = await AdminAPI.getAllGroups();
+                console.log('getAllGroups result:', result);
                 
                 if (result.success) {
                     allGroups = result.groups;
+                    console.log('Loaded groups:', allGroups);
+                    console.log('Number of groups loaded:', allGroups.length);
+                    
                     displayGroups(allGroups);
                     updateStatistics(result);
                 } else {
+                    console.error('Failed to load groups:', result.message);
                     Utils.showError('เกิดข้อผิดพลาด', result.message);
                 }
                 
@@ -761,6 +766,7 @@
                 
             } catch (error) {
                 Utils.hideLoading();
+                console.error('loadGroupsData error:', error);
                 handleAPIError(error, 'เกิดข้อผิดพลาดในการโหลดข้อมูล');
             }
         }
@@ -891,76 +897,119 @@
             try {
                 Utils.showLoading('กำลังโหลดรายละเอียด...');
                 
+                console.log('viewGroup called with groupId:', groupId);
+                console.log('Available groups:', allGroups);
+                
                 const group = allGroups.find(g => g.groupId === groupId);
                 if (!group) {
+                    Utils.hideLoading();
                     Utils.showError('ไม่พบข้อมูล', 'ไม่พบข้อมูลกลุ่มที่ต้องการ');
                     return;
                 }
                 
+                console.log('Found group:', group);
                 currentGroup = group;
-                displayGroupDetails(group);
+                
+                // Display group details with error handling
+                try {
+                    displayGroupDetails(group);
+                    console.log('Group details displayed successfully');
+                } catch (displayError) {
+                    console.error('Error displaying group details:', displayError);
+                    Utils.hideLoading();
+                    Utils.showError('ข้อผิดพลาดการแสดงผล', 'ไม่สามารถแสดงรายละเอียดกลุ่มได้');
+                    return;
+                }
                 
                 Utils.hideLoading();
                 
-                const modal = new bootstrap.Modal(document.getElementById('groupDetailsModal'));
-                modal.show();
+                // Show modal with error handling
+                try {
+                    const modal = new bootstrap.Modal(document.getElementById('groupDetailsModal'));
+                    modal.show();
+                    console.log('Modal shown successfully');
+                } catch (modalError) {
+                    console.error('Error showing modal:', modalError);
+                    Utils.showError('ข้อผิดพลาด Modal', 'ไม่สามารถแสดงหน้าต่างรายละเอียดได้');
+                }
                 
             } catch (error) {
                 Utils.hideLoading();
+                console.error('viewGroup error:', error);
                 handleAPIError(error, 'เกิดข้อผิดพลาดในการโหลดรายละเอียด');
             }
         }
 
         // Display group details
         function displayGroupDetails(group) {
-            const content = document.getElementById('groupDetailsContent');
-            content.innerHTML = `
-                <div class="row">
-                    <div class="col-md-6">
-                        <h6 class="text-success mb-3">ข้อมูลพื้นฐาน</h6>
-                        <table class="table table-borderless">
-                            <tr>
-                                <td class="fw-bold">รหัสกลุ่ม:</td>
-                                <td><span class="badge bg-primary">${group.groupCode}</span></td>
-                            </tr>
-                            <tr>
-                                <td class="fw-bold">ชื่อกลุ่ม:</td>
-                                <td>${group.groupName}</td>
-                            </tr>
-                            <tr>
-                                <td class="fw-bold">ผู้จัดการ:</td>
-                                <td>${group.managerUsername}</td>
-                            </tr>
-                            <tr>
-                                <td class="fw-bold">สถานะ:</td>
-                                <td>
-                                    ${group.status === 'active' ? 
-                                        '<span class="badge bg-success">เปิดใช้งาน</span>' : 
-                                        '<span class="badge bg-secondary">ปิดใช้งาน</span>'
-                                    }
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="fw-bold">วันที่สร้าง:</td>
-                                <td>${Utils.formatDateTimeThai(group.created)}</td>
-                            </tr>
-                        </table>
-                    </div>
-                    <div class="col-md-6">
-                        <h6 class="text-success mb-3">สถิติ</h6>
-                        <div class="row g-3">
-                            <div class="col-6">
-                                <div class="card border-success">
-                                    <div class="card-body text-center">
-                                        <h4 class="text-success">${group.statistics.totalFarmers}</h4>
-                                        <small class="text-muted">เกษตรกร</small>
+            try {
+                console.log('displayGroupDetails called with:', group);
+                
+                const content = document.getElementById('groupDetailsContent');
+                if (!content) {
+                    throw new Error('groupDetailsContent element not found');
+                }
+                
+                // Ensure statistics exist
+                const stats = group.statistics || { totalFarmers: 0, totalQRCodes: 0 };
+                console.log('Group statistics:', stats);
+                
+                // Safe date formatting
+                let formattedDate;
+                try {
+                    formattedDate = group.created ? Utils.formatDateTimeThai(group.created) : 'ไม่ระบุ';
+                } catch (dateError) {
+                    console.warn('Date formatting error:', dateError);
+                    formattedDate = group.created || 'ไม่ระบุ';
+                }
+                
+                content.innerHTML = `
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-success mb-3">ข้อมูลพื้นฐาน</h6>
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td class="fw-bold">รหัสกลุ่ม:</td>
+                                    <td><span class="badge bg-primary">${group.groupCode || 'ไม่ระบุ'}</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">ชื่อกลุ่ม:</td>
+                                    <td>${group.groupName || group.groupCode || 'ไม่ระบุ'}</td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">ผู้จัดการ:</td>
+                                    <td>${group.managerUsername || 'ไม่ระบุ'}</td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">สถานะ:</td>
+                                    <td>
+                                        ${group.status === 'active' ? 
+                                            '<span class="badge bg-success">เปิดใช้งาน</span>' : 
+                                            '<span class="badge bg-secondary">ปิดใช้งาน</span>'
+                                        }
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">วันที่สร้าง:</td>
+                                    <td>${formattedDate}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-success mb-3">สถิติ</h6>
+                            <div class="row g-3">
+                                <div class="col-6">
+                                    <div class="card border-success">
+                                        <div class="card-body text-center">
+                                            <h4 class="text-success">${stats.totalFarmers || 0}</h4>
+                                            <small class="text-muted">เกษตรกร</small>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="card border-info">
-                                    <div class="card-body text-center">
-                                        <h4 class="text-info">${group.statistics.totalQRCodes}</h4>
+                                <div class="col-6">
+                                    <div class="card border-info">
+                                        <div class="card-body text-center">
+                                            <h4 class="text-info">${stats.totalQRCodes || 0}</h4>
                                         <small class="text-muted">QR Code</small>
                                     </div>
                                 </div>
@@ -1015,7 +1064,14 @@
                     </div>
                 </div>
             `;
+            
+            console.log('Group details HTML generated and inserted successfully');
+            
+        } catch (error) {
+            console.error('Error in displayGroupDetails:', error);
+            throw error;
         }
+    }
 
         // Edit group
         function editGroup(groupId) {
