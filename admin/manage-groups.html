@@ -898,26 +898,16 @@
                 // Check if data is available first
                 if (!allGroups || allGroups.length === 0) {
                     console.log('allGroups not ready, waiting...');
-                    Utils.showLoading('กำลังโหลดข้อมูลกลุ่ม...');
                     
-                    // Wait for data to be loaded
+                    // Wait for data to be loaded (no loading modal)
                     await loadGroupsData();
                     
                     if (!allGroups || allGroups.length === 0) {
-                        Utils.hideLoading();
                         Utils.showError('ไม่พบข้อมูล', 'ไม่สามารถโหลดข้อมูลกลุ่มได้');
                         return;
                     }
-                    
-                    // Update loading message instead of showing new modal
-                    const modal = document.getElementById('loadingModal');
-                    if (modal) {
-                        const messageEl = modal.querySelector('h5');
-                        if (messageEl) messageEl.textContent = 'กำลังเตรียมรายละเอียด...';
-                    }
-                } else {
-                    Utils.showLoading('กำลังเตรียมรายละเอียด...');
                 }
+                // No loading modal - direct processing
                 
                 console.log('viewGroup called with groupId:', groupId);
                 console.log('Available groups:', allGroups.length, 'groups');
@@ -938,53 +928,19 @@
                     console.log('Group details displayed successfully');
                 } catch (displayError) {
                     console.error('Error displaying group details:', displayError);
-                    Utils.hideLoading();
                     Utils.showError('ข้อผิดพลาดการแสดงผล', 'ไม่สามารถแสดงรายละเอียดกลุ่มได้');
                     return;
                 }
                 
-                // Aggressively close loading modal
-                const loadingModalEl = document.getElementById('loadingModal');
-                
-                // Method 1: Utils.hideLoading()
-                Utils.hideLoading();
-                
-                // Method 2: Force close via Bootstrap Modal
-                const loadingModal = bootstrap.Modal.getInstance(loadingModalEl);
-                if (loadingModal) {
-                    loadingModal.hide();
+                // Show group details modal directly (no loading modal interference)
+                try {
+                    const modal = new bootstrap.Modal(document.getElementById('groupDetailsModal'));
+                    modal.show();
+                    console.log('Group details modal shown directly');
+                } catch (modalError) {
+                    console.error('Error showing modal:', modalError);
+                    Utils.showError('ข้อผิดพลาด Modal', 'ไม่สามารถแสดงหน้าต่างรายละเอียดได้');
                 }
-                
-                // Method 3: Force DOM manipulation
-                loadingModalEl.classList.remove('show');
-                loadingModalEl.style.display = 'none';
-                loadingModalEl.setAttribute('aria-hidden', 'true');
-                loadingModalEl.removeAttribute('aria-modal');
-                
-                // Remove backdrop
-                const backdrop = document.querySelector('.modal-backdrop');
-                if (backdrop) {
-                    backdrop.remove();
-                }
-                
-                // Remove modal-open class from body
-                document.body.classList.remove('modal-open');
-                document.body.style.removeProperty('overflow');
-                document.body.style.removeProperty('padding-right');
-                
-                console.log('Loading modal forcefully closed');
-                
-                // Small delay then show group details modal
-                setTimeout(() => {
-                    try {
-                        const modal = new bootstrap.Modal(document.getElementById('groupDetailsModal'));
-                        modal.show();
-                        console.log('Group details modal shown successfully');
-                    } catch (modalError) {
-                        console.error('Error showing modal:', modalError);
-                        Utils.showError('ข้อผิดพลาด Modal', 'ไม่สามารถแสดงหน้าต่างรายละเอียดได้');
-                    }
-                }, 100);
                 
             } catch (error) {
                 Utils.hideLoading();
