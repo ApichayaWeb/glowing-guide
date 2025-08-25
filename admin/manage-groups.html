@@ -943,51 +943,48 @@
                     return;
                 }
                 
-                // Hide loading and wait for it to fully close before showing details modal
+                // Aggressively close loading modal
                 const loadingModalEl = document.getElementById('loadingModal');
                 
-                // First try Utils.hideLoading()
+                // Method 1: Utils.hideLoading()
                 Utils.hideLoading();
                 
-                // Then force close the loading modal
+                // Method 2: Force close via Bootstrap Modal
                 const loadingModal = bootstrap.Modal.getInstance(loadingModalEl);
                 if (loadingModal) {
                     loadingModal.hide();
                 }
                 
-                // Wait for loading modal to be completely hidden
-                const waitForLoadingToClose = () => {
-                    return new Promise((resolve) => {
-                        // Listen for the modal hidden event
-                        const onHidden = () => {
-                            loadingModalEl.removeEventListener('hidden.bs.modal', onHidden);
-                            resolve();
-                        };
-                        
-                        // Check if modal is already hidden
-                        if (!loadingModalEl.classList.contains('show')) {
-                            resolve();
-                            return;
-                        }
-                        
-                        loadingModalEl.addEventListener('hidden.bs.modal', onHidden);
-                        
-                        // Backup timeout in case event doesn't fire
-                        setTimeout(resolve, 500);
-                    });
-                };
+                // Method 3: Force DOM manipulation
+                loadingModalEl.classList.remove('show');
+                loadingModalEl.style.display = 'none';
+                loadingModalEl.setAttribute('aria-hidden', 'true');
+                loadingModalEl.removeAttribute('aria-modal');
                 
-                // Wait for loading modal to close, then show group details modal
-                waitForLoadingToClose().then(() => {
+                // Remove backdrop
+                const backdrop = document.querySelector('.modal-backdrop');
+                if (backdrop) {
+                    backdrop.remove();
+                }
+                
+                // Remove modal-open class from body
+                document.body.classList.remove('modal-open');
+                document.body.style.removeProperty('overflow');
+                document.body.style.removeProperty('padding-right');
+                
+                console.log('Loading modal forcefully closed');
+                
+                // Small delay then show group details modal
+                setTimeout(() => {
                     try {
                         const modal = new bootstrap.Modal(document.getElementById('groupDetailsModal'));
                         modal.show();
-                        console.log('Modal shown successfully');
+                        console.log('Group details modal shown successfully');
                     } catch (modalError) {
                         console.error('Error showing modal:', modalError);
                         Utils.showError('ข้อผิดพลาด Modal', 'ไม่สามารถแสดงหน้าต่างรายละเอียดได้');
                     }
-                });
+                }, 100);
                 
             } catch (error) {
                 Utils.hideLoading();
