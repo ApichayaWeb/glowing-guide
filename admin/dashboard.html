@@ -1164,13 +1164,13 @@
                 Utils.showLoading('กำลังเพิ่มกลุ่ม...');
                 
                 const result = await AdminAPI.createGroup(formData);
-				
-				// รองรับทั้งรูปแบบ {group:{...}} และ {data:{...}}
-				const group = result?.group ?? result?.data;
                 
                 Utils.hideLoading();
+                console.log('CreateGroup result:', result);
                 
-                if (result.success) {
+                if (result.success && result.group) {
+                    // รองรับทั้งรูปแบบ {group:{...}} และ {data:{...}}
+                    const group = result.group || result.data;
                     group.statistics ||= { totalFarmers: 0, totalQRCodes: 0 };
 					
 					Utils.showSuccess('เพิ่มกลุ่มสำเร็จ', `สร้างกลุ่ม ${group.groupCode} เรียบร้อยแล้ว`);
@@ -1185,8 +1185,24 @@
                         loadDashboardData();
                     }, 500);
                 } else {
-                   Utils.showError('เกิดข้อผิดพลาด', result?.message || 'รูปแบบผลลัพธ์ไม่ถูกต้อง');
-					console.warn('Unexpected result shape:', result);
+                    // Handle failure cases
+                    const errorMessage = result?.message || 'เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ';
+                    
+                    // Show more specific error based on message content
+                    if (errorMessage.includes('โฟลเดอร์')) {
+                        Utils.showError('ข้อผิดพลาดโฟลเดอร์', errorMessage);
+                    } else if (errorMessage.includes('สิทธิ์')) {
+                        Utils.showError('ไม่มีสิทธิ์เข้าถึง', errorMessage);
+                    } else {
+                        Utils.showError('เกิดข้อผิดพลาด', errorMessage);
+                    }
+                    
+                    console.error('CreateGroup failed:', {
+                        result: result,
+                        success: result?.success,
+                        message: result?.message,
+                        details: result?.details
+                    });
                 }
                 
             } catch (error) {
