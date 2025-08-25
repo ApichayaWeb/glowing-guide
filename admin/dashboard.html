@@ -733,6 +733,17 @@
             
             console.log('Admin access granted');
             
+            // Clear any existing auth navigation items first
+            const authNavItems = document.querySelectorAll('.auth-nav-item');
+            authNavItems.forEach(item => item.remove());
+            
+            // Override setupNavigation to prevent any additional navigation setup
+            const originalSetupNav = AuthAPI.setupNavigation;
+            AuthAPI.setupNavigation = function() {
+                console.log('setupNavigation called but blocked for dashboard page');
+                return;
+            };
+            
             // Setup page with user info only (ไม่สร้าง navigation เพิ่ม)
             if (AuthAPI.setupPage({ setupNavigation: false })) {
                 console.log('Page setup completed successfully');
@@ -742,6 +753,9 @@
                 
                 loadDashboardData();
                 setupEventListeners();
+                
+                // Set up periodic cleanup of auth nav items
+                setInterval(cleanupAuthNavItems, 1000);
             } else {
                 console.error('Page setup failed');
             }
@@ -751,6 +765,13 @@
         function updateUserNavigation() {
             const currentUser = AuthAPI.getCurrentUser();
             console.log('Updating user navigation with:', currentUser);
+            
+            // Remove any auth nav items that might have been added
+            const authNavItems = document.querySelectorAll('.auth-nav-item');
+            authNavItems.forEach(item => {
+                console.log('Removing auth nav item:', item);
+                item.remove();
+            });
             
             if (currentUser) {
                 // Update user display name in all elements with class 'user-display'
@@ -779,6 +800,15 @@
                 }
             } else {
                 console.warn('No current user found for navigation update');
+            }
+        }
+
+        // Cleanup function to remove unwanted auth nav items
+        function cleanupAuthNavItems() {
+            const authNavItems = document.querySelectorAll('.auth-nav-item');
+            if (authNavItems.length > 0) {
+                console.log('Cleaning up', authNavItems.length, 'auth nav items');
+                authNavItems.forEach(item => item.remove());
             }
         }
 
