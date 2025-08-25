@@ -30,14 +30,14 @@
             </a>
 
             <!-- Mobile Toggle -->
-            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
 
             <!-- Navigation Items -->
             <div class="collapse navbar-collapse" id="navbarNav">
-                <!-- Main Navigation -->
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <!-- Main Navigation - Hidden on mobile in collapsed menu -->
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 d-lg-flex d-none">
                     <li class="nav-item mx-1">
                         <a class="nav-link nav-link-custom" href="dashboard.html">
                             <i class="fas fa-tachometer-alt nav-icon"></i>
@@ -58,15 +58,59 @@
                     </li>
                 </ul>
 
-                <!-- User Menu -->
-                <ul class="navbar-nav">
+                <!-- Mobile Menu - Shown only on mobile when collapsed -->
+                <ul class="navbar-nav d-lg-none w-100">
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-custom" href="dashboard.html">
+                            <i class="fas fa-tachometer-alt nav-icon"></i>
+                            <span class="nav-text">แผงควบคุม</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-custom active" href="manage-groups.html">
+                            <i class="fas fa-users nav-icon"></i>
+                            <span class="nav-text">จัดการกลุ่ม</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-custom" href="reports.html">
+                            <i class="fas fa-chart-bar nav-icon"></i>
+                            <span class="nav-text">รายงาน</span>
+                        </a>
+                    </li>
+                    <li><hr class="dropdown-divider my-2"></li>
+                    <li class="nav-item">
+                        <div class="d-flex align-items-center px-3 py-2">
+                            <i class="fas fa-user-circle me-2 text-light"></i>
+                            <div>
+                                <div class="fw-bold text-light user-display">Admin</div>
+                                <small class="text-light-emphasis">ผู้ดูแลระบบ</small>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-custom" href="#" onclick="changePassword()">
+                            <i class="fas fa-key nav-icon"></i>
+                            <span class="nav-text">เปลี่ยนรหัสผ่าน</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-custom logout-btn" href="#" onclick="AuthAPI.confirmLogout()">
+                            <i class="fas fa-sign-out-alt nav-icon"></i>
+                            <span class="nav-text">ออกจากระบบ</span>
+                        </a>
+                    </li>
+                </ul>
+
+                <!-- Desktop User Menu -->
+                <ul class="navbar-nav d-lg-flex d-none">
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle user-menu" href="#" role="button" data-bs-toggle="dropdown">
+                        <a class="nav-link dropdown-toggle user-menu" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <div class="user-info d-flex align-items-center">
                                 <div class="user-avatar me-2">
                                     <i class="fas fa-user-circle"></i>
                                 </div>
-                                <div class="user-details d-none d-md-block">
+                                <div class="user-details">
                                     <div class="user-name user-display">Admin</div>
                                     <div class="user-role">ผู้ดูแลระบบ</div>
                                 </div>
@@ -97,7 +141,7 @@
                             </li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
-                                <a class="dropdown-item dropdown-item-custom logout-btn" href="#">
+                                <a class="dropdown-item dropdown-item-custom logout-btn" href="#" onclick="AuthAPI.confirmLogout()">
                                     <i class="fas fa-sign-out-alt me-3 text-danger"></i>
                                     <span>ออกจากระบบ</span>
                                 </a>
@@ -285,10 +329,6 @@
                     <input type="hidden" id="editGroupId">
                     <div class="modal-body">
                         <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="editGroupName" class="form-label">ชื่อกลุ่มเกษตรกร</label>
-                                <input type="text" class="form-control" id="editGroupName" required>
-                            </div>
                             <div class="col-md-6 mb-3">
                                 <label for="editGroupCode" class="form-label">รหัสกลุ่ม</label>
                                 <input type="text" class="form-control" id="editGroupCode" readonly>
@@ -924,7 +964,6 @@
             
             // Fill form data
             document.getElementById('editGroupId').value = group.groupId;
-            document.getElementById('editGroupName').value = group.groupName;
             document.getElementById('editGroupCode').value = group.groupCode;
             document.getElementById('editManagerUsername').value = group.managerUsername;
             document.getElementById('editGroupStatus').value = group.status;
@@ -954,7 +993,6 @@
             
             const groupId = document.getElementById('editGroupId').value;
             const formData = {
-                groupName: document.getElementById('editGroupName').value.trim(),
                 status: document.getElementById('editGroupStatus').value
             };
 
