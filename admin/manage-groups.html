@@ -635,6 +635,9 @@
             loadGroupsData();
             setupEventListeners();
             
+            // Check URL parameter for direct group view
+            checkURLForGroupView();
+            
             // Set up aggressive periodic cleanup of auth nav items
             setInterval(cleanupAuthNavItems, 500);
             
@@ -740,6 +743,36 @@
             
             // Edit group form
             document.getElementById('editGroupForm').addEventListener('submit', handleEditGroup);
+        }
+
+        // Check URL parameter for direct group view
+        async function checkURLForGroupView() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const groupId = urlParams.get('group');
+            
+            if (groupId) {
+                console.log('URL parameter detected - groupId:', groupId);
+                
+                // Wait a bit for data to load, then show group details
+                setTimeout(async () => {
+                    // Ensure data is loaded
+                    if (!allGroups || allGroups.length === 0) {
+                        console.log('Groups not loaded yet, waiting...');
+                        await loadGroupsData();
+                    }
+                    
+                    if (allGroups && allGroups.length > 0) {
+                        console.log('Showing group details for:', groupId);
+                        await viewGroup(groupId);
+                        
+                        // Clean up URL parameter after showing
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                    } else {
+                        console.error('No groups data available for URL parameter');
+                        Utils.showError('ไม่พบข้อมูล', 'ไม่สามารถโหลดรายละเอียดกลุ่มได้');
+                    }
+                }, 1000); // Wait 1 second for initial data load
+            }
         }
 
         // Load groups data
