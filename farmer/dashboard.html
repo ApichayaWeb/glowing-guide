@@ -239,6 +239,13 @@
 
         async function initializePage() {
             try {
+                // Check if password change is required
+                const forcePasswordChange = Storage.get('force_password_change');
+                if (forcePasswordChange) {
+                    window.location.href = '../change-password.html';
+                    return;
+                }
+                
                 // Use PageProtection for proper authentication
                 if (!PageProtection.protectFarmerPage()) {
                     return;
