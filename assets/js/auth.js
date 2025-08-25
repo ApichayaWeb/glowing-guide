@@ -1,39 +1,6 @@
 /**
  * ระบบสอบย้อนกลับผักอุดร - Enhanced Authentication JavaScript
- * =========================================================
- * 
- * ENHANCED AUTO LOGOUT SYSTEM v2.0
- * 
- * This comprehensive authentication system provides:
- * 
- * 🔐 SECURITY FEATURES:
- * • Multi-layer logout detection (idle, session, security)
- * • Cross-browser tab synchronization
- * • Suspicious activity monitoring
- * • Failed attempt tracking
- * • Session integrity validation
- * 
- * ⏱️ TIMEOUT MANAGEMENT:
- * • 30-minute idle timeout with 5-minute warning
- * • 8-hour session expiration with 30-minute warning  
- * • Token refresh mechanism
- * • Graceful data saving before logout
- * 
- * 🚀 ENHANCED FEATURES:
- * • Network status monitoring
- * • Heartbeat monitoring
- * • Emergency logout (Ctrl+Shift+L)
- * • Auto-save pending form data
- * • Activity statistics tracking
- * 
- * 🔄 REAL-TIME SYNC:
- * • Cross-tab logout coordination
- * • Multiple session detection
- * • Shared warning notifications
- * • Synchronized user state
- * 
- * =============================================================================
- */
+*/
 
 /**
  * Enhanced Authentication API with Auto Logout System
@@ -1739,7 +1706,19 @@ Object.assign(AuthAPI, {
                 icon = 'success';
         }
         
-        Utils.showMessage(icon, title, text);
+        // Use SweetAlert2 directly since Utils.showMessage doesn't exist
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                icon: icon,
+                title: title,
+                text: text,
+                timer: 2000,
+                showConfirmButton: false
+            });
+        } else {
+            // Fallback for pages without SweetAlert2
+            console.log(`Logout: ${title} - ${text}`);
+        }
     },
     
     /**
@@ -1804,132 +1783,3 @@ document.addEventListener('DOMContentLoaded', function() {
 // Export for global use
 window.AuthAPI = AuthAPI;
 window.PageProtection = PageProtection;
-
-/**
- * =============================================================================
- * COMPREHENSIVE DOCUMENTATION - Enhanced Auto Logout System
- * =============================================================================
- * 
- * OVERVIEW:
- * This enhanced authentication system provides comprehensive auto logout
- * functionality with multiple security features and cross-tab synchronization.
- * 
- * FEATURES:
- * 
- * 1. IDLE TIMEOUT DETECTION:
- *    - Monitors user activity (mouse, keyboard, touch, scroll, etc.)
- *    - 30-minute idle timeout with 5-minute warning
- *    - Graceful warning dialog with countdown timer
- *    - Automatic data saving before logout
- * 
- * 2. SESSION EXPIRATION MANAGEMENT:
- *    - 8-hour maximum session duration
- *    - 30-minute warning before expiration
- *    - Token refresh mechanism (when available)
- *    - Automatic session extension option
- * 
- * 3. SECURITY LOGOUT MECHANISMS:
- *    - Multiple failed login attempt detection
- *    - Suspicious activity monitoring (dev tools, rapid navigation)
- *    - Cross-tab logout detection
- *    - Multiple session warning
- *    - Security event logging
- * 
- * 4. MULTIPLE LOGOUT METHODS:
- *    - Manual: User-initiated with confirmation
- *    - Auto: Idle timeout or session expiration
- *    - Force: Security-triggered immediate logout
- *    - Emergency: Keyboard shortcut (Ctrl+Shift+L)
- * 
- * 5. ENHANCED FEATURES:
- *    - Cross-tab synchronization
- *    - Network status monitoring
- *    - Heartbeat monitoring
- *    - Pending data auto-save
- *    - Activity tracking and statistics
- *    - Session integrity validation
- * 
- * USAGE EXAMPLES:
- * 
- * // Initialize auto logout for authenticated users
- * AuthAPI.initializeAutoLogout();
- * 
- * // Manual logout with confirmation
- * AuthAPI.confirmLogout();
- * 
- * // Emergency logout (no confirmation)
- * AuthAPI.emergencyLogout();
- * 
- * // Force logout for security reasons
- * AuthAPI.forceLogout('security_breach');
- * 
- * // Check if user is still logged in (enhanced validation)
- * if (AuthAPI.isLoggedIn()) {
- *     // User is authenticated and session is valid
- * }
- * 
- * CONFIGURATION:
- * All timeouts and settings can be customized through AuthAPI.CONFIG:
- * 
- * AuthAPI.CONFIG = {
- *     IDLE_TIMEOUT: 30 * 60 * 1000,        // 30 minutes
- *     IDLE_WARNING: 25 * 60 * 1000,        // 25 minutes
- *     SESSION_TIMEOUT: 8 * 60 * 60 * 1000,  // 8 hours
- *     SESSION_WARNING: 7.5 * 60 * 60 * 1000, // 7.5 hours
- *     MAX_FAILED_ATTEMPTS: 3,               // Max failed logins
- *     HEARTBEAT_INTERVAL: 5 * 60 * 1000,    // 5 minutes
- *     CROSS_TAB_KEY: 'auth_cross_tab_sync'   // Storage key
- * };
- * 
- * SECURITY EVENTS:
- * The system logs various security events:
- * - login_failed: Failed login attempts
- * - logout_initiated: All logout events with method and reason
- * - multiple_failed_attempts: Suspicious login activity
- * - devtools_opened: Developer tools access
- * - suspicious_navigation: Rapid page changes
- * - multiple_sessions: Multiple active sessions detected
- * 
- * KEYBOARD SHORTCUTS:
- * - Ctrl+Shift+L: Emergency logout
- * - Ctrl+S: Quick save (enhanced)
- * 
- * CROSS-TAB SYNCHRONIZATION:
- * The system synchronizes logout events across browser tabs:
- * - When user logs out in one tab, all other tabs are notified
- * - Session warnings are shared across tabs
- * - Multiple session detection works across tabs
- * - Heartbeat monitoring prevents concurrent sessions
- * 
- * NETWORK MONITORING:
- * - Detects online/offline status changes
- * - Saves data when offline, syncs when back online
- * - Shows user-friendly notifications for network status
- * - Handles graceful degradation when offline
- * 
- * DATA PERSISTENCE:
- * - Auto-saves form data before logout
- * - Preserves scroll position and user state
- * - Activity tracking and session statistics
- * - Security event logging for audit purposes
- * 
- * INTEGRATION WITH EXISTING SYSTEM:
- * This enhanced system is fully backward compatible with the existing
- * authentication system. All existing functions work as before, with
- * additional security and auto logout features.
- * 
- * BROWSER COMPATIBILITY:
- * - Modern browsers with localStorage support
- * - Page Visibility API for tab switching detection
- * - Navigator.onLine for network status
- * - Event listeners for activity detection
- * 
- * SECURITY CONSIDERATIONS:
- * - All sensitive data is cleared on logout
- * - Session tokens are validated on each check
- * - Cross-tab events prevent session hijacking
- * - Activity logging helps detect suspicious behavior
- * - Multiple session detection prevents unauthorized access
- * 
- * =============================================================================
- */
