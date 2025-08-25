@@ -384,6 +384,13 @@ const AdminAPI = {
             dateFrom: dateFrom,
             dateTo: dateTo
         });
+    },
+
+    /**
+     * Test Google Drive access
+     */
+    async testDriveAccess() {
+        return await API.makeRequest('testDriveAccess');
     }
 };
 
@@ -571,17 +578,39 @@ const ReportAPI = {
  */
 function handleAPIError(error, defaultMessage = 'เกิดข้อผิดพลาด') {
     console.error('API Error:', error);
+    console.error('Error details:', {
+        type: typeof error,
+        message: error?.message,
+        stack: error?.stack,
+        response: error?.response,
+        status: error?.status
+    });
     
     let message = defaultMessage;
+    let title = 'เกิดข้อผิดพลาด';
     
-    if (error.message) {
+    // Handle different error types
+    if (error?.response?.data?.message) {
+        message = error.response.data.message;
+    } else if (error?.message) {
         message = error.message;
     } else if (typeof error === 'string') {
         message = error;
+    } else if (error?.error) {
+        message = error.error;
+    }
+    
+    // Special handling for folder creation errors
+    if (message.includes('โฟลเดอร์')) {
+        title = 'ข้อผิดพลาดโฟลเดอร์';
+    } else if (message.includes('สิทธิ์')) {
+        title = 'ไม่มีสิทธิ์เข้าถึง';
+    } else if (message.includes('เครือข่าย') || message.includes('network')) {
+        title = 'ปัญหาการเชื่อมต่อ';
     }
     
     Utils.hideLoading();
-    Utils.showError('เกิดข้อผิดพลาด', message);
+    Utils.showError(title, message);
 }
 
 /**
